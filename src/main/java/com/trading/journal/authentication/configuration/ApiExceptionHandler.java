@@ -3,6 +3,7 @@ package com.trading.journal.authentication.configuration;
 import static net.logstash.logback.argument.StructuredArguments.kv;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ResponseEntity.status;
 
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -40,11 +42,12 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleException(final Exception ex) {
-        final String message = Optional.ofNullable(ex.getCause()).orElse(ex).getMessage();
-        logger.error(UNEXPECTED_EXCEPTION_HAPPENED, ex, kv("error-message", message));
-        final Map<String, String> errors = new ConcurrentHashMap<>();
-        errors.put("error", Optional.ofNullable(message).orElse(UNEXPECTED_EXCEPTION_HAPPENED));
-        return status(INTERNAL_SERVER_ERROR).body(errors);
+        return status(INTERNAL_SERVER_ERROR).body(extractMessage(ex));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Map<String, String>> handleWebExchangeBindException(final AuthenticationException ex) {
+        return status(UNAUTHORIZED).body(extractMessage(ex));
     }
 
     @ExceptionHandler(WebExchangeBindException.class)
@@ -69,6 +72,14 @@ public class ApiExceptionHandler {
         }
         final String message = Optional.ofNullable(ex.getCause()).orElse(ex).getMessage();
         logger.error(CONSTRAINT_MESSAGE, ex, kv("error-message", message), kv("errors", errors));
+        return errors;
+    }
+
+    private Map<String, String> extractMessage(Exception exception) {
+        final String message = Optional.ofNullable(exception.getCause()).orElse(exception).getMessage();
+        logger.error(UNEXPECTED_EXCEPTION_HAPPENED, exception, kv("error-message", message));
+        final Map<String, String> errors = new ConcurrentHashMap<>();
+        errors.put("error", Optional.ofNullable(message).orElse(UNEXPECTED_EXCEPTION_HAPPENED));
         return errors;
     }
 }
