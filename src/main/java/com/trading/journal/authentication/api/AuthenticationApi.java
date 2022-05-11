@@ -1,5 +1,7 @@
 package com.trading.journal.authentication.api;
 
+import com.trading.journal.authentication.authentication.Login;
+import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 
 import org.springframework.http.HttpStatus;
@@ -19,21 +21,14 @@ import reactor.core.publisher.Mono;
 public interface AuthenticationApi {
 
         @ApiOperation(notes = "Sign up as a new user", value = "Sign up")
-        @ApiResponses({
-                        @ApiResponse(code = 200, message = "New user created"),
-                        @ApiResponse(code = 400, message = "Invalid data provided") })
+        @ApiResponses(@ApiResponse(code = 200, message = "New user created"))
         @PostMapping("/signup")
         @ResponseStatus(HttpStatus.OK)
         Mono<Void> signup(@RequestBody UserRegistration registration);
 
-        // @ApiOperation(notes = "Sign in", value = "Sign in", response =
-        // LoginResponse.class)
-        // @ApiResponses({
-        // @ApiResponse(code = 200, message = "User logged in"),
-        // @ApiResponse(code = 400, message = Constants.HTTP_400_MESSAGE),
-        // @ApiResponse(code = 401, message = Constants.HTTP_401_MESSAGE)})
-        // @PostMapping("/signin")
-        // @ResponseStatus(HttpStatus.OK)
-        // Mono<LoginResponse> signin(@RequestBody Login login);
-
+        @ApiOperation(notes = "Sign in", value = "Sign in", response = LoginResponse.class)
+        @ApiResponses(@ApiResponse(code = 200, message = "User logged in"))
+        @PostMapping("/signin")
+        @ResponseStatus(HttpStatus.OK)
+        Mono<LoginResponse> signin(@RequestBody Login login);
 }
