@@ -2,6 +2,9 @@ package com.trading.journal.authentication.api;
 
 import javax.validation.Valid;
 
+import com.trading.journal.authentication.authentication.AuthenticationService;
+import com.trading.journal.authentication.authentication.Login;
+import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.registration.service.SignupService;
 
@@ -13,14 +16,21 @@ import reactor.core.publisher.Mono;
 public class AuthenticationController implements AuthenticationApi {
 
     private final SignupService signupService;
+    private final AuthenticationService authenticationService;
 
-    public AuthenticationController(SignupService signupService) {
+    public AuthenticationController(SignupService signupService, AuthenticationService authenticationService) {
         this.signupService = signupService;
+        this.authenticationService = authenticationService;
     }
 
     @Override
     public Mono<Void> signup(@Valid UserRegistration registration) {
         return signupService.signUp(registration);
+    }
+
+    @Override
+    public Mono<LoginResponse> signin(@Valid Login login) {
+        return authenticationService.signIn(login);
     }
 
 }
