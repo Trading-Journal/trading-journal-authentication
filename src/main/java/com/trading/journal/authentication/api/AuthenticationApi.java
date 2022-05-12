@@ -20,15 +20,15 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/authentication")
 public interface AuthenticationApi {
 
-        @ApiOperation(notes = "Sign up as a new user", value = "Sign up")
-        @ApiResponses(@ApiResponse(code = 200, message = "New user created"))
-        @PostMapping("/signup")
-        @ResponseStatus(HttpStatus.OK)
-        Mono<Void> signup(@RequestBody UserRegistration registration);
+    @ApiOperation(notes = "Sign up as a new user", value = "Sign up")
+    @ApiResponses(@ApiResponse(code = 200, message = "New user created"))
+    @PostMapping("/signup")
+    @ResponseStatus(HttpStatus.OK)
+    Mono<Void> signup(@RequestBody UserRegistration registration);
 
-        @ApiOperation(notes = "Sign in", value = "Sign in", response = LoginResponse.class)
-        @ApiResponses(@ApiResponse(code = 200, message = "User logged in"))
-        @PostMapping("/signin")
-        @ResponseStatus(HttpStatus.OK)
-        Mono<LoginResponse> signin(@RequestBody Login login);
+    @ApiOperation(notes = "Sign in", value = "Sign in", response = LoginResponse.class)
+    @ApiResponses(@ApiResponse(code = 200, message = "User logged in"))
+    @PostMapping("/signin")
+    @ResponseStatus(HttpStatus.OK)
+    Mono<LoginResponse> signin(@RequestBody Login login);
 }
