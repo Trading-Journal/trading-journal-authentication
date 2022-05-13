@@ -16,6 +16,8 @@ import com.trading.journal.authentication.user.Authority;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import reactor.core.publisher.Mono;
@@ -39,7 +41,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password()))
                 .onErrorResume(throwable -> Mono.error(new AuthenticationServiceException(throwable.getMessage())))
-                .then(applicationUserService.getUserByEmail(login.email()))
+                .map(Authentication::getPrincipal)
+                .cast(UserDetails.class)
+                .map(UserDetails::getUsername)
+                .flatMap(applicationUserService::getUserByEmail)
                 .map(user -> {
                     TokenData tokenData = jwtTokenProvider.generateJwtToken(user);
                     return new LoginResponse(
