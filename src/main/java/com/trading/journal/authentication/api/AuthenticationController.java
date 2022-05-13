@@ -6,7 +6,7 @@ import com.trading.journal.authentication.authentication.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.registration.service.SignupService;
+import com.trading.journal.authentication.registration.service.RegistrationService;
 
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,10 +15,10 @@ import reactor.core.publisher.Mono;
 @RestController
 public class AuthenticationController implements AuthenticationApi {
 
-    private final SignupService signupService;
+    private final RegistrationService signupService;
     private final AuthenticationService authenticationService;
 
-    public AuthenticationController(SignupService signupService, AuthenticationService authenticationService) {
+    public AuthenticationController(RegistrationService signupService, AuthenticationService authenticationService) {
         this.signupService = signupService;
         this.authenticationService = authenticationService;
     }

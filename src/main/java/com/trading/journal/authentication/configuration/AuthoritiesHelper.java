@@ -1,4 +1,4 @@
-package com.trading.journal.authentication.user;
+package com.trading.journal.authentication.configuration;
 
 public class AuthoritiesHelper {
     public static final String ROLE_USER = "ROLE_USER";

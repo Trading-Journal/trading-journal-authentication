@@ -9,11 +9,12 @@ import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
+import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.configuration.AuthoritiesHelper;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.ApplicationUserService;
-import com.trading.journal.authentication.user.AuthoritiesHelper;
 import com.trading.journal.authentication.user.Authority;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -44,7 +45,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
                         Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
                 .doOnSuccess(checkForEmptyAuthorities())
                 .onErrorResume(Mono::error)
-                .map(user -> User.withUsername(user.userName())
+                .map(user -> User.withUsername(user.email())
                         .password(user.password())
                         .authorities(user.authorities().stream()
                                 .map(role -> new SimpleGrantedAuthority(role.name())).collect(Collectors.toList()))
@@ -91,13 +92,13 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     private Consumer<ApplicationUser> checkForEmptyAuthorities() {
         return user -> ofNullable(user.authorities())
                 .filter(list -> !list.isEmpty())
-                .orElseThrow(() -> new UsernameNotFoundException("There is no authorities for this user"));
+                .orElseThrow(() -> new ApplicationException("There is no authorities for this user"));
     }
 
     private Consumer<Boolean> checkForInvalidUser() {
         return valid -> {
             if (!valid) {
-                throw new UsernameNotFoundException("User name or email already exist");
+                throw new ApplicationException("User name or email already exist");
             }
         };
     }

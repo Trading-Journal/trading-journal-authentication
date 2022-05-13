@@ -3,11 +3,13 @@
 ## Pending
 
 * Authorize users/requests
+  * Use username as tenancy
 * Me information endpoint
 * Private key/certificate for token key
   * Application properties
     * add expiration for token
 * Refresh token mechanism
+* Secure token better
 * Change password
 * Email verification
 * Admin on start up
@@ -17,6 +19,7 @@
   * This should allow user storage to be in another DB then MongoDB
 * Delete account
 * Lib for token validation to be used in other projects
+  * ApplicationUser Interface, ContextUser and Token Provider, JwtTokenAuthenticationFilter and All JWT package must be here
   * Consider:
     * Token validation
     * Token reader
