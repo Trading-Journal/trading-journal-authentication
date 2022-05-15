@@ -2,19 +2,22 @@
 
 ## Pending
 
-* Authorize users/requests
-  * Use username as tenancy
 * Me information endpoint
+  * Improve SecurityConfigurationTest with
+    * Login
+    * Me access with two different users
 * Private key/certificate for token key
   * Application properties
     * add expiration for token
 * Refresh token mechanism
 * Secure token better
 * Change password
+* On signup set change password on first login
 * Email verification
 * Admin on start up
   * Must change password
 * Admin endpoints
+  * Improve SecurityConfigurationTest with admin access
 * Interface for Application User/Application User Repository (and other Entities if needed)
   * This should allow user storage to be in another DB then MongoDB
 * Delete account

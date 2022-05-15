@@ -9,7 +9,8 @@ import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguratio
 
 @Profile("test")
 @Configuration
-public class EmbeddedMongoDbConfiguration extends AbstractReactiveMongoConfiguration {
+public class EmbeddedMongoDbConfiguration extends
+        AbstractReactiveMongoConfiguration {
 
     @Override
     protected String getDatabaseName() {
@@ -18,6 +19,6 @@ public class EmbeddedMongoDbConfiguration extends AbstractReactiveMongoConfigura
 
     @Override
     public MongoClient reactiveMongoClient() {
-        return MongoClients.create();
+        return MongoClients.create("mongodb://localhost:27018");
     }
 }
