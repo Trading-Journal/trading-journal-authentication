@@ -20,5 +20,7 @@ public class MongoInitializer implements ApplicationContextInitializer<Configura
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
                 format("spring.data.mongodb.uri=mongodb://%s:%s", mongoContainer.getHost(),
                         mongoContainer.getMappedPort(27017)));
+        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
+                "spring.data.mongodb.database: test-db");
     }
 }
