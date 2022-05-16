@@ -6,10 +6,8 @@ import com.mongodb.reactivestreams.client.MongoClients;
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration;
 
-@Profile("!test")
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
 public class MongoConfiguration extends AbstractReactiveMongoConfiguration {

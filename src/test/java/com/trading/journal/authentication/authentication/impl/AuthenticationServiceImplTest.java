@@ -58,7 +58,7 @@ public class AuthenticationServiceImplTest {
         Login login = new Login("mail@mail.com", "123456");
 
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
-        ContextUser principal = new ContextUser("mail@mail.com", "", authorities, "username");
+        ContextUser principal = new ContextUser("mail@mail.com", authorities, "username");
         Authentication authentication = new UsernamePasswordAuthenticationToken(principal, authorities);
         when(authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password())))

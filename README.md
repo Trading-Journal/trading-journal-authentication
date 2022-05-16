@@ -2,9 +2,6 @@
 
 ## Pending
 
-* Authorize users/requests
-  * Use username as tenancy
-* Me information endpoint
 * Private key/certificate for token key
   * Application properties
     * add expiration for token
@@ -15,6 +12,7 @@
 * Admin on start up
   * Must change password
 * Admin endpoints
+  * Improve SecurityConfigurationTest with admin access
 * Interface for Application User/Application User Repository (and other Entities if needed)
   * This should allow user storage to be in another DB then MongoDB
 * Delete account

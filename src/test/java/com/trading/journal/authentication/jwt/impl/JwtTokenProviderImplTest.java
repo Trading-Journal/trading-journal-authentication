@@ -13,7 +13,7 @@ import java.util.List;
 
 import com.trading.journal.authentication.configuration.AuthoritiesHelper;
 import com.trading.journal.authentication.jwt.DateHelper;
-import com.trading.journal.authentication.jwt.JwtConstantsHelper;
+import com.trading.journal.authentication.jwt.JwtHelper;
 import com.trading.journal.authentication.jwt.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.TokenData;
 import com.trading.journal.authentication.user.ApplicationUser;
@@ -130,13 +130,13 @@ public class JwtTokenProviderImplTest {
 
         String token = Jwts.builder()
                 .signWith(Keys.hmacShaKeyFor(TOKEN_SECRET.getBytes()), SignatureAlgorithm.HS512)
-                .setHeaderParam(JwtConstantsHelper.HEADER_TYP, JwtConstantsHelper.TOKEN_TYPE)
-                .setIssuer(JwtConstantsHelper.TOKEN_ISSUER)
-                .setAudience(JwtConstantsHelper.TOKEN_AUDIENCE)
+                .setHeaderParam(JwtHelper.HEADER_TYP, JwtHelper.TOKEN_TYPE)
+                .setIssuer(JwtHelper.TOKEN_ISSUER)
+                .setAudience(JwtHelper.TOKEN_AUDIENCE)
                 .setSubject(userName)
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiration)
-                .claim(JwtConstantsHelper.AUTHORITIES, Collections.singletonList(AuthoritiesHelper.ROLE_USER))
+                .claim(JwtHelper.AUTHORITIES, Collections.singletonList(AuthoritiesHelper.ROLE_USER))
                 .compact();
 
         boolean isTokenValid = tokenProvider.validateToken(token);
@@ -153,13 +153,13 @@ public class JwtTokenProviderImplTest {
 
         String token = Jwts.builder()
                 .signWith(Keys.hmacShaKeyFor(TOKEN_SECRET.getBytes()), SignatureAlgorithm.HS512)
-                .setHeaderParam(JwtConstantsHelper.HEADER_TYP, JwtConstantsHelper.TOKEN_TYPE)
-                .setIssuer(JwtConstantsHelper.TOKEN_ISSUER)
-                .setAudience(JwtConstantsHelper.TOKEN_AUDIENCE)
+                .setHeaderParam(JwtHelper.HEADER_TYP, JwtHelper.TOKEN_TYPE)
+                .setIssuer(JwtHelper.TOKEN_ISSUER)
+                .setAudience(JwtHelper.TOKEN_AUDIENCE)
                 .setSubject(userName)
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiration)
-                .claim(JwtConstantsHelper.AUTHORITIES, Collections.singletonList(AuthoritiesHelper.ROLE_USER))
+                .claim(JwtHelper.AUTHORITIES, Collections.singletonList(AuthoritiesHelper.ROLE_USER))
                 .compact();
 
         boolean isTokenValid = tokenProvider.validateToken(token);

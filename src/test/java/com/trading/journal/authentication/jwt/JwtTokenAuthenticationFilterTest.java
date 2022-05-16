@@ -56,7 +56,7 @@ public class JwtTokenAuthenticationFilterTest {
         };
 
         MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo/foo")
-                .header(HttpHeaders.AUTHORIZATION, JwtConstantsHelper.TOKEN_PREFIX.concat(tokenData.token())));
+                .header(HttpHeaders.AUTHORIZATION, JwtHelper.TOKEN_PREFIX.concat(tokenData.token())));
         jwtTokenAuthenticationFilter.filter(exchange, filterChain).block();
     }
 

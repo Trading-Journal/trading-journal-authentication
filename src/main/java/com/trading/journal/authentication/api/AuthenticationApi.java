@@ -5,6 +5,7 @@ import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,11 +25,11 @@ public interface AuthenticationApi {
     @ApiResponses(@ApiResponse(code = 200, message = "New user created"))
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.OK)
-    Mono<Void> signup(@RequestBody UserRegistration registration);
+    Mono<ResponseEntity<Void>> signup(@RequestBody UserRegistration registration);
 
     @ApiOperation(notes = "Sign in", value = "Sign in", response = LoginResponse.class)
     @ApiResponses(@ApiResponse(code = 200, message = "User logged in"))
     @PostMapping("/signin")
     @ResponseStatus(HttpStatus.OK)
-    Mono<LoginResponse> signin(@RequestBody Login login);
+    Mono<ResponseEntity<LoginResponse>> signin(@RequestBody Login login);
 }

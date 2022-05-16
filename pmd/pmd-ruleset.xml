@@ -8,6 +8,7 @@
     <rule ref="category/java/codestyle.xml">
         <exclude name="LongVariable" />
         <exclude name="ShortVariable" />
+        <exclude name="ShortMethodName" />
         <exclude name="LocalVariableCouldBeFinal" />
         <exclude name="MethodArgumentCouldBeFinal" />
         <exclude name="AtLeastOneConstructor" />

@@ -1,8 +1,19 @@
 package com.trading.journal.authentication.jwt.impl;
 
-import com.trading.journal.authentication.jwt.JwtConstantsHelper;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import com.trading.journal.authentication.jwt.AccessTokenInfo;
+import com.trading.journal.authentication.jwt.ContextUser;
+import com.trading.journal.authentication.jwt.JwtHelper;
 
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -18,6 +29,42 @@ public class JwtTokenParser {
 
     public JwtTokenParser(String secret) {
         this.secret = secret;
+    }
+
+    public Authentication getAuthentication(String token) {
+        var jwsClaims = parseToken(token);
+        Collection<? extends GrantedAuthority> authorities = getAuthorities(jwsClaims);
+        String tenancy = getTenancy(jwsClaims);
+        ContextUser principal = new ContextUser(jwsClaims.getBody().getSubject(), authorities, tenancy);
+        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+    }
+
+    public List<String> getRoles(String token) {
+        var jwsClaims = parseToken(token);
+        return getAuthorities(jwsClaims).stream()
+                .map(SimpleGrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+    }
+
+    public AccessTokenInfo getAccessTokenInfo(String token) {
+        var jwsClaims = parseToken(token);
+        List<String> authorities = getAuthorities(jwsClaims).stream().map(a -> a.getAuthority())
+                .collect(Collectors.toList());
+        String tenancy = getTenancy(jwsClaims);
+        return new AccessTokenInfo(jwsClaims.getBody().getSubject(), tenancy, authorities);
+    }
+
+    private List<SimpleGrantedAuthority> getAuthorities(Jws<Claims> token) {
+        return ((List<?>) token.getBody().get(JwtHelper.AUTHORITIES))
+                .stream()
+                .map(authority -> new SimpleGrantedAuthority((String) authority))
+                .collect(Collectors.toList());
+    }
+
+    private String getTenancy(Jws<Claims> token) {
+        return Optional.ofNullable(token.getBody().get(JwtHelper.TENANCY)).map(Object::toString)
+                .orElseThrow(() -> new AuthenticationServiceException(
+                        String.format("User company not found inside the token %s", token)));
     }
 
     @SuppressWarnings("PMD")
@@ -46,6 +93,6 @@ public class JwtTokenParser {
     }
 
     private String resolveToken(String bearerHeader) {
-        return bearerHeader.replace(JwtConstantsHelper.TOKEN_PREFIX, "");
+        return bearerHeader.replace(JwtHelper.TOKEN_PREFIX, "");
     }
 }
