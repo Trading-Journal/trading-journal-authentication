@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.trading.journal.authentication.user.ApplicationUser;
 
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.Authentication;
 
 public interface JwtTokenProvider {
@@ -15,4 +16,8 @@ public interface JwtTokenProvider {
     boolean validateToken(String token);
 
     List<String> getRoles(String token);
+
+    String resolveToken(ServerHttpRequest request);
+
+    AccessTokenInfo getAccessTokenInfo(String token);
 }

@@ -8,6 +8,7 @@ import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.registration.service.RegistrationService;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import reactor.core.publisher.Mono;
@@ -24,13 +25,13 @@ public class AuthenticationController implements AuthenticationApi {
     }
 
     @Override
-    public Mono<Void> signup(@Valid UserRegistration registration) {
-        return signupService.signUp(registration);
+    public Mono<ResponseEntity<Void>> signup(@Valid UserRegistration registration) {
+        return signupService.signUp(registration).map(ResponseEntity::ok);
     }
 
     @Override
-    public Mono<LoginResponse> signin(@Valid Login login) {
-        return authenticationService.signIn(login);
+    public Mono<ResponseEntity<LoginResponse>> signin(@Valid Login login) {
+        return authenticationService.signIn(login).map(ResponseEntity::ok);
     }
 
 }

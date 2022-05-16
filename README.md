@@ -2,17 +2,12 @@
 
 ## Pending
 
-* Me information endpoint
-  * Improve SecurityConfigurationTest with
-    * Login
-    * Me access with two different users
 * Private key/certificate for token key
   * Application properties
     * add expiration for token
 * Refresh token mechanism
 * Secure token better
 * Change password
-* On signup set change password on first login
 * Email verification
 * Admin on start up
   * Must change password

@@ -7,7 +7,7 @@ import javax.validation.Valid;
 import com.trading.journal.authentication.authentication.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
-import com.trading.journal.authentication.jwt.JwtConstantsHelper;
+import com.trading.journal.authentication.jwt.JwtHelper;
 import com.trading.journal.authentication.jwt.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.TokenData;
 import com.trading.journal.authentication.user.ApplicationUserService;
@@ -48,7 +48,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .map(user -> {
                     TokenData tokenData = jwtTokenProvider.generateJwtToken(user);
                     return new LoginResponse(
-                            JwtConstantsHelper.TOKEN_TYPE,
+                            JwtHelper.TOKEN_TYPE,
                             tokenData.token(),
                             user.authorities().stream().map(Authority::name).collect(Collectors.toList()),
                             tokenData.expirationIn(),

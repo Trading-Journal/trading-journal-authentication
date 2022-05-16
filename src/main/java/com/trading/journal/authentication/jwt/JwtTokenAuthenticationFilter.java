@@ -2,8 +2,6 @@ package com.trading.journal.authentication.jwt;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -24,7 +22,7 @@ public class JwtTokenAuthenticationFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String token = resolveToken(exchange.getRequest());
+        String token = tokenProvider.resolveToken(exchange.getRequest());
         Mono<Void> monoChain;
         if (StringUtils.hasText(token) && this.tokenProvider.validateToken(token)) {
             Authentication authentication = this.tokenProvider.getAuthentication(token);
@@ -34,14 +32,5 @@ public class JwtTokenAuthenticationFilter implements WebFilter {
             monoChain = chain.filter(exchange);
         }
         return monoChain;
-    }
-
-    private String resolveToken(ServerHttpRequest request) {
-        String bearerToken = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        String token = null;
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(JwtConstantsHelper.TOKEN_PREFIX)) {
-            token = bearerToken.replace(JwtConstantsHelper.TOKEN_PREFIX, "");
-        }
-        return token;
     }
 }

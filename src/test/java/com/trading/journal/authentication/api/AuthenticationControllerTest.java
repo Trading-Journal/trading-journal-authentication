@@ -2,6 +2,8 @@ package com.trading.journal.authentication.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
+
 import com.trading.journal.authentication.MongoInitializer;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -59,7 +62,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    @DisplayName("When signIp as new user return success and token")
+    @DisplayName("When signIn user return success and token")
     void signIn() {
         UserRegistration userRegistration = new UserRegistration(
                 "firstName",
@@ -83,5 +86,51 @@ public class AuthenticationControllerTest {
                 .isOk()
                 .expectBody(LoginResponse.class)
                 .value(response -> assertThat(response.token()).isNotBlank());
+    }
+
+    @Test
+    @DisplayName("When signIn user that does not exist, return 401")
+    void signInFails() {
+        Login login = new Login("mail3@mail.com", "dad231#$#4");
+
+        webTestClient
+                .post()
+                .uri("/authentication/signin")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(login)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> assertThat(response.get("error")).isEqualTo("User mail3@mail.com does not exist"));
+    }
+
+    @Test
+    @DisplayName("When signIn with wrong password, return 401")
+    void signInFailsPassword() {
+        UserRegistration userRegistration = new UserRegistration(
+                "firstName",
+                "lastName",
+                "UserName4",
+                "mail4@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+
+        applicationUserService.createNewUser(userRegistration).block();
+
+        Login login = new Login("mail@mail.com", "wrong_password");
+
+        webTestClient
+                .post()
+                .uri("/authentication/signin")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(login)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> assertThat(response.get("error")).isEqualTo("Invalid Credentials"));
     }
 }

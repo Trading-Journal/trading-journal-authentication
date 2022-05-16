@@ -31,6 +31,8 @@ public class SwaggerConfiguration implements WebFluxConfigurer {
     private static final List<Response> GLOBAL_RESPONSES = Arrays.asList(
             new ResponseBuilder().code("400")
                     .description("Invalid data provided").build(),
+            new ResponseBuilder().code("401")
+                    .description("Unauthorized access").build(),
             new ResponseBuilder().code("403")
                     .description("Access forbidden to the resource").build(),
             new ResponseBuilder().code("404")

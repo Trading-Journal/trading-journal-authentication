@@ -2,7 +2,6 @@ package com.trading.journal.authentication.jwt.impl;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -10,9 +9,9 @@ import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
-import com.trading.journal.authentication.jwt.ContextUser;
+import com.trading.journal.authentication.jwt.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.DateHelper;
-import com.trading.journal.authentication.jwt.JwtConstantsHelper;
+import com.trading.journal.authentication.jwt.JwtHelper;
 import com.trading.journal.authentication.jwt.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.TokenData;
 import com.trading.journal.authentication.user.ApplicationUser;
@@ -20,12 +19,12 @@ import com.trading.journal.authentication.user.Authority;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -59,25 +58,16 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
         String token = Jwts.builder()
                 .signWith(secretKey, SignatureAlgorithm.HS512)
-                .setHeaderParam(JwtConstantsHelper.HEADER_TYP, JwtConstantsHelper.TOKEN_TYPE)
-                .setIssuer(JwtConstantsHelper.TOKEN_ISSUER)
-                .setAudience(JwtConstantsHelper.TOKEN_AUDIENCE)
+                .setHeaderParam(JwtHelper.HEADER_TYP, JwtHelper.TOKEN_TYPE)
+                .setIssuer(JwtHelper.TOKEN_ISSUER)
+                .setAudience(JwtHelper.TOKEN_AUDIENCE)
                 .setSubject(applicationUser.userName())
                 .setIssuedAt(issuedAt)
                 .setExpiration(getExpirationDate())
-                .claim(JwtConstantsHelper.AUTHORITIES, authorities)
-                .claim(JwtConstantsHelper.TENANCY, applicationUser.userName())
+                .claim(JwtHelper.AUTHORITIES, authorities)
+                .claim(JwtHelper.TENANCY, applicationUser.userName())
                 .compact();
         return new TokenData(token, 3600, issuedAt);
-    }
-
-    @Override
-    public Authentication getAuthentication(String token) {
-        var jwsClaims = tokenParser.parseToken(token);
-        Collection<? extends GrantedAuthority> authorities = getAuthorities(jwsClaims);
-        String tenancy = getTenancy(jwsClaims);
-        ContextUser principal = new ContextUser(jwsClaims.getBody().getSubject(), "", authorities, tenancy);
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
     @Override
@@ -94,29 +84,33 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     }
 
     @Override
+    public Authentication getAuthentication(String token) {
+        return tokenParser.getAuthentication(token);
+    }
+
+    @Override
     public List<String> getRoles(String token) {
-        var jwsClaims = tokenParser.parseToken(token);
-        return getAuthorities(jwsClaims).stream()
-                .map(SimpleGrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+        return tokenParser.getRoles(token);
+    }
+
+    @Override
+    public String resolveToken(ServerHttpRequest request) {
+        String bearerToken = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        String token = null;
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(JwtHelper.TOKEN_PREFIX)) {
+            token = bearerToken.replace(JwtHelper.TOKEN_PREFIX, "");
+        }
+        return token;
+    }
+
+    @Override
+    public AccessTokenInfo getAccessTokenInfo(String token) {
+        return tokenParser.getAccessTokenInfo(token);
     }
 
     private Date getExpirationDate() {
         return Date.from(LocalDateTime.now().plusSeconds(3600)
                 .atZone(ZoneId.systemDefault())
                 .toInstant());
-    }
-
-    private List<SimpleGrantedAuthority> getAuthorities(Jws<Claims> token) {
-        return ((List<?>) token.getBody().get(JwtConstantsHelper.AUTHORITIES))
-                .stream()
-                .map(authority -> new SimpleGrantedAuthority((String) authority))
-                .collect(Collectors.toList());
-    }
-
-    private String getTenancy(Jws<Claims> token) {
-        return Optional.ofNullable(token.getBody().get(JwtConstantsHelper.TENANCY)).map(Object::toString)
-                .orElseThrow(() -> new AuthenticationServiceException(
-                        String.format("User company not found inside the token %s", token)));
     }
 }

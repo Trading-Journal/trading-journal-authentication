@@ -10,9 +10,9 @@ public class ContextUser extends User {
     private static final long serialVersionUID = 2657274830115424036L;
     private final String tenancy;
 
-    public ContextUser(String username, String password, Collection<? extends GrantedAuthority> authorities,
+    public ContextUser(String username, Collection<? extends GrantedAuthority> authorities,
             String tenancy) {
-        super(username, password, authorities);
+        super(username, "", authorities);
         this.tenancy = tenancy;
     }
 

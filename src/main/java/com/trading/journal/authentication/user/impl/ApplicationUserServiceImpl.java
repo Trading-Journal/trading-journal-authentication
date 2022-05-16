@@ -16,6 +16,7 @@ import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.ApplicationUserService;
 import com.trading.journal.authentication.user.Authority;
+import com.trading.journal.authentication.user.UserInfo;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -87,6 +88,11 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     @Override
     public Mono<Boolean> emailExists(String email) {
         return repository.existsByEmail(email);
+    }
+
+    @Override
+    public Mono<UserInfo> getUserInfo(String userName) {
+        return repository.findByUserName(userName);
     }
 
     private Consumer<ApplicationUser> checkForEmptyAuthorities() {
