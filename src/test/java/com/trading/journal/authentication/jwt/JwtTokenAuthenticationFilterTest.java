@@ -1,16 +1,14 @@
 package com.trading.journal.authentication.jwt;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.UUID;
 
-import com.trading.journal.authentication.jwt.impl.JwtTokenProviderImpl;
-import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.Authority;
+import com.trading.journal.authentication.jwt.helper.JwtHelper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
@@ -21,31 +19,21 @@ import reactor.core.publisher.Mono;
 
 @ExtendWith(SpringExtension.class)
 public class JwtTokenAuthenticationFilterTest {
-    JwtTokenProvider tokenProvider;
+
+    @Mock
+    JwtTokenParser tokenParser;
 
     JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @BeforeEach
     public void setUp() {
-        tokenProvider = new JwtTokenProviderImpl();
-        jwtTokenAuthenticationFilter = new JwtTokenAuthenticationFilter(tokenProvider);
+        jwtTokenAuthenticationFilter = new JwtTokenAuthenticationFilter(tokenParser);
     }
 
     @Test
     @DisplayName("Given server request with token process request successfully")
     void serverRequestSuccess() {
-        ApplicationUser appUser = new ApplicationUser(
-                "UserAdm",
-                "123456",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new Authority("ROLE_USER")),
-                LocalDateTime.now());
-
-        TokenData tokenData = tokenProvider.generateJwtToken(appUser);
+        String token = UUID.randomUUID().toString();
 
         WebFilterChain filterChain = (filterExchange) -> {
             try {
@@ -56,7 +44,8 @@ public class JwtTokenAuthenticationFilterTest {
         };
 
         MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo/foo")
-                .header(HttpHeaders.AUTHORIZATION, JwtHelper.TOKEN_PREFIX.concat(tokenData.token())));
+                .header(HttpHeaders.AUTHORIZATION, JwtHelper.TOKEN_PREFIX.concat(token)));
+
         jwtTokenAuthenticationFilter.filter(exchange, filterChain).block();
     }
 

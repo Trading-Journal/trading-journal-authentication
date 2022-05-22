@@ -11,21 +11,21 @@ import org.springframework.web.server.WebFilterChain;
 
 import reactor.core.publisher.Mono;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class JwtTokenAuthenticationFilter implements WebFilter {
 
-    private final JwtTokenProvider tokenProvider;
+    private final JwtTokenParser tokenParser;
 
-    public JwtTokenAuthenticationFilter(JwtTokenProvider tokenProvider) {
-        this.tokenProvider = tokenProvider;
+    public JwtTokenAuthenticationFilter(JwtTokenParser tokenParser) {
+        this.tokenParser = tokenParser;
     }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String token = tokenProvider.resolveToken(exchange.getRequest());
+        String token = tokenParser.resolveToken(exchange.getRequest());
         Mono<Void> monoChain;
-        if (StringUtils.hasText(token) && this.tokenProvider.validateToken(token)) {
-            Authentication authentication = this.tokenProvider.getAuthentication(token);
+        if (StringUtils.hasText(token) && this.tokenParser.isTokenValid(token)) {
+            Authentication authentication = this.tokenParser.getAuthentication(token);
             monoChain = chain.filter(exchange)
                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
         } else {

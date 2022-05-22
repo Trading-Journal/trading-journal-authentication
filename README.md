@@ -13,6 +13,8 @@
   * Must change password
 * Admin endpoints
   * Improve SecurityConfigurationTest with admin access
+* Postman Test run
+* Test Coverage with fail under X percent
 * Interface for Application User/Application User Repository (and other Entities if needed)
   * This should allow user storage to be in another DB then MongoDB
 * Delete account
@@ -22,10 +24,30 @@
     * Token validation
     * Token reader
     * With Private key/certificate
+    * etc
 * Use token generated here in another project to validate flow and Lib (above)
 * Create version 1.0.0
 * Create TAG with current code for reuse in other projects
 
-<http://localhost:8080/swagger-ui/index.html>
+## Swagger
 
+[Localhost swagger URL](http://localhost:8080/swagger-ui/index.html)
+
+## Running
+
+### Container Dependencies
+
+```bash
 docker run -p 27017:27017 --name mongo -d mongo
+```
+
+### Keys Dependencies
+
+```bash
+# Generate a secret
+openssl genrsa -out secret_key.pem 2048
+# Transform the secret into a private key, to sign the jwt token
+openssl pkcs8 -topk8 -inform PEM -outform PEM -in secret_key.pem -out private_key.pem -nocrypt
+# Generate a public key from the secret to verify the jwt token
+openssl rsa -in secret_key.pem -pubout -outform PEM -out public_key.pem
+```

@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
-import com.trading.journal.authentication.jwt.AccessTokenInfo;
-import com.trading.journal.authentication.jwt.JwtTokenProvider;
+import com.trading.journal.authentication.jwt.JwtTokenParser;
+import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ public class AccessTokenResolverTest {
     BindingContext bindingContext;
 
     @Mock
-    JwtTokenProvider tokenProvider;
+    JwtTokenParser tokenParser;
 
     @InjectMocks
     AccessTokenResolver accessTokenResolver;
@@ -45,8 +45,8 @@ public class AccessTokenResolverTest {
         MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo/foo")
                 .header(HttpHeaders.AUTHORIZATION, jwtToken));
 
-        when(tokenProvider.resolveToken(exchange.getRequest())).thenReturn(jwtToken);
-        when(tokenProvider.getAccessTokenInfo(jwtToken)).thenReturn(
+        when(tokenParser.resolveToken(exchange.getRequest())).thenReturn(jwtToken);
+        when(tokenParser.getAccessTokenInfo(jwtToken)).thenReturn(
                 new AccessTokenInfo(
                         "UserAdm",
                         "tenancy_1",

@@ -1,7 +1,7 @@
 package com.trading.journal.authentication.jwt.impl;
 
-import com.trading.journal.authentication.jwt.AccessToken;
-import com.trading.journal.authentication.jwt.JwtTokenProvider;
+import com.trading.journal.authentication.jwt.JwtTokenParser;
+import com.trading.journal.authentication.jwt.data.AccessToken;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.reactive.BindingContext;
@@ -12,10 +12,10 @@ import reactor.core.publisher.Mono;
 
 public class AccessTokenResolver implements HandlerMethodArgumentResolver {
 
-    private final JwtTokenProvider tokenProvider;
+    private final JwtTokenParser tokenParser;
 
-    public AccessTokenResolver(JwtTokenProvider tokenProvider) {
-        this.tokenProvider = tokenProvider;
+    public AccessTokenResolver(JwtTokenParser tokenParser) {
+        this.tokenParser = tokenParser;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class AccessTokenResolver implements HandlerMethodArgumentResolver {
     @Override
     public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
             ServerWebExchange exchange) {
-        String token = tokenProvider.resolveToken(exchange.getRequest());
-        return Mono.just(tokenProvider.getAccessTokenInfo(token));
+        String token = tokenParser.resolveToken(exchange.getRequest());
+        return Mono.just(tokenParser.getAccessTokenInfo(token));
     }
 }

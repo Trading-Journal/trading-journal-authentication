@@ -1,4 +1,4 @@
-package com.trading.journal.authentication.jwt;
+package com.trading.journal.authentication.jwt.data;
 
 import java.util.Collection;
 

@@ -7,9 +7,9 @@ import javax.validation.Valid;
 import com.trading.journal.authentication.authentication.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
-import com.trading.journal.authentication.jwt.JwtHelper;
 import com.trading.journal.authentication.jwt.JwtTokenProvider;
-import com.trading.journal.authentication.jwt.TokenData;
+import com.trading.journal.authentication.jwt.data.TokenData;
+import com.trading.journal.authentication.jwt.helper.JwtHelper;
 import com.trading.journal.authentication.user.ApplicationUserService;
 import com.trading.journal.authentication.user.Authority;
 

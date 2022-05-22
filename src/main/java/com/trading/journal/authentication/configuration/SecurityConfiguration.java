@@ -3,7 +3,7 @@ package com.trading.journal.authentication.configuration;
 import java.util.stream.Stream;
 
 import com.trading.journal.authentication.jwt.JwtTokenAuthenticationFilter;
-import com.trading.journal.authentication.jwt.JwtTokenProvider;
+import com.trading.journal.authentication.jwt.JwtTokenParser;
 import com.trading.journal.authentication.user.ApplicationUserService;
 
 import org.springframework.context.annotation.Bean;
@@ -23,15 +23,15 @@ public class SecurityConfiguration {
     private final ApplicationUserService applicationUserService;
     private final PasswordEncoder passwordEncoder;
     private final ServerAuthenticationExceptionEntryPoint serverAuthenticationExceptionEntryPoint;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenParser tokenParser;
 
     public SecurityConfiguration(ApplicationUserService applicationUserService, PasswordEncoder passwordEncoder,
             ServerAuthenticationExceptionEntryPoint serverAuthenticationExceptionEntryPoint,
-            JwtTokenProvider jwtTokenProvider) {
+            JwtTokenParser tokenParser) {
         this.applicationUserService = applicationUserService;
         this.passwordEncoder = passwordEncoder;
         this.serverAuthenticationExceptionEntryPoint = serverAuthenticationExceptionEntryPoint;
-        this.jwtTokenProvider = jwtTokenProvider;
+        this.tokenParser = tokenParser;
     }
 
     @Bean
@@ -56,7 +56,7 @@ public class SecurityConfiguration {
                         .hasAuthority(AuthoritiesHelper.ROLE_ADMIN)
                         .anyExchange()
                         .hasAuthority(AuthoritiesHelper.ROLE_USER))
-                .addFilterAt(new JwtTokenAuthenticationFilter(jwtTokenProvider), SecurityWebFiltersOrder.HTTP_BASIC)
+                .addFilterAt(new JwtTokenAuthenticationFilter(tokenParser), SecurityWebFiltersOrder.HTTP_BASIC)
                 .build();
     }
 
