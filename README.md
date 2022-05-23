@@ -2,11 +2,11 @@
 
 ## Pending
 
-* Private key/certificate for token key
-  * Application properties
-    * add expiration for token
+* Improve tests where there is no or are incomplete
 * Refresh token mechanism
 * Secure token better
+  * Change some constant values to configuration
+  * Add more validations to token valid such issuer, audience, etc.
 * Change password
 * Email verification
 * Admin on start up

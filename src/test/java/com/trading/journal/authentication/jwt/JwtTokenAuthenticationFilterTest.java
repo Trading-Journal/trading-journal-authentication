@@ -2,7 +2,7 @@ package com.trading.journal.authentication.jwt;
 
 import java.util.UUID;
 
-import com.trading.journal.authentication.jwt.helper.JwtHelper;
+import com.trading.journal.authentication.jwt.helper.JwtConstants;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,13 +21,13 @@ import reactor.core.publisher.Mono;
 public class JwtTokenAuthenticationFilterTest {
 
     @Mock
-    JwtTokenParser tokenParser;
+    JwtTokenReader tokenReader;
 
     JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @BeforeEach
     public void setUp() {
-        jwtTokenAuthenticationFilter = new JwtTokenAuthenticationFilter(tokenParser);
+        jwtTokenAuthenticationFilter = new JwtTokenAuthenticationFilter(tokenReader);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class JwtTokenAuthenticationFilterTest {
         };
 
         MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo/foo")
-                .header(HttpHeaders.AUTHORIZATION, JwtHelper.TOKEN_PREFIX.concat(token)));
+                .header(HttpHeaders.AUTHORIZATION, JwtConstants.TOKEN_PREFIX.concat(token)));
 
         jwtTokenAuthenticationFilter.filter(exchange, filterChain).block();
     }

@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.jwt.helper;
 
-public final class JwtHelper {
+public final class JwtConstants {
 
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String TOKEN_NAME = "Bearer";

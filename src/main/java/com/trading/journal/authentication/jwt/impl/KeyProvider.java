@@ -38,6 +38,5 @@ public class KeyProvider {
         } catch (NoSuchAlgorithmException e) {
             throw new JwtException(String.format("Failed to load RSA %s key", keyType), e);
         }
-
     }
 }
