@@ -2,48 +2,52 @@ package com.trading.journal.authentication.jwt.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
+import java.io.File;
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
-import com.trading.journal.authentication.configuration.AuthoritiesHelper;
-import com.trading.journal.authentication.jwt.DateHelper;
-import com.trading.journal.authentication.jwt.JwtHelper;
+import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.jwt.JwtTokenProvider;
-import com.trading.journal.authentication.jwt.TokenData;
+import com.trading.journal.authentication.jwt.PrivateKeyProvider;
+import com.trading.journal.authentication.jwt.data.JwtProperties;
+import com.trading.journal.authentication.jwt.data.ServiceType;
+import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.Authority;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-
+@ExtendWith(SpringExtension.class)
 public class JwtTokenProviderImplTest {
-    private final static String TOKEN_SECRET = "1_sEQNtLZ33v4Ynye4tQ8pJ8lOhmjMNEs7XI-nJ0s6lKjyTMHmK7Gpfnz1xQmoF6zSlQMe4t34wua-YHeX4aCj3W5q9Ty3MPP7I1ULC3B9InNq8Y4_SpwciizpH7wsUlfEO1VAtV6MxSXhBaoYY1yI4UWRYvtAMH_idWiIA-y25x1KBF5slm9ry6DZa5t0mFpXzqFXjsrcxF724B_zKl--Ka-yG_jDdD-iPxyr8EWOIZgs2TVkgAn_jZ3-1VvH-HPvtCBrDdbVAc4NVK-o04Uyf2y-Fb72naYQbfFLkMk9_NCIpG6TpGeEGQR9e5wO0A87mzEGtTHDAV85WE5uXDw";
+
+    @Mock
+    PrivateKeyProvider privateKeyProvider;
 
     JwtTokenProvider tokenProvider;
 
     @BeforeEach
     public void setUp() {
-        tokenProvider = new JwtTokenProviderImpl();
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 3600L);
+        tokenProvider = new JwtTokenProviderImpl(properties, privateKeyProvider);
     }
 
     @Test
     @DisplayName("Given user and its roles when generateJwtToken, return JWT token")
-    void given_user_and_roles_return_token() {
+    void given_user_and_roles_return_token() throws NoSuchAlgorithmException, IOException {
         ApplicationUser appUser = new ApplicationUser(
                 "UserAdm",
                 "123456",
@@ -55,6 +59,8 @@ public class JwtTokenProviderImplTest {
                 Collections.singletonList(new Authority("ROLE_USER")),
                 LocalDateTime.now());
 
+        when(privateKeyProvider.provide(new File("arg"))).thenReturn(mockPrivateKey());
+
         TokenData tokenData = tokenProvider.generateJwtToken(appUser);
 
         assertThat(tokenData.token()).isNotEmpty();
@@ -63,27 +69,8 @@ public class JwtTokenProviderImplTest {
     }
 
     @Test
-    @DisplayName("Given user and its roles when getRoles, return same roles")
-    void getRoles() {
-        ApplicationUser appUser = new ApplicationUser(
-                "UserAdm",
-                "123456",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                Arrays.asList(new Authority("ROLE_USER"), new Authority("ROLE_ADMIN")),
-                LocalDateTime.now());
-
-        TokenData tokenData = tokenProvider.generateJwtToken(appUser);
-        List<String> roles = tokenProvider.getRoles(tokenData.token());
-        assertThat(roles).containsOnly(AuthoritiesHelper.ROLE_ADMIN, AuthoritiesHelper.ROLE_USER);
-    }
-
-    @Test
     @DisplayName("Given user with null roles when generateJwtToken, return exception")
-    void nullRoles() {
+    void nullRoles() throws IOException, NoSuchAlgorithmException {
         ApplicationUser appUser = new ApplicationUser(
                 "UserAdm",
                 "123456",
@@ -95,15 +82,19 @@ public class JwtTokenProviderImplTest {
                 null,
                 LocalDateTime.now());
 
-        assertThrows(
-                AuthenticationServiceException.class,
+        when(privateKeyProvider.provide(new File("arg"))).thenReturn(mockPrivateKey());
+
+        ApplicationException exception = assertThrows(
+                ApplicationException.class,
                 () -> tokenProvider.generateJwtToken(appUser),
                 "User has not authority roles");
+
+        assertThat(exception.getRawStatusCode()).isEqualTo(401);
     }
 
     @Test
     @DisplayName("Given user with empty roles when generateJwtToken, return exception")
-    void emptyRoles() {
+    void emptyRoles() throws IOException, NoSuchAlgorithmException {
         ApplicationUser appUser = new ApplicationUser(
                 "UserAdm",
                 "123456",
@@ -115,76 +106,20 @@ public class JwtTokenProviderImplTest {
                 Collections.emptyList(),
                 LocalDateTime.now());
 
-        assertThrows(
-                AuthenticationServiceException.class,
+        when(privateKeyProvider.provide(new File("arg"))).thenReturn(mockPrivateKey());
+
+        ApplicationException exception = assertThrows(
+                ApplicationException.class,
                 () -> tokenProvider.generateJwtToken(appUser),
                 "User has not authority roles");
+
+        assertThat(exception.getRawStatusCode()).isEqualTo(401);
     }
 
-    @Test
-    @DisplayName("Given expired jwt token when validateToken return invalid")
-    void expiredToken() {
-        String userName = "user";
-        Date issuedAt = DateHelper.getUTCDatetimeAsDate();
-        Date expiration = Date.from(LocalDateTime.now().minusSeconds(1).atZone(ZoneId.systemDefault()).toInstant());
-
-        String token = Jwts.builder()
-                .signWith(Keys.hmacShaKeyFor(TOKEN_SECRET.getBytes()), SignatureAlgorithm.HS512)
-                .setHeaderParam(JwtHelper.HEADER_TYP, JwtHelper.TOKEN_TYPE)
-                .setIssuer(JwtHelper.TOKEN_ISSUER)
-                .setAudience(JwtHelper.TOKEN_AUDIENCE)
-                .setSubject(userName)
-                .setIssuedAt(issuedAt)
-                .setExpiration(expiration)
-                .claim(JwtHelper.AUTHORITIES, Collections.singletonList(AuthoritiesHelper.ROLE_USER))
-                .compact();
-
-        boolean isTokenValid = tokenProvider.validateToken(token);
-
-        assertThat(isTokenValid).isFalse();
-    }
-
-    @Test
-    @DisplayName("Given almost expired jwt token when validateToken return valid")
-    void almostExpiredToken() {
-        String userName = "user";
-        Date issuedAt = DateHelper.getUTCDatetimeAsDate();
-        Date expiration = Date.from(LocalDateTime.now().plusSeconds(3).atZone(ZoneId.systemDefault()).toInstant());
-
-        String token = Jwts.builder()
-                .signWith(Keys.hmacShaKeyFor(TOKEN_SECRET.getBytes()), SignatureAlgorithm.HS512)
-                .setHeaderParam(JwtHelper.HEADER_TYP, JwtHelper.TOKEN_TYPE)
-                .setIssuer(JwtHelper.TOKEN_ISSUER)
-                .setAudience(JwtHelper.TOKEN_AUDIENCE)
-                .setSubject(userName)
-                .setIssuedAt(issuedAt)
-                .setExpiration(expiration)
-                .claim(JwtHelper.AUTHORITIES, Collections.singletonList(AuthoritiesHelper.ROLE_USER))
-                .compact();
-
-        boolean isTokenValid = tokenProvider.validateToken(token);
-
-        assertThat(isTokenValid).isTrue();
-    }
-
-    @Test
-    @DisplayName("Given token when get authentication return Principal data")
-    void getAuthentication() {
-        ApplicationUser appUser = new ApplicationUser(
-                "UserAdm",
-                "123456",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new Authority("ROLE_USER")),
-                LocalDateTime.now());
-
-        var tokenData = tokenProvider.generateJwtToken(appUser);
-        Authentication authentication = tokenProvider.getAuthentication(tokenData.token());
-
-        assertThat(((User) authentication.getPrincipal()).getUsername()).isEqualTo("UserAdm");
-        assertThat(authentication.getAuthorities().toArray()).contains(new SimpleGrantedAuthority("ROLE_USER"));
+    private PrivateKey mockPrivateKey() throws NoSuchAlgorithmException {
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+        keyGen.initialize(2048);
+        KeyPair keyPair = keyGen.genKeyPair();
+        return keyPair.getPrivate();
     }
 }

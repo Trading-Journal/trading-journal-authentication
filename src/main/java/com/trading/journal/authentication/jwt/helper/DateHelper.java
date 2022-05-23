@@ -1,4 +1,4 @@
-package com.trading.journal.authentication.jwt;
+package com.trading.journal.authentication.jwt.helper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

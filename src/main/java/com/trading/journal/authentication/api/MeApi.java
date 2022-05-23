@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.api;
 
-import com.trading.journal.authentication.jwt.AccessTokenInfo;
+import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.user.UserInfo;
 
 import org.springframework.http.HttpStatus;

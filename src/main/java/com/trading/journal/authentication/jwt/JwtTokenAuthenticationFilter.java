@@ -1,5 +1,7 @@
 package com.trading.journal.authentication.jwt;
 
+import com.trading.journal.authentication.jwt.impl.JwtResolveTokenHttpHeader;
+
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
@@ -11,21 +13,23 @@ import org.springframework.web.server.WebFilterChain;
 
 import reactor.core.publisher.Mono;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class JwtTokenAuthenticationFilter implements WebFilter {
 
-    private final JwtTokenProvider tokenProvider;
+    private final JwtTokenReader tokenReader;
+    private final JwtResolveToken resolveToken;
 
-    public JwtTokenAuthenticationFilter(JwtTokenProvider tokenProvider) {
-        this.tokenProvider = tokenProvider;
+    public JwtTokenAuthenticationFilter(JwtTokenReader tokenReader) {
+        this.tokenReader = tokenReader;
+        this.resolveToken = new JwtResolveTokenHttpHeader();
     }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String token = tokenProvider.resolveToken(exchange.getRequest());
+        String token = resolveToken.resolve(exchange.getRequest());
         Mono<Void> monoChain;
-        if (StringUtils.hasText(token) && this.tokenProvider.validateToken(token)) {
-            Authentication authentication = this.tokenProvider.getAuthentication(token);
+        if (StringUtils.hasText(token) && this.tokenReader.isTokenValid(token)) {
+            Authentication authentication = this.tokenReader.getAuthentication(token);
             monoChain = chain.filter(exchange)
                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
         } else {

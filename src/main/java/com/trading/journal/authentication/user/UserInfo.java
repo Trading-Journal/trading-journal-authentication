@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.trading.journal.authentication.jwt.DateHelper;
+import com.trading.journal.authentication.jwt.helper.DateHelper;
 
 import org.springframework.data.mongodb.core.mapping.Field;
 

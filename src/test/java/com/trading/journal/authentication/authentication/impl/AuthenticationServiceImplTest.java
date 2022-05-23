@@ -16,9 +16,9 @@ import java.util.List;
 
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
-import com.trading.journal.authentication.jwt.ContextUser;
 import com.trading.journal.authentication.jwt.JwtTokenProvider;
-import com.trading.journal.authentication.jwt.TokenData;
+import com.trading.journal.authentication.jwt.data.ContextUser;
+import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserService;
 
