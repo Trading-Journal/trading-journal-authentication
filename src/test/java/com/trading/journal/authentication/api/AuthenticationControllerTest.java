@@ -85,7 +85,10 @@ public class AuthenticationControllerTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(LoginResponse.class)
-                .value(response -> assertThat(response.accessToken()).isNotBlank());
+                .value(response -> {
+                    assertThat(response.accessToken()).isNotBlank();
+                    assertThat(response.refreshToken()).isNotBlank();
+                });
     }
 
     @Test

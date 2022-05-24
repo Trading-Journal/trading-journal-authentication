@@ -60,7 +60,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
@@ -90,7 +90,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
@@ -116,7 +116,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
@@ -144,7 +144,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
@@ -170,7 +170,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
@@ -196,7 +196,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().minusSeconds(2)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
@@ -208,7 +208,8 @@ public class JwtTokenReaderImplTest {
     }
 
     private JwtTokenParser mockParser(KeyPair keyPair) {
-        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 3600L);
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 3600L,
+                86400L);
         try {
             when(publicKeyProvider.provide(new File("arg"))).thenReturn(keyPair.getPublic());
         } catch (IOException e) {

@@ -68,7 +68,7 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
     }
 
     private List<SimpleGrantedAuthority> getAuthorities(Jws<Claims> token) {
-        return ((List<?>) token.getBody().get(JwtConstants.AUTHORITIES))
+        return ((List<?>) token.getBody().get(JwtConstants.SCOPES))
                 .stream()
                 .map(authority -> new SimpleGrantedAuthority((String) authority))
                 .collect(Collectors.toList());

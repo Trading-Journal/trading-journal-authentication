@@ -24,6 +24,6 @@ public class JwtPropertiesResourceTest {
         assertThat(properties.serviceType()).isEqualTo(ServiceType.RESOURCE);
         assertThat(properties.privateKey()).isNull();
         assertThat(properties.publicKey()).isNotNull();
-        assertThat(properties.expiration()).isEqualTo(3600L);
+        assertThat(properties.accessTokenExpiration()).isNull();
     }
 }

@@ -47,7 +47,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     return new LoginResponse(
                             JwtConstants.TOKEN_TYPE,
                             tokenData.accessToken(),
-                            "refreshToken",
+                            tokenData.refreshToken(),
                             tokenData.expirationIn(),
                             tokenData.issuedAt(),
                             user.firstName());

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -58,22 +59,33 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .collect(Collectors.toList());
 
         Date issuedAt = DateHelper.getUTCDatetimeAsDate();
-        String token = Jwts.builder()
+        String accessToken = Jwts.builder()
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
                 .setIssuer(JwtConstants.TOKEN_ISSUER)
                 .setAudience(JwtConstants.TOKEN_AUDIENCE)
                 .setSubject(applicationUser.userName())
                 .setIssuedAt(issuedAt)
-                .setExpiration(getExpirationDate())
-                .claim(JwtConstants.AUTHORITIES, authorities)
+                .setExpiration(getExpirationDate(properties.accessTokenExpiration()))
+                .claim(JwtConstants.SCOPES, authorities)
                 .claim(JwtConstants.TENANCY, applicationUser.userName())
                 .compact();
-        return new TokenData(token, null, properties.expiration(), issuedAt);
+
+        String refreshToken = Jwts.builder()
+                .signWith(privateKey, SignatureAlgorithm.RS256)
+                .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
+                .setIssuer(JwtConstants.TOKEN_ISSUER)
+                .setSubject(applicationUser.userName())
+                .setIssuedAt(issuedAt)
+                .setExpiration(getExpirationDate(properties.refreshTokenExpiration()))
+                .claim(JwtConstants.SCOPES, Collections.singletonList(JwtConstants.REFRESH_TOKEN))
+                .compact();
+
+        return new TokenData(accessToken, refreshToken, properties.accessTokenExpiration(), issuedAt);
     }
 
-    private Date getExpirationDate() {
-        return Date.from(LocalDateTime.now().plusSeconds(properties.expiration())
+    private Date getExpirationDate(Long expireIn) {
+        return Date.from(LocalDateTime.now().plusSeconds(expireIn)
                 .atZone(ZoneId.systemDefault())
                 .toInstant());
     }

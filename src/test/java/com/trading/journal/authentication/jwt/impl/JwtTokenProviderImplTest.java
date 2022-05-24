@@ -41,7 +41,8 @@ public class JwtTokenProviderImplTest {
 
     @BeforeEach
     public void setUp() {
-        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 3600L);
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 3600L,
+                86400L);
         tokenProvider = new JwtTokenProviderImpl(properties, privateKeyProvider);
     }
 
@@ -64,6 +65,7 @@ public class JwtTokenProviderImplTest {
         TokenData tokenData = tokenProvider.generateJwtToken(appUser);
 
         assertThat(tokenData.accessToken()).isNotEmpty();
+        assertThat(tokenData.refreshToken()).isNotEmpty();
         assertThat(tokenData.expirationIn()).isEqualTo(3600L);
         assertThat(tokenData.issuedAt()).isBefore(Date.from(Instant.now()));
     }

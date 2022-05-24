@@ -3,20 +3,7 @@
 ## Pending
 
 * Refresh token mechanism
-  * refreshToken expiration property higher than accessToken
   * Claims - check other claims names
-    * Refresh
-        Claims
-            {
-            "sub": "svlada@gmail.com",
-            "scopes": [
-                "ROLE_REFRESH_TOKEN"
-            ],
-            "iss": "http://svlada.com",
-            "jti": "90afe78c-1d2e-4869-a77e-1d754b60e0ce",
-            "iat": 1472033308,
-            "exp": 1472036908
-            }
 * Roles Interface, can be Static or a Entity
 * Secure token better
   * Change some constant values to configuration

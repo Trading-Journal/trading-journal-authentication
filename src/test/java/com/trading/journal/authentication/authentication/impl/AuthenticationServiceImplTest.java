@@ -76,12 +76,15 @@ public class AuthenticationServiceImplTest {
                 LocalDateTime.now());
         when(applicationUserService.getUserByEmail(login.email())).thenReturn(Mono.just(applicationUser));
 
-        TokenData tokenData = new TokenData("token", null, 3600L, Date.from(Instant.now()));
+        TokenData tokenData = new TokenData("token", "refresh", 3600L, Date.from(Instant.now()));
         when(jwtTokenProvider.generateJwtToken(applicationUser)).thenReturn(tokenData);
 
         Mono<LoginResponse> signIn = authenticationService.signIn(login);
         StepVerifier.create(signIn)
-                .assertNext(response -> assertThat(response.accessToken()).isNotBlank()).verifyComplete();
+                .assertNext(response -> {
+                    assertThat(response.accessToken()).isNotBlank();
+                    assertThat(response.refreshToken()).isNotBlank();
+                }).verifyComplete();
 
     }
 
