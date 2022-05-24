@@ -1,7 +1,5 @@
 package com.trading.journal.authentication.authentication.impl;
 
-import java.util.stream.Collectors;
-
 import javax.validation.Valid;
 
 import com.trading.journal.authentication.authentication.AuthenticationService;
@@ -11,7 +9,6 @@ import com.trading.journal.authentication.jwt.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.user.ApplicationUserService;
-import com.trading.journal.authentication.user.Authority;
 
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -49,11 +46,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     TokenData tokenData = jwtTokenProvider.generateJwtToken(user);
                     return new LoginResponse(
                             JwtConstants.TOKEN_TYPE,
-                            tokenData.token(),
-                            user.authorities().stream().map(Authority::name).collect(Collectors.toList()),
+                            tokenData.accessToken(),
+                            "refreshToken",
                             tokenData.expirationIn(),
                             tokenData.issuedAt(),
-                            user.userName(),
                             user.firstName());
                 });
     }

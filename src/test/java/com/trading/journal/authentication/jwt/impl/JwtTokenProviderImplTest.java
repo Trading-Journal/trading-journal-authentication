@@ -63,7 +63,7 @@ public class JwtTokenProviderImplTest {
 
         TokenData tokenData = tokenProvider.generateJwtToken(appUser);
 
-        assertThat(tokenData.token()).isNotEmpty();
+        assertThat(tokenData.accessToken()).isNotEmpty();
         assertThat(tokenData.expirationIn()).isEqualTo(3600L);
         assertThat(tokenData.issuedAt()).isBefore(Date.from(Instant.now()));
     }

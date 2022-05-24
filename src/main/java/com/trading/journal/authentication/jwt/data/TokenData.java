@@ -3,7 +3,8 @@ package com.trading.journal.authentication.jwt.data;
 import java.util.Date;
 
 public record TokenData(
-        String token,
+        String accessToken,
+        String refreshToken,
         long expirationIn,
         Date issuedAt) {
 }

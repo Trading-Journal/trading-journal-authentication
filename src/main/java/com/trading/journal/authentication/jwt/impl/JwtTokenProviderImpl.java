@@ -69,7 +69,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .claim(JwtConstants.AUTHORITIES, authorities)
                 .claim(JwtConstants.TENANCY, applicationUser.userName())
                 .compact();
-        return new TokenData(token, properties.expiration(), issuedAt);
+        return new TokenData(token, null, properties.expiration(), issuedAt);
     }
 
     private Date getExpirationDate() {

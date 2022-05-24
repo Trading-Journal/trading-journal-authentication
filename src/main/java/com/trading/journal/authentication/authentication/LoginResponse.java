@@ -1,20 +1,17 @@
 package com.trading.journal.authentication.authentication;
 
 import java.util.Date;
-import java.util.List;
 
 public record LoginResponse(
         String type,
 
-        String token,
+        String accessToken,
 
-        List<String> roles,
+        String refreshToken,
 
-        Long expirationIn,
+        Long expirationInSeconds,
 
         Date issuedAt,
-
-        String userName,
 
         String user) {
 }
