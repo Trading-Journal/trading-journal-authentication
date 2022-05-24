@@ -33,24 +33,21 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
     private final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
     private final JwtProperties properties;
-    private final PrivateKeyProvider privateKeyProvider;
+    private final Key privateKey;
 
     public JwtTokenProviderImpl(JwtProperties properties, PrivateKeyProvider privateKeyProvider) {
         this.properties = properties;
-        this.privateKeyProvider = privateKeyProvider;
-    }
-
-    @Override
-    public TokenData generateJwtToken(ApplicationUser applicationUser) {
-        Key privateKey;
         try {
-            privateKey = privateKeyProvider.provide(this.properties.privateKey());
+            this.privateKey = privateKeyProvider.provide(this.properties.privateKey());
         } catch (IOException e) {
             logger.error("Failed to load RSA private key", e);
             throw (ApplicationException) new ApplicationException(HttpStatus.UNAUTHORIZED,
                     "Failed to load RSA private key").initCause(e);
         }
+    }
 
+    @Override
+    public TokenData generateAccessToken(ApplicationUser applicationUser) {
         List<String> authorities = Optional.ofNullable(applicationUser.authorities())
                 .filter(list -> !list.isEmpty())
                 .orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "User has not authority roles"))
@@ -60,7 +57,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
         Date issuedAt = DateHelper.getUTCDatetimeAsDate();
         String accessToken = Jwts.builder()
-                .signWith(privateKey, SignatureAlgorithm.RS256)
+                .signWith(this.privateKey, SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
                 .setIssuer(JwtConstants.TOKEN_ISSUER)
                 .setAudience(JwtConstants.TOKEN_AUDIENCE)
@@ -71,8 +68,15 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .claim(JwtConstants.TENANCY, applicationUser.userName())
                 .compact();
 
+        return new TokenData(accessToken,
+                issuedAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+    }
+
+    @Override
+    public TokenData generateRefreshToken(ApplicationUser applicationUser) {
+        Date issuedAt = DateHelper.getUTCDatetimeAsDate();
         String refreshToken = Jwts.builder()
-                .signWith(privateKey, SignatureAlgorithm.RS256)
+                .signWith(this.privateKey, SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
                 .setIssuer(JwtConstants.TOKEN_ISSUER)
                 .setSubject(applicationUser.userName())
@@ -81,7 +85,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .claim(JwtConstants.SCOPES, Collections.singletonList(JwtConstants.REFRESH_TOKEN))
                 .compact();
 
-        return new TokenData(accessToken, refreshToken,
+        return new TokenData(refreshToken,
                 issuedAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
     }
 

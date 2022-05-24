@@ -136,4 +136,22 @@ public class AuthenticationControllerTest {
                 })
                 .value(response -> assertThat(response.get("error")).isEqualTo("Invalid Credentials"));
     }
+
+    @Test
+    @DisplayName("When refreshing token, return success and new token")
+    void refreshToken() {
+
+    }
+
+    @Test
+    @DisplayName("When refreshing token with access token, return unauthorized exception")
+    void refreshTokenUnauthorized() {
+
+    }
+
+    @Test
+    @DisplayName("When refreshing token with expired token, return unauthorized exception")
+    void refreshTokenExpired() {
+
+    }
 }

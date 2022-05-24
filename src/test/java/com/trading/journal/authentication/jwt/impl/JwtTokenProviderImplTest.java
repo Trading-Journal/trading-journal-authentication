@@ -38,15 +38,16 @@ public class JwtTokenProviderImplTest {
     JwtTokenProvider tokenProvider;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws NoSuchAlgorithmException, IOException {
         JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 3600L,
                 86400L);
+        when(privateKeyProvider.provide(new File("arg"))).thenReturn(mockPrivateKey());
         tokenProvider = new JwtTokenProviderImpl(properties, privateKeyProvider);
     }
 
     @Test
-    @DisplayName("Given user and its roles when generateJwtToken, return JWT token")
-    void given_user_and_roles_return_token() throws NoSuchAlgorithmException, IOException {
+    @DisplayName("Given user and its roles when generateAccessToken, return JWT token")
+    void generateAccessToken() {
         ApplicationUser appUser = new ApplicationUser(
                 "UserAdm",
                 "123456",
@@ -58,18 +59,35 @@ public class JwtTokenProviderImplTest {
                 Collections.singletonList(new Authority("ROLE_USER")),
                 LocalDateTime.now());
 
-        when(privateKeyProvider.provide(new File("arg"))).thenReturn(mockPrivateKey());
+        TokenData tokenData = tokenProvider.generateAccessToken(appUser);
 
-        TokenData tokenData = tokenProvider.generateJwtToken(appUser);
-
-        assertThat(tokenData.accessToken()).isNotEmpty();
-        assertThat(tokenData.refreshToken()).isNotEmpty();
+        assertThat(tokenData.token()).isNotEmpty();
         assertThat(tokenData.issuedAt()).isBefore(LocalDateTime.now());
     }
 
     @Test
-    @DisplayName("Given user with null roles when generateJwtToken, return exception")
-    void nullRoles() throws IOException, NoSuchAlgorithmException {
+    @DisplayName("Given user and its roles when generateRefreshToken, return JWT token")
+    void generateRefreshToken() {
+        ApplicationUser appUser = new ApplicationUser(
+                "UserAdm",
+                "123456",
+                "user",
+                "admin",
+                "mail@mail.com",
+                true,
+                true,
+                Collections.singletonList(new Authority("ROLE_USER")),
+                LocalDateTime.now());
+
+        TokenData tokenData = tokenProvider.generateRefreshToken(appUser);
+
+        assertThat(tokenData.token()).isNotEmpty();
+        assertThat(tokenData.issuedAt()).isBefore(LocalDateTime.now());
+    }
+
+    @Test
+    @DisplayName("Given user with null roles when generateAccessToken, return exception")
+    void nullRoles() {
         ApplicationUser appUser = new ApplicationUser(
                 "UserAdm",
                 "123456",
@@ -81,18 +99,16 @@ public class JwtTokenProviderImplTest {
                 null,
                 LocalDateTime.now());
 
-        when(privateKeyProvider.provide(new File("arg"))).thenReturn(mockPrivateKey());
-
         ApplicationException exception = assertThrows(
                 ApplicationException.class,
-                () -> tokenProvider.generateJwtToken(appUser),
+                () -> tokenProvider.generateAccessToken(appUser),
                 "User has not authority roles");
 
         assertThat(exception.getRawStatusCode()).isEqualTo(401);
     }
 
     @Test
-    @DisplayName("Given user with empty roles when generateJwtToken, return exception")
+    @DisplayName("Given user with empty roles when generateAccessToken, return exception")
     void emptyRoles() throws IOException, NoSuchAlgorithmException {
         ApplicationUser appUser = new ApplicationUser(
                 "UserAdm",
@@ -109,7 +125,7 @@ public class JwtTokenProviderImplTest {
 
         ApplicationException exception = assertThrows(
                 ApplicationException.class,
-                () -> tokenProvider.generateJwtToken(appUser),
+                () -> tokenProvider.generateAccessToken(appUser),
                 "User has not authority roles");
 
         assertThat(exception.getRawStatusCode()).isEqualTo(401);

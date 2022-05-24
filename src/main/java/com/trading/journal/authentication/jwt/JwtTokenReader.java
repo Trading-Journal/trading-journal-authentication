@@ -9,5 +9,7 @@ public interface JwtTokenReader {
 
     AccessTokenInfo getAccessTokenInfo(String token);
 
+    AccessTokenInfo getRefreshTokenInfo(String token);
+
     boolean isTokenValid(String token);
 }

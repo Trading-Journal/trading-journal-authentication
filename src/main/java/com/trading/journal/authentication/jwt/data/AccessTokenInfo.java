@@ -5,5 +5,5 @@ import java.util.List;
 public record AccessTokenInfo(
         String userName,
         String tenancy,
-        List<String> roles) {
+        List<String> scopes) {
 }

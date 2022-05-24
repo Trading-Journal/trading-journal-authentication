@@ -53,34 +53,35 @@ public class JwtIntegratedTest {
                 Arrays.asList(new Authority("ROLE_USER"), new Authority("ROLE_ADMIN")),
                 LocalDateTime.now());
 
-        TokenData tokens = jwtTokenProvider.generateJwtToken(appUser);
+        TokenData accessToken = jwtTokenProvider.generateAccessToken(appUser);
 
-        assertThat(tokens.accessToken()).isNotBlank();
-        assertThat(tokens.refreshToken()).isNotBlank();
-        Jws<Claims> accessToken = jwtTokenParser.parseToken(tokens.accessToken());
-        assertThat(accessToken.getBody().getSubject()).isEqualTo(appUser.userName());
-        assertThat(accessToken.getBody().get(JwtConstants.TENANCY)).isEqualTo(appUser.userName());
-        assertThat(accessToken.getBody().getAudience()).isEqualTo("trade-journal");
-        assertThat(accessToken.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
+        assertThat(accessToken.token()).isNotBlank();
+        Jws<Claims> accessTokenClaims = jwtTokenParser.parseToken(accessToken.token());
+        assertThat(accessTokenClaims.getBody().getSubject()).isEqualTo(appUser.userName());
+        assertThat(accessTokenClaims.getBody().get(JwtConstants.TENANCY)).isEqualTo(appUser.userName());
+        assertThat(accessTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
+        assertThat(accessTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
         Date start = Date.from(LocalDateTime.now().plusSeconds(3500L).atZone(ZoneId.systemDefault()).toInstant());
         Date end = Date.from(LocalDateTime.now().plusSeconds(3600L).atZone(ZoneId.systemDefault()).toInstant());
-        assertThat(accessToken.getBody().getExpiration()).isBetween(start, end);
-        List<String> scopes = ((List<?>) accessToken.getBody().get(JwtConstants.SCOPES))
+        assertThat(accessTokenClaims.getBody().getExpiration()).isBetween(start, end);
+        List<String> scopes = ((List<?>) accessTokenClaims.getBody().get(JwtConstants.SCOPES))
                 .stream()
                 .map(authority -> new SimpleGrantedAuthority((String) authority))
                 .map(arg0 -> arg0.getAuthority())
                 .collect(Collectors.toList());
         assertThat(scopes).containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
 
-        Jws<Claims> refreshToken = jwtTokenParser.parseToken(tokens.refreshToken());
-        assertThat(refreshToken.getBody().getSubject()).isEqualTo(appUser.userName());
-        assertThat(refreshToken.getBody().get(JwtConstants.TENANCY)).isNull();
-        assertThat(refreshToken.getBody().getAudience()).isNull();
-        assertThat(refreshToken.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
+        TokenData refreshToken = jwtTokenProvider.generateRefreshToken(appUser);
+        assertThat(refreshToken.token()).isNotBlank();
+        Jws<Claims> refreshTokenClaims = jwtTokenParser.parseToken(refreshToken.token());
+        assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo(appUser.userName());
+        assertThat(refreshTokenClaims.getBody().get(JwtConstants.TENANCY)).isNull();
+        assertThat(refreshTokenClaims.getBody().getAudience()).isNull();
+        assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
         start = Date.from(LocalDateTime.now().plusSeconds(86300L).atZone(ZoneId.systemDefault()).toInstant());
         end = Date.from(LocalDateTime.now().plusSeconds(86400L).atZone(ZoneId.systemDefault()).toInstant());
-        assertThat(refreshToken.getBody().getExpiration()).isBetween(start, end);
-        scopes = ((List<?>) refreshToken.getBody().get(JwtConstants.SCOPES))
+        assertThat(refreshTokenClaims.getBody().getExpiration()).isBetween(start, end);
+        scopes = ((List<?>) refreshTokenClaims.getBody().get(JwtConstants.SCOPES))
                 .stream()
                 .map(authority -> new SimpleGrantedAuthority((String) authority))
                 .map(arg0 -> arg0.getAuthority())
