@@ -10,10 +10,8 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.jwt.JwtTokenProvider;
@@ -66,8 +64,7 @@ public class JwtTokenProviderImplTest {
 
         assertThat(tokenData.accessToken()).isNotEmpty();
         assertThat(tokenData.refreshToken()).isNotEmpty();
-        assertThat(tokenData.expirationIn()).isEqualTo(3600L);
-        assertThat(tokenData.issuedAt()).isBefore(Date.from(Instant.now()));
+        assertThat(tokenData.issuedAt()).isBefore(LocalDateTime.now());
     }
 
     @Test

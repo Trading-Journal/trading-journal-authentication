@@ -8,10 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import com.trading.journal.authentication.authentication.Login;
@@ -66,7 +64,7 @@ public class AuthenticationServiceImplTest {
 
         ApplicationUser applicationUser = new ApplicationUser(
                 "UserName",
-                "sdsa54ds56a4ds564d",
+                "12345679",
                 "firstName",
                 "lastName",
                 "mail@mail.com",
@@ -76,7 +74,7 @@ public class AuthenticationServiceImplTest {
                 LocalDateTime.now());
         when(applicationUserService.getUserByEmail(login.email())).thenReturn(Mono.just(applicationUser));
 
-        TokenData tokenData = new TokenData("token", "refresh", 3600L, Date.from(Instant.now()));
+        TokenData tokenData = new TokenData("token", "refresh", LocalDateTime.now());
         when(jwtTokenProvider.generateJwtToken(applicationUser)).thenReturn(tokenData);
 
         Mono<LoginResponse> signIn = authenticationService.signIn(login);

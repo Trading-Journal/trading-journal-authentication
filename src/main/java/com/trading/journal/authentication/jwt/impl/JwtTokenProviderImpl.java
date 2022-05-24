@@ -81,7 +81,8 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .claim(JwtConstants.SCOPES, Collections.singletonList(JwtConstants.REFRESH_TOKEN))
                 .compact();
 
-        return new TokenData(accessToken, refreshToken, properties.accessTokenExpiration(), issuedAt);
+        return new TokenData(accessToken, refreshToken,
+                issuedAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
     }
 
     private Date getExpirationDate(Long expireIn) {

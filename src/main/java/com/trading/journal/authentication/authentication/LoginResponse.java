@@ -1,6 +1,9 @@
 package com.trading.journal.authentication.authentication;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.trading.journal.authentication.jwt.helper.DateHelper;
 
 public record LoginResponse(
         String type,
@@ -9,9 +12,7 @@ public record LoginResponse(
 
         String refreshToken,
 
-        Long expirationInSeconds,
-
-        Date issuedAt,
+        @JsonFormat(pattern = DateHelper.DATE_TIME_FORMAT) LocalDateTime issuedAt,
 
         String user) {
 }
