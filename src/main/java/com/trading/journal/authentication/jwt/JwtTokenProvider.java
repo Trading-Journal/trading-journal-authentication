@@ -5,5 +5,7 @@ import com.trading.journal.authentication.user.ApplicationUser;
 
 public interface JwtTokenProvider {
 
-    TokenData generateJwtToken(ApplicationUser applicationUser);
+    TokenData generateAccessToken(ApplicationUser applicationUser);
+
+    TokenData generateRefreshToken(ApplicationUser applicationUser);
 }

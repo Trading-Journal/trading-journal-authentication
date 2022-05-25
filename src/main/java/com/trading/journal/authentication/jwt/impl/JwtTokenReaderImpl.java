@@ -55,11 +55,22 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
     }
 
     @Override
+    public AccessTokenInfo getRefreshTokenInfo(String token) {
+        Jws<Claims> jwsClaims = tokenParser.parseToken(token);
+        List<String> authorities = getAuthorities(jwsClaims).stream().map(a -> a.getAuthority())
+                .collect(Collectors.toList());
+        return new AccessTokenInfo(jwsClaims.getBody().getSubject(), null, authorities);
+    }
+
+    @Override
     public boolean isTokenValid(String token) {
         boolean isValid = false;
         try {
             Jws<Claims> claims = tokenParser.parseToken(token);
-            isValid = !claims.getBody().getExpiration().before(new Date());
+            boolean notExpired = !claims.getBody().getExpiration().before(new Date());
+            boolean sameIssuer = JwtConstants.TOKEN_ISSUER.equals(claims.getBody().getIssuer());
+            boolean sameAudience = JwtConstants.TOKEN_AUDIENCE.equals(claims.getBody().getAudience());
+            isValid = notExpired && sameIssuer && sameAudience;
         } catch (ApplicationException e) {
             logger.info("Invalid JWT token.");
             logger.trace("Invalid JWT token trace.", e);
@@ -68,7 +79,7 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
     }
 
     private List<SimpleGrantedAuthority> getAuthorities(Jws<Claims> token) {
-        return ((List<?>) token.getBody().get(JwtConstants.AUTHORITIES))
+        return ((List<?>) token.getBody().get(JwtConstants.SCOPES))
                 .stream()
                 .map(authority -> new SimpleGrantedAuthority((String) authority))
                 .collect(Collectors.toList());
@@ -79,5 +90,4 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
                 .orElseThrow(() -> new AuthenticationServiceException(
                         String.format("User tenancy not found inside the token %s", token)));
     }
-
 }

@@ -2,8 +2,9 @@
 
 ## Pending
 
-* Improve tests where there is no or are incomplete
-* Refresh token mechanism
+* Interface for Application User/Application User Repository (and other Entities if needed)
+  * This should allow user storage to be in another DB then MongoDB
+* Roles Interface, can be Static or a Entity
 * Secure token better
   * Change some constant values to configuration
   * Add more validations to token valid such issuer, audience, etc.
@@ -15,8 +16,6 @@
   * Improve SecurityConfigurationTest with admin access
 * Postman Test run
 * Test Coverage with fail under X percent
-* Interface for Application User/Application User Repository (and other Entities if needed)
-  * This should allow user storage to be in another DB then MongoDB
 * Delete account
 * Lib for token validation to be used in other projects
   * ApplicationUser Interface, ContextUser and Token Provider, JwtTokenAuthenticationFilter and All JWT package must be here

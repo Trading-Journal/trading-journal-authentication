@@ -59,7 +59,7 @@ public class MeControllerTest {
                 .get()
                 .uri("/me")
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + loginResponse.token())
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()
                 .expectStatus()
                 .isOk()

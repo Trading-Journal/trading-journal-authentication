@@ -54,18 +54,18 @@ public class JwtTokenParserImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
-        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L);
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L);
         when(publicKeyProvider.provide(new File("arg"))).thenReturn(keyPair.getPublic());
 
         JwtTokenParser jwtTokenParser = new JwtTokenParserImpl(publicKeyProvider, properties);
         Jws<Claims> claims = jwtTokenParser.parseToken(token);
 
         assertThat(claims.getBody().getSubject()).isEqualTo("user_name");
-        assertThat(claims.getBody().get(JwtConstants.AUTHORITIES)).isEqualTo(Collections.singletonList("ROLE_USER"));
+        assertThat(claims.getBody().get(JwtConstants.SCOPES)).isEqualTo(Collections.singletonList("ROLE_USER"));
         assertThat(claims.getBody().get(JwtConstants.TENANCY)).isEqualTo("tenancy_1");
     }
 
@@ -84,11 +84,11 @@ public class JwtTokenParserImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().minusSeconds(10)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
-        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L);
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L);
         when(publicKeyProvider.provide(new File("arg"))).thenReturn(keyPair.getPublic());
 
         JwtTokenParser jwtTokenParser = new JwtTokenParserImpl(publicKeyProvider, properties);
@@ -115,11 +115,11 @@ public class JwtTokenParserImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
-        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L);
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L);
 
         KeyPair othKeyPair = mockKeyPair();
         when(publicKeyProvider.provide(new File("arg"))).thenReturn(othKeyPair.getPublic());

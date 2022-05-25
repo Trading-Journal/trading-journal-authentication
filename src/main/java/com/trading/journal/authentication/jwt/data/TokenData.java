@@ -1,9 +1,8 @@
 package com.trading.journal.authentication.jwt.data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public record TokenData(
         String token,
-        long expirationIn,
-        Date issuedAt) {
+        LocalDateTime issuedAt) {
 }

@@ -46,7 +46,7 @@ public class JwtTokenReaderImplTest {
     JwtTokenParser tokenParser;
 
     @Test
-    @DisplayName("Given token return Authentication")
+    @DisplayName("Given access token return Authentication")
     void authentication() {
         KeyPair keyPair = mockKeyPair();
         String token = Jwts.builder()
@@ -60,7 +60,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
@@ -76,7 +76,7 @@ public class JwtTokenReaderImplTest {
     }
 
     @Test
-    @DisplayName("Given token without tenancy when getting Authentication return exception")
+    @DisplayName("Given access token without tenancy when getting Authentication return exception")
     void authenticationException() {
         KeyPair keyPair = mockKeyPair();
         String token = Jwts.builder()
@@ -90,7 +90,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
@@ -102,7 +102,7 @@ public class JwtTokenReaderImplTest {
     }
 
     @Test
-    @DisplayName("Given token when getting Token Info return info")
+    @DisplayName("Given access token when getting Token Info return info")
     void accessTokenInfo() {
         KeyPair keyPair = mockKeyPair();
         String token = Jwts.builder()
@@ -116,7 +116,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
@@ -126,11 +126,11 @@ public class JwtTokenReaderImplTest {
         AccessTokenInfo accessTokenInfo = jwtTokenReader.getAccessTokenInfo(token);
         assertThat(accessTokenInfo.userName()).isEqualTo("user_name");
         assertThat(accessTokenInfo.tenancy()).isEqualTo("tenancy_1");
-        assertThat(accessTokenInfo.roles()).containsExactly("ROLE_USER");
+        assertThat(accessTokenInfo.scopes()).containsExactly("ROLE_USER");
     }
 
     @Test
-    @DisplayName("Given token without tenancy when getting Token Info return exception")
+    @DisplayName("Given access token without tenancy when getting Token Info return exception")
     void accessTokenInfoException() {
         KeyPair keyPair = mockKeyPair();
         String token = Jwts.builder()
@@ -144,7 +144,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
@@ -156,7 +156,7 @@ public class JwtTokenReaderImplTest {
     }
 
     @Test
-    @DisplayName("Given token return it is valid")
+    @DisplayName("Given access token return it is valid")
     void validToken() {
         KeyPair keyPair = mockKeyPair();
         String token = Jwts.builder()
@@ -170,7 +170,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
@@ -182,7 +182,7 @@ public class JwtTokenReaderImplTest {
     }
 
     @Test
-    @DisplayName("Given token return it is invalid because it is expired 2 seconds ago")
+    @DisplayName("Given access token return it is invalid because it is expired 2 seconds ago")
     void invalidToken() {
         KeyPair keyPair = mockKeyPair();
         String token = Jwts.builder()
@@ -196,7 +196,7 @@ public class JwtTokenReaderImplTest {
                 .setExpiration(Date.from(LocalDateTime.now().minusSeconds(2)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
-                .claim(JwtConstants.AUTHORITIES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
@@ -207,8 +207,87 @@ public class JwtTokenReaderImplTest {
         assertThat(tokenValid).isFalse();
     }
 
+    @Test
+    @DisplayName("Given access token return it is invalid because it has different issuer")
+    void invalidTokenIssuer() {
+        KeyPair keyPair = mockKeyPair();
+        String token = Jwts.builder()
+                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
+                .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
+                .setIssuer("another_issuer")
+                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setSubject("user_name")
+                .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
+                        .toInstant()))
+                .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.TENANCY, "tenancy_1")
+                .compact();
+
+        JwtTokenParser mockParser = mockParser(keyPair);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+
+        boolean tokenValid = jwtTokenReader.isTokenValid(token);
+        assertThat(tokenValid).isFalse();
+    }
+
+    @Test
+    @DisplayName("Given access token return it is invalid because it has different audience")
+    void invalidTokenAudience() {
+        KeyPair keyPair = mockKeyPair();
+        String token = Jwts.builder()
+                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
+                .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
+                .setIssuer(JwtConstants.TOKEN_ISSUER)
+                .setAudience("another_audience")
+                .setSubject("user_name")
+                .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
+                        .toInstant()))
+                .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()))
+                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
+                .claim(JwtConstants.TENANCY, "tenancy_1")
+                .compact();
+
+        JwtTokenParser mockParser = mockParser(keyPair);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+
+        boolean tokenValid = jwtTokenReader.isTokenValid(token);
+        assertThat(tokenValid).isFalse();
+    }
+
+    @Test
+    @DisplayName("Given refresh token when getting Token Info return info")
+    void refreshTokenInfo() {
+        KeyPair keyPair = mockKeyPair();
+        String token = Jwts.builder()
+                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
+                .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
+                .setIssuer(JwtConstants.TOKEN_ISSUER)
+                .setSubject("user_name")
+                .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
+                        .toInstant()))
+                .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()))
+                .claim(JwtConstants.SCOPES, Collections.singletonList("REFRESH_TOKEN"))
+                .compact();
+
+        JwtTokenParser mockParser = mockParser(keyPair);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+
+        AccessTokenInfo accessTokenInfo = jwtTokenReader.getRefreshTokenInfo(token);
+        assertThat(accessTokenInfo.userName()).isEqualTo("user_name");
+        assertThat(accessTokenInfo.tenancy()).isNull();
+        assertThat(accessTokenInfo.scopes()).containsExactly("REFRESH_TOKEN");
+    }
+
     private JwtTokenParser mockParser(KeyPair keyPair) {
-        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 3600L);
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 3600L,
+                86400L);
         try {
             when(publicKeyProvider.provide(new File("arg"))).thenReturn(keyPair.getPublic());
         } catch (IOException e) {

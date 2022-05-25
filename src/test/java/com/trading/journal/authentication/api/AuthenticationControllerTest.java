@@ -2,11 +2,22 @@ package com.trading.journal.authentication.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
+import java.security.Key;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 
 import com.trading.journal.authentication.MongoInitializer;
+import com.trading.journal.authentication.authentication.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
+import com.trading.journal.authentication.jwt.PrivateKeyProvider;
+import com.trading.journal.authentication.jwt.data.JwtProperties;
+import com.trading.journal.authentication.jwt.helper.DateHelper;
+import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUserService;
 
@@ -22,6 +33,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
 @SpringBootTest
 @Testcontainers
 @ContextConfiguration(initializers = MongoInitializer.class)
@@ -32,6 +46,15 @@ public class AuthenticationControllerTest {
 
     @Autowired
     private ApplicationUserService applicationUserService;
+
+    @Autowired
+    private AuthenticationService authenticationService;
+
+    @Autowired
+    PrivateKeyProvider privateKeyProvider;
+
+    @Autowired
+    JwtProperties properties;
 
     private WebTestClient webTestClient;
 
@@ -85,7 +108,10 @@ public class AuthenticationControllerTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(LoginResponse.class)
-                .value(response -> assertThat(response.token()).isNotBlank());
+                .value(response -> {
+                    assertThat(response.accessToken()).isNotBlank();
+                    assertThat(response.refreshToken()).isNotBlank();
+                });
     }
 
     @Test
@@ -132,5 +158,102 @@ public class AuthenticationControllerTest {
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .value(response -> assertThat(response.get("error")).isEqualTo("Invalid Credentials"));
+    }
+
+    @Test
+    @DisplayName("When refreshing token, return success and new token")
+    void refreshToken() {
+        UserRegistration user = new UserRegistration(
+                "John",
+                "Travolta",
+                "johntravolta",
+                "johntravolta@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+
+        applicationUserService.createNewUser(user).block();
+
+        Login login = new Login(user.email(), user.password());
+
+        LoginResponse loginResponse = authenticationService.signIn(login).block();
+
+        webTestClient
+                .post()
+                .uri("/authentication/refresh-token")
+                .header("refresh-token", loginResponse.refreshToken())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(LoginResponse.class)
+                .value(response -> {
+                    assertThat(response.accessToken()).isNotBlank();
+                    assertThat(response.refreshToken()).isNotBlank();
+                });
+    }
+
+    @Test
+    @DisplayName("When refreshing token with access token, return unauthorized exception")
+    void refreshTokenUnauthorized() {
+        UserRegistration user = new UserRegistration(
+                "allan",
+                "weber",
+                "allanweber",
+                "allanweber@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+
+        applicationUserService.createNewUser(user).block();
+
+        Login login = new Login(user.email(), user.password());
+
+        LoginResponse loginResponse = authenticationService.signIn(login).block();
+
+        webTestClient
+                .post()
+                .uri("/authentication/refresh-token")
+                .header("refresh-token", loginResponse.accessToken())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> assertThat(response.get("error"))
+                        .isEqualTo("Refresh token is invalid or is not a refresh token"));
+    }
+
+    @Test
+    @DisplayName("When refreshing token with expired token, return unauthorized exception")
+    void refreshTokenExpired() throws IOException {
+        Key privateKey = privateKeyProvider.provide(this.properties.privateKey());
+
+        Date expiration = Date.from(LocalDateTime.now().minusSeconds(1L)
+                .atZone(ZoneId.systemDefault())
+                .toInstant());
+
+        Date issuedAt = DateHelper.getUTCDatetimeAsDate();
+        String refreshToken = Jwts.builder()
+                .signWith(privateKey, SignatureAlgorithm.RS256)
+                .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
+                .setIssuer(JwtConstants.TOKEN_ISSUER)
+                .setSubject("allan")
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiration)
+                .claim(JwtConstants.SCOPES, Collections.singletonList(JwtConstants.REFRESH_TOKEN))
+                .compact();
+
+        webTestClient
+                .post()
+                .uri("/authentication/refresh-token")
+                .header("refresh-token", refreshToken)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> assertThat(response.get("error"))
+                        .isEqualTo("Refresh token is expired"));
     }
 }

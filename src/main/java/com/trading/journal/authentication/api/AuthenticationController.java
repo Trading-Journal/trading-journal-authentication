@@ -16,22 +16,27 @@ import reactor.core.publisher.Mono;
 @RestController
 public class AuthenticationController implements AuthenticationApi {
 
-    private final RegistrationService signupService;
+    private final RegistrationService registrationService;
     private final AuthenticationService authenticationService;
 
     public AuthenticationController(RegistrationService signupService, AuthenticationService authenticationService) {
-        this.signupService = signupService;
+        this.registrationService = signupService;
         this.authenticationService = authenticationService;
     }
 
     @Override
     public Mono<ResponseEntity<Void>> signup(@Valid UserRegistration registration) {
-        return signupService.signUp(registration).map(ResponseEntity::ok);
+        return registrationService.signUp(registration).map(ResponseEntity::ok);
     }
 
     @Override
     public Mono<ResponseEntity<LoginResponse>> signin(@Valid Login login) {
         return authenticationService.signIn(login).map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<LoginResponse>> refreshToken(String refreshToken) {
+        return authenticationService.refreshToken(refreshToken).map(ResponseEntity::ok);
     }
 
 }
