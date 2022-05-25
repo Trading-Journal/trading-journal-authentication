@@ -76,7 +76,8 @@ public class JwtIntegratedTest {
         Jws<Claims> refreshTokenClaims = jwtTokenParser.parseToken(refreshToken.token());
         assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo(appUser.userName());
         assertThat(refreshTokenClaims.getBody().get(JwtConstants.TENANCY)).isNull();
-        assertThat(refreshTokenClaims.getBody().getAudience()).isNull();
+        assertThat(accessTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
+        assertThat(accessTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
         assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
         start = Date.from(LocalDateTime.now().plusSeconds(86300L).atZone(ZoneId.systemDefault()).toInstant());
         end = Date.from(LocalDateTime.now().plusSeconds(86400L).atZone(ZoneId.systemDefault()).toInstant());

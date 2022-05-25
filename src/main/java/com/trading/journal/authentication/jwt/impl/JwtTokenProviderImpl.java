@@ -79,6 +79,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .signWith(this.privateKey, SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
                 .setIssuer(JwtConstants.TOKEN_ISSUER)
+                .setAudience(JwtConstants.TOKEN_AUDIENCE)
                 .setSubject(applicationUser.userName())
                 .setIssuedAt(issuedAt)
                 .setExpiration(getExpirationDate(properties.refreshTokenExpiration()))

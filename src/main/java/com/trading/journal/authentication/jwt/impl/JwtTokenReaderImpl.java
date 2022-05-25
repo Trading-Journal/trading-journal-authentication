@@ -67,7 +67,10 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
         boolean isValid = false;
         try {
             Jws<Claims> claims = tokenParser.parseToken(token);
-            isValid = !claims.getBody().getExpiration().before(new Date());
+            boolean notExpired = !claims.getBody().getExpiration().before(new Date());
+            boolean sameIssuer = JwtConstants.TOKEN_ISSUER.equals(claims.getBody().getIssuer());
+            boolean sameAudience = JwtConstants.TOKEN_AUDIENCE.equals(claims.getBody().getAudience());
+            isValid = notExpired && sameIssuer && sameAudience;
         } catch (ApplicationException e) {
             logger.info("Invalid JWT token.");
             logger.trace("Invalid JWT token trace.", e);
