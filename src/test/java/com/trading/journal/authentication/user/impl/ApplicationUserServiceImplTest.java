@@ -1,21 +1,11 @@
 package com.trading.journal.authentication.user.impl;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
-
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.user.*;
+import com.trading.journal.authentication.authority.UserAuthority;
+import com.trading.journal.authentication.authority.UserAuthorityService;
 import com.trading.journal.authentication.registration.UserRegistration;
-
+import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,9 +16,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @ExtendWith(SpringExtension.class)
 public class ApplicationUserServiceImplTest {
@@ -65,12 +64,12 @@ public class ApplicationUserServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
         when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(0));
         when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(0));
-        when(userAuthorityService.saveBasicUserAuthorities(any())).thenReturn(Mono.just(new UserAuthority(1L, 1L, "USER")));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(Mono.just(new UserAuthority(1L, 1L, 1L, "USER")));
         when(encoder.encode(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(Mono.just(appUser));
         when(applicationUserRepository.findById(anyLong())).thenReturn(Mono.just(appUser));
@@ -98,8 +97,8 @@ public class ApplicationUserServiceImplTest {
                 .expectErrorMatches(throwable -> throwable instanceof ApplicationException
                         && ((ApplicationException) throwable).getStatusCode().equals(BAD_REQUEST)
                         && ((ApplicationException) throwable)
-                                .getStatusText()
-                                .equals("User name or email already exist"))
+                        .getStatusText()
+                        .equals("User name or email already exist"))
                 .verify();
 
         verify(applicationUserRepository, never()).save(any());
@@ -124,8 +123,8 @@ public class ApplicationUserServiceImplTest {
                 .expectErrorMatches(throwable -> throwable instanceof ApplicationException
                         && ((ApplicationException) throwable).getStatusCode().equals(BAD_REQUEST)
                         && ((ApplicationException) throwable)
-                                .getStatusText()
-                                .equals("User name or email already exist"))
+                        .getStatusText()
+                        .equals("User name or email already exist"))
                 .verify();
 
         verify(applicationUserRepository, never()).save(any());
@@ -150,8 +149,8 @@ public class ApplicationUserServiceImplTest {
                 .expectErrorMatches(throwable -> throwable instanceof ApplicationException
                         && ((ApplicationException) throwable).getStatusCode().equals(BAD_REQUEST)
                         && ((ApplicationException) throwable)
-                                .getStatusText()
-                                .equals("User name or email already exist"))
+                        .getStatusText()
+                        .equals("User name or email already exist"))
                 .verify();
 
         verify(applicationUserRepository, never()).save(any());
@@ -225,13 +224,13 @@ public class ApplicationUserServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L,"ROLE_USER")),
                 LocalDateTime.now());
 
         when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(Mono.just(applicationUser));
 
         Mono<UserDetails> userDetailsMono = applicationUserServiceImpl.findByUsername(applicationUser.getEmail());
-        when(userAuthorityService.loadListOfSimpleGrantedAuthority(applicationUser)).thenReturn(Mono.just(singletonList(new SimpleGrantedAuthority("ROLE_USER"))));
+        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(Mono.just(singletonList(new SimpleGrantedAuthority("ROLE_USER"))));
 
         StepVerifier.create(userDetailsMono)
                 .assertNext(details -> {
@@ -241,7 +240,7 @@ public class ApplicationUserServiceImplTest {
                     assertThat(details.isAccountNonLocked()).isTrue();
                     assertThat(details.getAuthorities().toArray()).hasSize(1);
                     assertThat(details.getAuthorities().toArray())
-                            .contains(new SimpleGrantedAuthority(AuthoritiesHelper.ROLE_USER));
+                            .contains(new SimpleGrantedAuthority("ROLE_USER"));
                 })
                 .verifyComplete();
     }
@@ -274,7 +273,7 @@ public class ApplicationUserServiceImplTest {
                 LocalDateTime.now());
 
         when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(Mono.just(applicationUser));
-        when(userAuthorityService.loadListOfSimpleGrantedAuthority(applicationUser)).thenReturn(Mono.just(emptyList()));
+        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(Mono.just(emptyList()));
 
         Mono<UserDetails> responseMono = applicationUserServiceImpl.findByUsername(applicationUser.getEmail());
         StepVerifier.create(responseMono)
@@ -299,7 +298,7 @@ public class ApplicationUserServiceImplTest {
                 LocalDateTime.now());
 
         when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(Mono.just(applicationUser));
-        when(userAuthorityService.loadListOfSimpleGrantedAuthority(applicationUser)).thenReturn(Mono.empty());
+        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(Mono.empty());
 
         Mono<UserDetails> responseMono = applicationUserServiceImpl.findByUsername(applicationUser.getEmail());
         StepVerifier.create(responseMono)

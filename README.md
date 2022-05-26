@@ -3,7 +3,7 @@
 ## Pending
 
 * Role/Authorities
-  * Roles Interface, can be Static or an Entity
+  * Roles can be Static or an Entity
   * Create an Enum with basic Roles (USER and ADMIN) with Category enum as well
     * If Static, just relly on Enum
     * If Entity, save all enums in db on startup
@@ -17,6 +17,14 @@
   * Must change password
 * Admin endpoints
   * Improve SecurityConfigurationTest with admin access
+  * Manage User
+    * Disable
+    * Delete
+    * Change authorities
+  * Manage Authorities via API
+    * Admin access only
+    * Validate if entity authorities is enabled before manage
+  * Manage user authorities
 * Postman Test run
 * Test Coverage with fail under X percent
 * Delete account

@@ -1,9 +1,6 @@
-package com.trading.journal.authentication.user;
+package com.trading.journal.authentication.authority;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -11,6 +8,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @Getter
 @Builder
+@EqualsAndHashCode
 @Table("UserAuthorities")
 public class UserAuthority {
 
@@ -19,10 +17,13 @@ public class UserAuthority {
 
     private Long userId;
 
+    private Long authorityId;
+
     private String name;
 
-    public UserAuthority(Long userId, String name) {
+    public UserAuthority(Long userId, String name, Long authorityId) {
         this.userId = userId;
         this.name = name;
+        this.authorityId = authorityId;
     }
 }

@@ -18,7 +18,7 @@ import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.UserAuthority;
+import com.trading.journal.authentication.authority.UserAuthority;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

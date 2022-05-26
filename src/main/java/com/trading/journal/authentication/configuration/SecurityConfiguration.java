@@ -6,7 +6,7 @@ import com.trading.journal.authentication.jwt.JwtTokenAuthenticationFilter;
 import com.trading.journal.authentication.jwt.JwtTokenReader;
 import com.trading.journal.authentication.user.ApplicationUserService;
 
-import com.trading.journal.authentication.user.AuthoritiesHelper;
+import com.trading.journal.authentication.authority.AuthoritiesHelper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -54,9 +54,9 @@ public class SecurityConfiguration {
                         .pathMatchers(getPublicPath())
                         .permitAll()
                         .pathMatchers(getAdminPath())
-                        .hasAuthority(AuthoritiesHelper.ROLE_ADMIN)
+                        .hasAuthority(AuthoritiesHelper.ROLE_ADMIN.getLabel())
                         .anyExchange()
-                        .hasAuthority(AuthoritiesHelper.ROLE_USER))
+                        .hasAuthority(AuthoritiesHelper.ROLE_USER.getLabel()))
                 .addFilterAt(new JwtTokenAuthenticationFilter(tokenReader), SecurityWebFiltersOrder.HTTP_BASIC)
                 .build();
     }

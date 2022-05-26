@@ -1,6 +1,8 @@
 package com.trading.journal.authentication.user.impl;
 
 import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.authority.UserAuthority;
+import com.trading.journal.authentication.authority.UserAuthorityService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.*;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +38,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
                 .findByEmail(email)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
                 .flatMap(applicationUser ->
-                        userAuthorityService.loadListOfSimpleGrantedAuthority(applicationUser)
+                        userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)
                                 .doOnSuccess(checkForEmptyAuthorities())
                                 .onErrorResume(Mono::error)
                                 .map(simpleGrantedAuthorities -> User.withUsername(applicationUser.getEmail())
@@ -54,7 +56,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     public Mono<ApplicationUser> getUserByEmail(String email) {
         return applicationUserRepository
                 .findByEmail(email)
-                .zipWhen(userAuthorityService::loadListUserAuthority)
+                .zipWhen(userAuthorityService::loadList)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
                 .map(userAndAuthorities -> {
                     ApplicationUser applicationUser = userAndAuthorities.getT1();
@@ -70,7 +72,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
                 .onErrorResume(Mono::error)
                 .then(buildNewUser(userRegistration))
                 .flatMap(applicationUserRepository::save)
-                .flatMap(userAuthorityService::saveBasicUserAuthorities)
+                .flatMap(userAuthorityService::saveCommonUserAuthorities)
                 .map(UserAuthority::getUserId)
                 .flatMap(applicationUserRepository::findById);
     }
@@ -95,7 +97,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     @Override
     public Mono<UserInfo> getUserInfo(String userName) {
         return applicationUserRepository.findByUserName(userName)
-                .zipWhen(userInfo -> userAuthorityService.loadListUserAuthority(userInfo.getId()))
+                .zipWhen(userInfo -> userAuthorityService.loadList(userInfo.getId()))
                 .map(userInfoAndAuthorities -> {
                     UserInfo userInfo = userInfoAndAuthorities.getT1();
                     userInfo.loadAuthorities(userInfoAndAuthorities.getT2().stream().map(UserAuthority::getName).collect(Collectors.toList()));
