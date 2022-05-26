@@ -2,12 +2,15 @@
 
 ## Pending
 
-* Interface for Application User/Application User Repository (and other Entities if needed)
-  * This should allow user storage to be in another DB then MongoDB
-* Roles Interface, can be Static or a Entity
+* Role/Authorities
+  * Roles Interface, can be Static or an Entity
+  * Create an Enum with basic Roles (USER and ADMIN) with Category enum as well
+    * If Static, just relly on Enum
+    * If Entity, save all enums in db on startup
+* Add name and metrics for all Mono/Flux
 * Secure token better
+  * Rename JWT Properties to something meaningful and generic 
   * Change some constant values to configuration
-  * Add more validations to token valid such issuer, audience, etc.
 * Change password
 * Email verification
 * Admin on start up
@@ -37,7 +40,7 @@
 ### Container Dependencies
 
 ```bash
-docker run -p 27017:27017 --name mongo -d mongo
+docker run -d -e MYSQL_USER=trade-journal -e MYSQL_PASSWORD=trade-journal -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=trade-journal -p 3306:3306 mysql:latest
 ```
 
 ### Keys Dependencies

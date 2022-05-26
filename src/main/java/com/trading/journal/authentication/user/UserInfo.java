@@ -1,28 +1,43 @@
 package com.trading.journal.authentication.user;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.trading.journal.authentication.jwt.helper.DateHelper;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.trading.journal.authentication.jwt.helper.DateHelper;
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Builder
+public class UserInfo {
 
-import org.springframework.data.mongodb.core.mapping.Field;
+    @JsonIgnore
+    private Long id;
 
-public record UserInfo(
+    private String userName;
 
-        @Field("_id") String userName,
+    private String firstName;
 
-        String firstName,
+    private String lastName;
 
-        String lastName,
+    private String email;
 
-        String email,
+    private Boolean enabled;
 
-        Boolean enabled,
+    private Boolean verified;
 
-        Boolean verified,
+    private List<String> authorities;
 
-        List<Authority> authorities,
+    @JsonFormat(pattern = DateHelper.DATE_TIME_FORMAT)
+    private LocalDateTime createdAt;
 
-        @JsonFormat(pattern = DateHelper.DATE_TIME_FORMAT) LocalDateTime createdAt) {
+    public void loadAuthorities(List<String> authorities) {
+        this.authorities = authorities;
+    }
 }

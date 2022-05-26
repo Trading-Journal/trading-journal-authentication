@@ -20,7 +20,7 @@ import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.data.ServiceType;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.Authority;
+import com.trading.journal.authentication.user.UserAuthority;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,6 +49,7 @@ public class JwtTokenProviderImplTest {
     @DisplayName("Given user and its roles when generateAccessToken, return JWT token")
     void generateAccessToken() {
         ApplicationUser appUser = new ApplicationUser(
+                1L,
                 "UserAdm",
                 "123456",
                 "user",
@@ -56,7 +57,7 @@ public class JwtTokenProviderImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new Authority("ROLE_USER")),
+                Collections.singletonList(new UserAuthority(1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
         TokenData tokenData = tokenProvider.generateAccessToken(appUser);
@@ -69,6 +70,7 @@ public class JwtTokenProviderImplTest {
     @DisplayName("Given user and its roles when generateRefreshToken, return JWT token")
     void generateRefreshToken() {
         ApplicationUser appUser = new ApplicationUser(
+                1L,
                 "UserAdm",
                 "123456",
                 "user",
@@ -76,7 +78,7 @@ public class JwtTokenProviderImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new Authority("ROLE_USER")),
+                Collections.singletonList(new UserAuthority(1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
         TokenData tokenData = tokenProvider.generateRefreshToken(appUser);
@@ -89,6 +91,7 @@ public class JwtTokenProviderImplTest {
     @DisplayName("Given user with null roles when generateAccessToken, return exception")
     void nullRoles() {
         ApplicationUser appUser = new ApplicationUser(
+                1L,
                 "UserAdm",
                 "123456",
                 "user",
@@ -102,7 +105,7 @@ public class JwtTokenProviderImplTest {
         ApplicationException exception = assertThrows(
                 ApplicationException.class,
                 () -> tokenProvider.generateAccessToken(appUser),
-                "User has not authority roles");
+                "User has no authorities");
 
         assertThat(exception.getRawStatusCode()).isEqualTo(401);
     }
@@ -111,6 +114,7 @@ public class JwtTokenProviderImplTest {
     @DisplayName("Given user with empty roles when generateAccessToken, return exception")
     void emptyRoles() throws IOException, NoSuchAlgorithmException {
         ApplicationUser appUser = new ApplicationUser(
+                1L,
                 "UserAdm",
                 "123456",
                 "user",
@@ -126,7 +130,7 @@ public class JwtTokenProviderImplTest {
         ApplicationException exception = assertThrows(
                 ApplicationException.class,
                 () -> tokenProvider.generateAccessToken(appUser),
-                "User has not authority roles");
+                "User has no authorities");
 
         assertThat(exception.getRawStatusCode()).isEqualTo(401);
     }

@@ -6,6 +6,7 @@ import com.trading.journal.authentication.jwt.JwtTokenAuthenticationFilter;
 import com.trading.journal.authentication.jwt.JwtTokenReader;
 import com.trading.journal.authentication.user.ApplicationUserService;
 
+import com.trading.journal.authentication.user.AuthoritiesHelper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

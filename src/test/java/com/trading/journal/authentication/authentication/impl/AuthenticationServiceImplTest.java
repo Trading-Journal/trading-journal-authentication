@@ -23,7 +23,7 @@ import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserService;
-import com.trading.journal.authentication.user.Authority;
+import com.trading.journal.authentication.user.UserAuthority;
 import com.trading.journal.authentication.user.UserInfo;
 
 import org.junit.jupiter.api.DisplayName;
@@ -73,6 +73,7 @@ public class AuthenticationServiceImplTest {
                 .thenReturn(Mono.just(authentication));
 
         ApplicationUser applicationUser = new ApplicationUser(
+                1L,
                 "UserName",
                 "12345679",
                 "firstName",
@@ -125,11 +126,12 @@ public class AuthenticationServiceImplTest {
                 Collections.singletonList("REFRESH_TOKEN"));
         when(jwtTokenReader.getRefreshTokenInfo(refreshToken)).thenReturn(tokenInfo);
 
-        UserInfo userInfo = new UserInfo("userName", "firstName", "lastName", "email@mail.com", true, true,
-                Collections.singletonList(new Authority("ROLE_USER")), LocalDateTime.now());
+        UserInfo userInfo = new UserInfo(1L,"userName", "firstName", "lastName", "email@mail.com", true, true,
+                Collections.singletonList("ROLE_USER"), LocalDateTime.now());
         when(applicationUserService.getUserInfo("userName")).thenReturn(Mono.just(userInfo));
 
         ApplicationUser applicationUser = new ApplicationUser(
+                1L,
                 "UserName",
                 "12345679",
                 "firstName",

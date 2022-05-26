@@ -13,6 +13,7 @@ import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.user.ApplicationUserService;
 
+import com.trading.journal.authentication.user.UserInfo;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -57,7 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             accessToken.token(),
                             refreshToken.token(),
                             accessToken.issuedAt(),
-                            applicationUser.firstName());
+                            applicationUser.getFirstName());
                 });
     }
 
@@ -65,8 +66,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public Mono<LoginResponse> refreshToken(String refreshToken) {
         return validateRefreshTokenAndGetUserName(refreshToken)
                 .flatMap(applicationUserService::getUserInfo)
-                .map(userInfo -> userInfo.email())
-                .flatMap(email -> applicationUserService.getUserByEmail(email))
+                .map(UserInfo::getEmail)
+                .flatMap(applicationUserService::getUserByEmail)
                 .map(applicationUser -> {
                     TokenData accessToken = jwtTokenProvider.generateAccessToken(applicationUser);
                     return new LoginResponse(
@@ -74,7 +75,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             accessToken.token(),
                             refreshToken,
                             accessToken.issuedAt(),
-                            applicationUser.firstName());
+                            applicationUser.getFirstName());
                 });
     }
 

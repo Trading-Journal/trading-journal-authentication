@@ -9,13 +9,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.trading.journal.authentication.MongoInitializer;
+import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.jwt.JwtTokenParser;
 import com.trading.journal.authentication.jwt.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.Authority;
+import com.trading.journal.authentication.user.UserAuthority;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ import io.jsonwebtoken.Jws;
 
 @SpringBootTest
 @Testcontainers
-@ContextConfiguration(initializers = MongoInitializer.class)
+@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 public class JwtIntegratedTest {
 
     @Autowired
@@ -43,6 +43,7 @@ public class JwtIntegratedTest {
     @Test
     void provider() {
         ApplicationUser appUser = new ApplicationUser(
+                1L,
                 "UserAdm",
                 "123456",
                 "user",
@@ -50,15 +51,15 @@ public class JwtIntegratedTest {
                 "mail@mail.com",
                 true,
                 true,
-                Arrays.asList(new Authority("ROLE_USER"), new Authority("ROLE_ADMIN")),
+                Arrays.asList(new UserAuthority(1L, 1L, "ROLE_USER"), new UserAuthority(1L, 1L, "ROLE_ADMIN")),
                 LocalDateTime.now());
 
         TokenData accessToken = jwtTokenProvider.generateAccessToken(appUser);
 
         assertThat(accessToken.token()).isNotBlank();
         Jws<Claims> accessTokenClaims = jwtTokenParser.parseToken(accessToken.token());
-        assertThat(accessTokenClaims.getBody().getSubject()).isEqualTo(appUser.userName());
-        assertThat(accessTokenClaims.getBody().get(JwtConstants.TENANCY)).isEqualTo(appUser.userName());
+        assertThat(accessTokenClaims.getBody().getSubject()).isEqualTo(appUser.getUserName());
+        assertThat(accessTokenClaims.getBody().get(JwtConstants.TENANCY)).isEqualTo(appUser.getUserName());
         assertThat(accessTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
         assertThat(accessTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
         Date start = Date.from(LocalDateTime.now().plusSeconds(3500L).atZone(ZoneId.systemDefault()).toInstant());
@@ -67,14 +68,14 @@ public class JwtIntegratedTest {
         List<String> scopes = ((List<?>) accessTokenClaims.getBody().get(JwtConstants.SCOPES))
                 .stream()
                 .map(authority -> new SimpleGrantedAuthority((String) authority))
-                .map(arg0 -> arg0.getAuthority())
+                .map(SimpleGrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         assertThat(scopes).containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
 
         TokenData refreshToken = jwtTokenProvider.generateRefreshToken(appUser);
         assertThat(refreshToken.token()).isNotBlank();
         Jws<Claims> refreshTokenClaims = jwtTokenParser.parseToken(refreshToken.token());
-        assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo(appUser.userName());
+        assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo(appUser.getUserName());
         assertThat(refreshTokenClaims.getBody().get(JwtConstants.TENANCY)).isNull();
         assertThat(accessTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
         assertThat(accessTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
@@ -85,7 +86,7 @@ public class JwtIntegratedTest {
         scopes = ((List<?>) refreshTokenClaims.getBody().get(JwtConstants.SCOPES))
                 .stream()
                 .map(authority -> new SimpleGrantedAuthority((String) authority))
-                .map(arg0 -> arg0.getAuthority())
+                .map(SimpleGrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         assertThat(scopes).containsExactly("REFRESH_TOKEN");
     }

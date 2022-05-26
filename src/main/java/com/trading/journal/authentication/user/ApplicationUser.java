@@ -1,33 +1,46 @@
 package com.trading.journal.authentication.user;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Table;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Builder
+@Table("Users")
+public class ApplicationUser {
 
-@Document(collection = "users")
-public record ApplicationUser(
-        @Id String userName,
+    @Id
+    private Long id;
 
-        String password,
+    private String userName;
 
-        String firstName,
+    private String password;
 
-        String lastName,
+    private String firstName;
 
-        String email,
+    private String lastName;
 
-        Boolean enabled,
+    private String email;
 
-        Boolean verified,
+    private Boolean enabled;
 
-        List<Authority> authorities,
+    private Boolean verified;
 
-        LocalDateTime createdAt) {
+    @Transient
+    private List<UserAuthority> authorities;
 
-    public ApplicationUser {
-        enabled = true;
-        verified = true;
+    private LocalDateTime createdAt;
+
+    public void loadAuthorities(List<UserAuthority> authorities) {
+        this.authorities = authorities;
     }
 }
