@@ -1,18 +1,17 @@
 package com.trading.journal.authentication.user;
 
-import org.springframework.data.mongodb.repository.Query;
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
-
+import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Mono;
 
-public interface ApplicationUserRepository extends ReactiveMongoRepository<ApplicationUser, String> {
+public interface ApplicationUserRepository extends ReactiveCrudRepository<ApplicationUser, Long> {
 
-    Mono<Boolean> existsByUserName(String userName);
+    Mono<Integer> countByUserName(String userName);
 
-    Mono<Boolean> existsByEmail(String email);
+    Mono<Integer> countByEmail(String email);
 
     Mono<ApplicationUser> findByEmail(String email);
 
-    @Query(fields = "{ '_id' : 1, 'firstName' : 1, 'lastName' : 1, 'email' : 1, 'enabled' : 1, 'verified' : 1, 'authorities' : 1, 'createdAt' : 1}")
+    @Query("select id, userName, firstName, lastName, email, enabled, verified, createdAt from Users where userName = :userName")
     Mono<UserInfo> findByUserName(String userName);
 }

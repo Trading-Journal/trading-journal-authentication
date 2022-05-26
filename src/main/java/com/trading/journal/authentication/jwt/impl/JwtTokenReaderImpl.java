@@ -1,20 +1,14 @@
 package com.trading.journal.authentication.jwt.impl;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.jwt.JwtTokenParser;
 import com.trading.journal.authentication.jwt.JwtTokenReader;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,13 +16,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class JwtTokenReaderImpl implements JwtTokenReader {
-
-    private final Logger logger = LoggerFactory.getLogger(JwtTokenReader.class);
 
     private final JwtTokenParser tokenParser;
 
@@ -72,8 +68,8 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
             boolean sameAudience = JwtConstants.TOKEN_AUDIENCE.equals(claims.getBody().getAudience());
             isValid = notExpired && sameIssuer && sameAudience;
         } catch (ApplicationException e) {
-            logger.info("Invalid JWT token.");
-            logger.trace("Invalid JWT token trace.", e);
+            log.info("Invalid JWT token.");
+            log.trace("Invalid JWT token trace.", e);
         }
         return isValid;
     }

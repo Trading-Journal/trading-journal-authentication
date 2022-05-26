@@ -1,68 +1,66 @@
 package com.trading.journal.authentication.user.impl;
 
-import static java.util.Collections.singletonList;
-import static java.util.Optional.ofNullable;
-
-import java.time.LocalDateTime;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import javax.validation.constraints.NotNull;
-
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.configuration.AuthoritiesHelper;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
-import com.trading.journal.authentication.user.ApplicationUserService;
-import com.trading.journal.authentication.user.Authority;
-import com.trading.journal.authentication.user.UserInfo;
-
+import com.trading.journal.authentication.user.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import reactor.core.publisher.Mono;
 
+import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
+
 @Service
+@RequiredArgsConstructor
 public class ApplicationUserServiceImpl implements ApplicationUserService {
 
-    private final ApplicationUserRepository repository;
-    private final PasswordEncoder encoder;
+    private final ApplicationUserRepository applicationUserRepository;
 
-    public ApplicationUserServiceImpl(ApplicationUserRepository repository, PasswordEncoder encoder) {
-        this.repository = repository;
-        this.encoder = encoder;
-    }
+    private final UserAuthorityService userAuthorityService;
+
+    private final PasswordEncoder encoder;
 
     @Override
     public Mono<UserDetails> findByUsername(String email) {
-        return repository
+        return applicationUserRepository
                 .findByEmail(email)
-                .switchIfEmpty(
-                        Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
-                .doOnSuccess(checkForEmptyAuthorities())
-                .onErrorResume(Mono::error)
-                .map(user -> User.withUsername(user.email())
-                        .password(user.password())
-                        .authorities(user.authorities().stream()
-                                .map(role -> new SimpleGrantedAuthority(role.name())).collect(Collectors.toList()))
-                        .accountExpired(!user.enabled())
-                        .credentialsExpired(!user.enabled())
-                        .disabled(!user.enabled())
-                        .accountLocked(!user.verified())
-                        .build());
+                .switchIfEmpty(Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
+                .flatMap(applicationUser ->
+                        userAuthorityService.loadListOfSimpleGrantedAuthority(applicationUser)
+                                .doOnSuccess(checkForEmptyAuthorities())
+                                .onErrorResume(Mono::error)
+                                .map(simpleGrantedAuthorities -> User.withUsername(applicationUser.getEmail())
+                                        .password(applicationUser.getPassword())
+                                        .authorities(simpleGrantedAuthorities)
+                                        .accountExpired(!applicationUser.getEnabled())
+                                        .credentialsExpired(!applicationUser.getEnabled())
+                                        .disabled(!applicationUser.getEnabled())
+                                        .accountLocked(!applicationUser.getVerified())
+                                        .build())
+                );
     }
 
     @Override
     public Mono<ApplicationUser> getUserByEmail(String email) {
-        return repository
+        return applicationUserRepository
                 .findByEmail(email)
-                .switchIfEmpty(
-                        Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))));
+                .zipWhen(userAuthorityService::loadListUserAuthority)
+                .switchIfEmpty(Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
+                .map(userAndAuthorities -> {
+                    ApplicationUser applicationUser = userAndAuthorities.getT1();
+                    applicationUser.loadAuthorities(userAndAuthorities.getT2());
+                    return applicationUser;
+                });
     }
 
     @Override
@@ -70,7 +68,11 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
         return validateNewUser(userRegistration.userName(), userRegistration.email())
                 .doOnSuccess(checkForInvalidUser())
                 .onErrorResume(Mono::error)
-                .flatMap(a -> repository.save(buildNewUser(userRegistration)));
+                .then(buildNewUser(userRegistration))
+                .flatMap(applicationUserRepository::save)
+                .flatMap(userAuthorityService::saveBasicUserAuthorities)
+                .map(UserAuthority::getUserId)
+                .flatMap(applicationUserRepository::findById);
     }
 
     @Override
@@ -82,21 +84,27 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
     @Override
     public Mono<Boolean> userNameExists(String userName) {
-        return repository.existsByUserName(userName);
+        return applicationUserRepository.countByUserName(userName).map(count -> count > 0);
     }
 
     @Override
     public Mono<Boolean> emailExists(String email) {
-        return repository.existsByEmail(email);
+        return applicationUserRepository.countByEmail(email).map(count -> count > 0);
     }
 
     @Override
     public Mono<UserInfo> getUserInfo(String userName) {
-        return repository.findByUserName(userName);
+        return applicationUserRepository.findByUserName(userName)
+                .zipWhen(userInfo -> userAuthorityService.loadListUserAuthority(userInfo.getId()))
+                .map(userInfoAndAuthorities -> {
+                    UserInfo userInfo = userInfoAndAuthorities.getT1();
+                    userInfo.loadAuthorities(userInfoAndAuthorities.getT2().stream().map(UserAuthority::getName).collect(Collectors.toList()));
+                    return userInfo;
+                });
     }
 
-    private Consumer<ApplicationUser> checkForEmptyAuthorities() {
-        return user -> ofNullable(user.authorities())
+    private Consumer<List<SimpleGrantedAuthority>> checkForEmptyAuthorities() {
+        return authorities -> ofNullable(authorities)
                 .filter(list -> !list.isEmpty())
                 .orElseThrow(() -> new ApplicationException("There is no authorities for this user"));
     }
@@ -109,16 +117,16 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
         };
     }
 
-    private ApplicationUser buildNewUser(UserRegistration userRegistration) {
-        return new ApplicationUser(userRegistration.userName(),
-                encoder.encode(userRegistration.password()),
-                userRegistration.firstName(),
-                userRegistration.lastName(),
-                userRegistration.email(),
-                true,
-                true,
-                singletonList(new Authority(AuthoritiesHelper.ROLE_USER)),
-                LocalDateTime.now());
+    private Mono<ApplicationUser> buildNewUser(UserRegistration userRegistration) {
+        return Mono.just(ApplicationUser.builder()
+                .userName(userRegistration.userName())
+                .password(encoder.encode(userRegistration.password()))
+                .firstName(userRegistration.firstName())
+                .lastName(userRegistration.lastName())
+                .email(userRegistration.email())
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .build());
     }
-
 }

@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
-import com.trading.journal.authentication.MongoInitializer;
+import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authentication.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
@@ -38,7 +38,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 @SpringBootTest
 @Testcontainers
-@ContextConfiguration(initializers = MongoInitializer.class)
+@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 public class AuthenticationControllerTest {
 
     @Autowired

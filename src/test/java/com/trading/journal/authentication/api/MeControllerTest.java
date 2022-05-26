@@ -1,17 +1,12 @@
 package com.trading.journal.authentication.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.stream.Stream;
-
-import com.trading.journal.authentication.MongoInitializer;
+import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authentication.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUserService;
 import com.trading.journal.authentication.user.UserInfo;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,9 +19,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest
 @Testcontainers
-@ContextConfiguration(initializers = MongoInitializer.class)
+@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 public class MeControllerTest {
 
     @Autowired
@@ -55,6 +54,7 @@ public class MeControllerTest {
 
         LoginResponse loginResponse = authenticationService.signIn(login).block();
 
+        assert loginResponse != null;
         webTestClient
                 .get()
                 .uri("/me")
@@ -65,10 +65,10 @@ public class MeControllerTest {
                 .isOk()
                 .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.userName()).isEqualTo(user.userName());
-                    assertThat(response.firstName()).isEqualTo(user.firstName());
-                    assertThat(response.lastName()).isEqualTo(user.lastName());
-                    assertThat(response.email()).isEqualTo(user.email());
+                    assertThat(response.getUserName()).isEqualTo(user.userName());
+                    assertThat(response.getFirstName()).isEqualTo(user.firstName());
+                    assertThat(response.getLastName()).isEqualTo(user.lastName());
+                    assertThat(response.getEmail()).isEqualTo(user.email());
                 });
     }
 

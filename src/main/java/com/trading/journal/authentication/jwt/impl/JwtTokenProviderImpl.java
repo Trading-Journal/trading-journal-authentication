@@ -18,10 +18,9 @@ import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.Authority;
+import com.trading.journal.authentication.user.UserAuthority;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +28,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @Service
+@Slf4j
 public class JwtTokenProviderImpl implements JwtTokenProvider {
 
-    private final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
     private final JwtProperties properties;
     private final Key privateKey;
 
@@ -40,7 +39,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         try {
             this.privateKey = privateKeyProvider.provide(this.properties.privateKey());
         } catch (IOException e) {
-            logger.error("Failed to load RSA private key", e);
+            log.error("Failed to load RSA private key", e);
             throw (ApplicationException) new ApplicationException(HttpStatus.UNAUTHORIZED,
                     "Failed to load RSA private key").initCause(e);
         }
@@ -48,11 +47,11 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
     @Override
     public TokenData generateAccessToken(ApplicationUser applicationUser) {
-        List<String> authorities = Optional.ofNullable(applicationUser.authorities())
+        List<String> authorities = Optional.ofNullable(applicationUser.getAuthorities())
                 .filter(list -> !list.isEmpty())
-                .orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "User has not authority roles"))
+                .orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "User has no authorities"))
                 .stream()
-                .map(Authority::name)
+                .map(UserAuthority::getName)
                 .collect(Collectors.toList());
 
         Date issuedAt = DateHelper.getUTCDatetimeAsDate();
@@ -61,11 +60,11 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
                 .setIssuer(JwtConstants.TOKEN_ISSUER)
                 .setAudience(JwtConstants.TOKEN_AUDIENCE)
-                .setSubject(applicationUser.userName())
+                .setSubject(applicationUser.getUserName())
                 .setIssuedAt(issuedAt)
                 .setExpiration(getExpirationDate(properties.accessTokenExpiration()))
                 .claim(JwtConstants.SCOPES, authorities)
-                .claim(JwtConstants.TENANCY, applicationUser.userName())
+                .claim(JwtConstants.TENANCY, applicationUser.getUserName())
                 .compact();
 
         return new TokenData(accessToken,
@@ -80,7 +79,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
                 .setIssuer(JwtConstants.TOKEN_ISSUER)
                 .setAudience(JwtConstants.TOKEN_AUDIENCE)
-                .setSubject(applicationUser.userName())
+                .setSubject(applicationUser.getUserName())
                 .setIssuedAt(issuedAt)
                 .setExpiration(getExpirationDate(properties.refreshTokenExpiration()))
                 .claim(JwtConstants.SCOPES, Collections.singletonList(JwtConstants.REFRESH_TOKEN))

@@ -2,7 +2,7 @@ package com.trading.journal.authentication.configuration;
 
 import java.util.stream.Stream;
 
-import com.trading.journal.authentication.MongoInitializer;
+import com.trading.journal.authentication.MySqlTestContainerInitializer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +19,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
 @Testcontainers
-@ContextConfiguration(initializers = MongoInitializer.class)
+@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 public class SecurityConfigurationTest {
     @Autowired
     private ApplicationContext context;
