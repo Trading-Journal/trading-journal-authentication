@@ -8,7 +8,7 @@ import java.util.Collections;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserService;
-import com.trading.journal.authentication.user.UserAuthority;
+import com.trading.journal.authentication.authority.UserAuthority;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,7 +49,7 @@ public class RegistrationServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L,"ROLE_USER")),
                 LocalDateTime.now());
 
         when(applicationUserService.createNewUser(userRegistration)).thenReturn(Mono.just(appUser));

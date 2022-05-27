@@ -23,7 +23,6 @@ import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserService;
-import com.trading.journal.authentication.user.UserAuthority;
 import com.trading.journal.authentication.user.UserInfo;
 
 import org.junit.jupiter.api.DisplayName;

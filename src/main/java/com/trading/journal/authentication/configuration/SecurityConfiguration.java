@@ -1,12 +1,14 @@
 package com.trading.journal.authentication.configuration;
 
-import java.util.stream.Stream;
-
+import com.trading.journal.authentication.authority.AuthoritiesHelper;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
+import com.trading.journal.authentication.authority.AuthorityService;
 import com.trading.journal.authentication.jwt.JwtTokenAuthenticationFilter;
 import com.trading.journal.authentication.jwt.JwtTokenReader;
 import com.trading.journal.authentication.user.ApplicationUserService;
-
-import com.trading.journal.authentication.user.AuthoritiesHelper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,7 +20,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Configuration
+@RequiredArgsConstructor
+@Slf4j
 public class SecurityConfiguration {
 
     private final ApplicationUserService applicationUserService;
@@ -26,18 +36,11 @@ public class SecurityConfiguration {
     private final ServerAuthenticationExceptionEntryPoint serverAuthenticationExceptionEntryPoint;
     private final JwtTokenReader tokenReader;
 
-    public SecurityConfiguration(ApplicationUserService applicationUserService, PasswordEncoder passwordEncoder,
-            ServerAuthenticationExceptionEntryPoint serverAuthenticationExceptionEntryPoint,
-            JwtTokenReader tokenReader) {
-        this.applicationUserService = applicationUserService;
-        this.passwordEncoder = passwordEncoder;
-        this.serverAuthenticationExceptionEntryPoint = serverAuthenticationExceptionEntryPoint;
-        this.tokenReader = tokenReader;
-    }
+    private final AuthorityService authorityService;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+        ServerHttpSecurity serverHttpSecurity = http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .cors()
                 .and()
@@ -49,16 +52,16 @@ public class SecurityConfiguration {
                 .exceptionHandling()
                 .authenticationEntryPoint(serverAuthenticationExceptionEntryPoint)
                 .and()
-                .authorizeExchange(it -> it.pathMatchers(HttpMethod.OPTIONS, "/**")
+                .authorizeExchange(exchangeSpec -> exchangeSpec.pathMatchers(HttpMethod.OPTIONS, "/**")
                         .permitAll()
                         .pathMatchers(getPublicPath())
-                        .permitAll()
-                        .pathMatchers(getAdminPath())
-                        .hasAuthority(AuthoritiesHelper.ROLE_ADMIN)
-                        .anyExchange()
-                        .hasAuthority(AuthoritiesHelper.ROLE_USER))
-                .addFilterAt(new JwtTokenAuthenticationFilter(tokenReader), SecurityWebFiltersOrder.HTTP_BASIC)
-                .build();
+                        .permitAll());
+
+        Map<AuthorityCategory, String[]> authorityCategoryMap = getAuthorityCategoryMap();
+        serverHttpSecurity.authorizeExchange(exchangeSpec -> exchangeSpec.pathMatchers(getAdminPath()).hasAnyAuthority(authorityCategoryMap.get(AuthorityCategory.ADMINISTRATOR)));
+        serverHttpSecurity.authorizeExchange(exchangeSpec -> exchangeSpec.anyExchange().hasAnyAuthority(authorityCategoryMap.get(AuthorityCategory.COMMON_USER)));
+
+        return serverHttpSecurity.addFilterAt(new JwtTokenAuthenticationFilter(tokenReader), SecurityWebFiltersOrder.HTTP_BASIC).build();
     }
 
     @Bean
@@ -70,13 +73,34 @@ public class SecurityConfiguration {
     }
 
     private String[] getPublicPath() {
-        String[] monitoring = { "/health/**", "/prometheus", "/metrics*/**" };
-        String[] authentication = { "/authentication*/**" };
-        String[] swagger = { "/", "/v2/api-docs", "/swagger*/**", "/webjars/**" };
+        String[] monitoring = {"/health/**", "/prometheus", "/metrics*/**"};
+        String[] authentication = {"/authentication*/**"};
+        String[] swagger = {"/", "/v2/api-docs", "/swagger*/**", "/webjars/**"};
         return Stream.of(monitoring, authentication, swagger).flatMap(Stream::of).toArray(String[]::new);
     }
 
     private String[] getAdminPath() {
-        return new String[] { "/admin/**" };
+        return new String[]{"/admin/**"};
+    }
+
+    private Map<AuthorityCategory, String[]> getAuthorityCategoryMap() {
+        Map<AuthorityCategory, String[]> categoryAuthorities = new ConcurrentHashMap<>();
+        Arrays.stream(AuthorityCategory.values()).toList()
+                .forEach(category -> {
+                    String[] authorities = authorityService.getAuthoritiesByCategory(category).collectList().blockOptional()
+                            .filter(list -> !list.isEmpty())
+                            .orElseGet(() -> {
+                                log.info("No authorities found in the database for {} category, so it will use the default authorities.", category);
+                                return AuthoritiesHelper.getByCategory(category)
+                                        .stream()
+                                        .map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()))
+                                        .collect(Collectors.toList());
+                            })
+                            .stream()
+                            .map(Authority::getName)
+                            .toArray(String[]::new);
+                    categoryAuthorities.put(category, authorities);
+                });
+        return categoryAuthorities;
     }
 }

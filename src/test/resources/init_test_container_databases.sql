@@ -12,11 +12,23 @@ CREATE TABLE `Users` (
   PRIMARY KEY (`id`)
 );
 
+CREATE TABLE `Authorities` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `category` varchar(50) NOT NULL,
+  `name` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`,`category`,`name`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
+);
+
 CREATE TABLE `UserAuthorities` (
   `id` int NOT NULL AUTO_INCREMENT,
   `userId` int NOT NULL,
+  `authorityId` int DEFAULT NULL,
   `name` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `userIdFk_idx` (`userId`),
-  CONSTRAINT `userIdFk` FOREIGN KEY (`userId`) REFERENCES `Users` (`id`)
-);
+  KEY `authorityIdFk_idx` (`authorityId`),
+  CONSTRAINT `authorityIdFk` FOREIGN KEY (`authorityId`) REFERENCES `Authorities` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `userIdFk` FOREIGN KEY (`userId`) REFERENCES `Users` (`id`) ON DELETE CASCADE
+)
+

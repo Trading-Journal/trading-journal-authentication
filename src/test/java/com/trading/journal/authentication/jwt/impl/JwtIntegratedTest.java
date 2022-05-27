@@ -15,7 +15,7 @@ import com.trading.journal.authentication.jwt.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.UserAuthority;
+import com.trading.journal.authentication.authority.UserAuthority;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ public class JwtIntegratedTest {
                 "mail@mail.com",
                 true,
                 true,
-                Arrays.asList(new UserAuthority(1L, 1L, "ROLE_USER"), new UserAuthority(1L, 1L, "ROLE_ADMIN")),
+                Arrays.asList(new UserAuthority(1L, 1L, 1L,"ROLE_USER"), new UserAuthority(1L, 1L, 1L,"ROLE_ADMIN")),
                 LocalDateTime.now());
 
         TokenData accessToken = jwtTokenProvider.generateAccessToken(appUser);

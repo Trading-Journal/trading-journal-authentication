@@ -20,7 +20,7 @@ import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.data.ServiceType;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.UserAuthority;
+import com.trading.journal.authentication.authority.UserAuthority;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -57,7 +57,7 @@ public class JwtTokenProviderImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(1L, 1L,1L, "ROLE_USER")),
                 LocalDateTime.now());
 
         TokenData tokenData = tokenProvider.generateAccessToken(appUser);
@@ -78,7 +78,7 @@ public class JwtTokenProviderImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(1L, 1L,1L, "ROLE_USER")),
                 LocalDateTime.now());
 
         TokenData tokenData = tokenProvider.generateRefreshToken(appUser);

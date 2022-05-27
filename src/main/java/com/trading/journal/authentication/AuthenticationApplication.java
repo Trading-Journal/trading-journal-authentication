@@ -1,5 +1,6 @@
 package com.trading.journal.authentication;
 
+import com.trading.journal.authentication.authority.properties.AuthorityProperties;
 import com.trading.journal.authentication.configuration.DatasourceProperties;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
 import org.springframework.boot.SpringApplication;
@@ -11,7 +12,7 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 
 @SpringBootApplication(exclude = {R2dbcAutoConfiguration.class})
 @EnableWebFlux
-@EnableConfigurationProperties({JwtProperties.class, DatasourceProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, DatasourceProperties.class, AuthorityProperties.class})
 @EnableR2dbcRepositories
 public class AuthenticationApplication {
 
