@@ -37,7 +37,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     public JwtTokenProviderImpl(JwtProperties properties, PrivateKeyProvider privateKeyProvider) {
         this.properties = properties;
         try {
-            this.privateKey = privateKeyProvider.provide(this.properties.privateKey());
+            this.privateKey = privateKeyProvider.provide(this.properties.getPrivateKey());
         } catch (IOException e) {
             log.error("Failed to load RSA private key", e);
             throw (ApplicationException) new ApplicationException(HttpStatus.UNAUTHORIZED,
@@ -58,11 +58,11 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         String accessToken = Jwts.builder()
                 .signWith(this.privateKey, SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setIssuer(properties.getIssuer())
+                .setAudience(properties.getAudience())
                 .setSubject(applicationUser.getUserName())
                 .setIssuedAt(issuedAt)
-                .setExpiration(getExpirationDate(properties.accessTokenExpiration()))
+                .setExpiration(getExpirationDate(properties.getAccessTokenExpiration()))
                 .claim(JwtConstants.SCOPES, authorities)
                 .claim(JwtConstants.TENANCY, applicationUser.getUserName())
                 .compact();
@@ -77,11 +77,11 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         String refreshToken = Jwts.builder()
                 .signWith(this.privateKey, SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setIssuer(properties.getIssuer())
+                .setAudience(properties.getAudience())
                 .setSubject(applicationUser.getUserName())
                 .setIssuedAt(issuedAt)
-                .setExpiration(getExpirationDate(properties.refreshTokenExpiration()))
+                .setExpiration(getExpirationDate(properties.getRefreshTokenExpiration()))
                 .claim(JwtConstants.SCOPES, Collections.singletonList(JwtConstants.REFRESH_TOKEN))
                 .compact();
 

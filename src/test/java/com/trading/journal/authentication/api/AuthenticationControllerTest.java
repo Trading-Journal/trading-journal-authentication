@@ -245,7 +245,7 @@ public class AuthenticationControllerTest {
     @Test
     @DisplayName("When refreshing token with expired token, return unauthorized exception")
     void refreshTokenExpired() throws IOException {
-        Key privateKey = privateKeyProvider.provide(this.properties.privateKey());
+        Key privateKey = privateKeyProvider.provide(this.properties.getPrivateKey());
 
         Date expiration = Date.from(LocalDateTime.now().minusSeconds(1L)
                 .atZone(ZoneId.systemDefault())
@@ -255,7 +255,8 @@ public class AuthenticationControllerTest {
         String refreshToken = Jwts.builder()
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
+                .setIssuer("trade-journal")
+                .setAudience("https://tradejournal.biz")
                 .setSubject("allan")
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiration)

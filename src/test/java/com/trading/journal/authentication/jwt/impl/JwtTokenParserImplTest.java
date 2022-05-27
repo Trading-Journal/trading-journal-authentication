@@ -46,8 +46,8 @@ public class JwtTokenParserImplTest {
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setIssuer("issuer")
+                .setAudience("audience")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
                         .toInstant()))
@@ -58,7 +58,7 @@ public class JwtTokenParserImplTest {
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
-        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L);
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L, "issuer", "audience");
         when(publicKeyProvider.provide(new File("arg"))).thenReturn(keyPair.getPublic());
 
         JwtTokenParser jwtTokenParser = new JwtTokenParserImpl(publicKeyProvider, properties);
@@ -76,8 +76,8 @@ public class JwtTokenParserImplTest {
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setIssuer("issuer")
+                .setAudience("audience")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
                         .toInstant()))
@@ -88,7 +88,7 @@ public class JwtTokenParserImplTest {
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
-        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L);
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L, "issuer", "audience");
         when(publicKeyProvider.provide(new File("arg"))).thenReturn(keyPair.getPublic());
 
         JwtTokenParser jwtTokenParser = new JwtTokenParserImpl(publicKeyProvider, properties);
@@ -107,8 +107,8 @@ public class JwtTokenParserImplTest {
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setIssuer("issuer")
+                .setAudience("audience")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
                         .toInstant()))
@@ -119,7 +119,7 @@ public class JwtTokenParserImplTest {
                 .claim(JwtConstants.TENANCY, "tenancy_1")
                 .compact();
 
-        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L);
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L, "issuer", "audience");
 
         KeyPair othKeyPair = mockKeyPair();
         when(publicKeyProvider.provide(new File("arg"))).thenReturn(othKeyPair.getPublic());

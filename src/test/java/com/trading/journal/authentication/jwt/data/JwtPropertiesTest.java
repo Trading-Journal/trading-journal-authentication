@@ -15,20 +15,20 @@ public class JwtPropertiesTest {
     @DisplayName("Build JwtProperties for provider service type")
     @Test
     void provider() {
-        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 15L);
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 15L, "issuer", "audience");
 
-        assertThat(properties.serviceType()).isEqualTo(ServiceType.PROVIDER);
-        assertThat(properties.privateKey()).isNotNull();
-        assertThat(properties.publicKey()).isNotNull();
-        assertThat(properties.accessTokenExpiration()).isEqualTo(10L);
-        assertThat(properties.refreshTokenExpiration()).isEqualTo(15L);
+        assertThat(properties.getServiceType()).isEqualTo(ServiceType.PROVIDER);
+        assertThat(properties.getPrivateKey()).isNotNull();
+        assertThat(properties.getPublicKey()).isNotNull();
+        assertThat(properties.getAccessTokenExpiration()).isEqualTo(10L);
+        assertThat(properties.getRefreshTokenExpiration()).isEqualTo(15L);
     }
 
     @DisplayName("Building JwtProperties for provider service type without private key throws exception")
     @Test
     void providerPrivateKeyException() {
         assertThrows(JwtException.class,
-                () -> new JwtProperties(ServiceType.PROVIDER, null, new File("arg"), 10L, 15L),
+                () -> new JwtProperties(ServiceType.PROVIDER, null, new File("arg"), 10L, 15L, "issuer", "audience").init(),
                 "For provider service type, both privateKey and publicKey must be provided");
     }
 
@@ -36,7 +36,7 @@ public class JwtPropertiesTest {
     @Test
     void providerPublicKeyException() {
         assertThrows(JwtException.class,
-                () -> new JwtProperties(ServiceType.PROVIDER, new File("arg"), null, 10L, 15L),
+                () -> new JwtProperties(ServiceType.PROVIDER, new File("arg"), null, 10L, 15L, "issuer", "audience").init(),
                 "For provider service type, both privateKey and publicKey must be provided");
     }
 
@@ -44,7 +44,7 @@ public class JwtPropertiesTest {
     @Test
     void providerExpirationException() {
         assertThrows(JwtException.class,
-                () -> new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), null, 15L),
+                () -> new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), null, 15L, "issuer", "audience").init(),
                 "For provider service type, access token and refresh token expiration must be provided");
     }
 
@@ -52,19 +52,19 @@ public class JwtPropertiesTest {
     @Test
     void providerRefreshExpirationException() {
         assertThrows(JwtException.class,
-                () -> new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 15L, null),
+                () -> new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 15L, null, "issuer", "audience").init(),
                 "For provider service type, access token and refresh token expiration must be provided");
     }
 
     @DisplayName("Build JwtProperties for resource service type")
     @Test
     void resource() {
-        JwtProperties properties = new JwtProperties(ServiceType.RESOURCE, null, new File("arg"), null, null);
+        JwtProperties properties = new JwtProperties(ServiceType.RESOURCE, null, new File("arg"), null, null, "issuer", "audience");
 
-        assertThat(properties.serviceType()).isEqualTo(ServiceType.RESOURCE);
-        assertThat(properties.privateKey()).isNull();
-        assertThat(properties.publicKey()).isNotNull();
-        assertThat(properties.accessTokenExpiration()).isNull();
+        assertThat(properties.getServiceType()).isEqualTo(ServiceType.RESOURCE);
+        assertThat(properties.getPrivateKey()).isNull();
+        assertThat(properties.getPublicKey()).isNotNull();
+        assertThat(properties.getAccessTokenExpiration()).isNull();
 
     }
 
@@ -72,7 +72,7 @@ public class JwtPropertiesTest {
     @Test
     void resourcePublicKeyException() {
         assertThrows(JwtException.class,
-                () -> new JwtProperties(ServiceType.RESOURCE, null, null, null, null),
+                () -> new JwtProperties(ServiceType.RESOURCE, null, null, null, null, "issuer", "audience").init(),
                 "For resource service type, publicKey must be provided");
     }
 }

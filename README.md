@@ -2,11 +2,10 @@
 
 ## Pending
 
-* Secure token better
-  * Rename JWT Properties to something meaningful and generic 
-  * Change some constant values to configuration
-* Change password
 * Email verification
+  * Configuration to enable email verification
+  * Send again
+* Change password
 * Admin on start up
   * Must change password
 * Admin endpoints
@@ -23,6 +22,7 @@
 * Test Coverage with fail under X percent
 * Delete account
 * Test Container/Kubernetes deploy with adding keys files
+* One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
 * Lib for token validation to be used in other projects
   * ApplicationUser Interface, ContextUser and Token Provider, JwtTokenAuthenticationFilter and All JWT package must be here
   * Consider:
