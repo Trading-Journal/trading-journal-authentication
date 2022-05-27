@@ -14,7 +14,7 @@ CREATE TABLE `Users` (
 
 CREATE TABLE `Authorities` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `category` int NOT NULL,
+  `category` varchar(50) NOT NULL,
   `name` varchar(45) NOT NULL,
   PRIMARY KEY (`id`,`category`,`name`),
   UNIQUE KEY `name_UNIQUE` (`name`)

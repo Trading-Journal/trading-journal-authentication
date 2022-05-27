@@ -8,17 +8,21 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authentication.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
+import com.trading.journal.authentication.authority.UserAuthority;
+import com.trading.journal.authentication.authority.UserAuthorityRepository;
 import com.trading.journal.authentication.jwt.PrivateKeyProvider;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.ApplicationUserService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +34,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -39,6 +44,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @SpringBootTest
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@TestPropertySource(properties = {"journal.authentication.authority.type=STATIC"})
 public class AuthenticationControllerTest {
 
     @Autowired
@@ -51,20 +57,27 @@ public class AuthenticationControllerTest {
     private AuthenticationService authenticationService;
 
     @Autowired
-    PrivateKeyProvider privateKeyProvider;
+    private PrivateKeyProvider privateKeyProvider;
 
     @Autowired
-    JwtProperties properties;
+    private JwtProperties properties;
+
+    @Autowired
+    private UserAuthorityRepository userAuthorityRepository;
+
+    @Autowired
+    ApplicationUserRepository applicationUserRepository;
 
     private WebTestClient webTestClient;
 
     @BeforeEach
     public void setUp() {
         webTestClient = WebTestClient.bindToApplicationContext(context).build();
+        applicationUserRepository.deleteAll().block();
     }
 
     @Test
-    @DisplayName("When signUp as new user return success")
+    @DisplayName("When signUp as new user return success and the UserAuthority entity has AuthorityId because the authorities are static")
     void signUp() {
         UserRegistration userRegistration = new UserRegistration(
                 "firstName",
@@ -82,6 +95,10 @@ public class AuthenticationControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk();
+
+        List<UserAuthority> userAuthorities = userAuthorityRepository.findAll().collectList().block();
+        assert userAuthorities != null;
+        userAuthorities.forEach(userAuthority -> assertThat(userAuthority.getAuthorityId()).isNull());
     }
 
     @Test
@@ -145,7 +162,7 @@ public class AuthenticationControllerTest {
 
         applicationUserService.createNewUser(userRegistration).block();
 
-        Login login = new Login("mail@mail.com", "wrong_password");
+        Login login = new Login("mail4@mail.com", "wrong_password");
 
         webTestClient
                 .post()
@@ -177,6 +194,7 @@ public class AuthenticationControllerTest {
 
         LoginResponse loginResponse = authenticationService.signIn(login).block();
 
+        assert loginResponse != null;
         webTestClient
                 .post()
                 .uri("/authentication/refresh-token")
@@ -209,6 +227,7 @@ public class AuthenticationControllerTest {
 
         LoginResponse loginResponse = authenticationService.signIn(login).block();
 
+        assert loginResponse != null;
         webTestClient
                 .post()
                 .uri("/authentication/refresh-token")

@@ -1,9 +1,6 @@
 package com.trading.journal.authentication.authority;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -11,6 +8,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @Getter
 @Builder
+@EqualsAndHashCode
 @Table("Authorities")
 public class Authority {
 
