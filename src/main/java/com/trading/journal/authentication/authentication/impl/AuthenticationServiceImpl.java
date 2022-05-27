@@ -50,7 +50,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             refreshToken.token(),
                             accessToken.issuedAt(),
                             applicationUser.getFirstName());
-                });
+                })
+                .name("signing_user").metrics();
     }
 
     @Override
@@ -67,7 +68,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             refreshToken,
                             accessToken.issuedAt(),
                             applicationUser.getFirstName());
-                });
+                })
+                .name("refresh_token").metrics();
     }
 
     private Mono<String> validateRefreshTokenAndGetUserName(String refreshToken) {

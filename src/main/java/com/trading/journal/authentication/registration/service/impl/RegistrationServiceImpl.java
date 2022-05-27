@@ -17,7 +17,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public Mono<Void> signUp(@Valid UserRegistration userRegistration) {
-        return applicationUserService.createNewUser(userRegistration).then().name("signup").metrics();
+        return applicationUserService.createNewUser(userRegistration).then().name("signup_user").metrics();
     }
 
 }
