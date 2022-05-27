@@ -7,12 +7,8 @@ import com.trading.journal.authentication.jwt.helper.DateHelper;
 
 public record LoginResponse(
         String type,
-
         String accessToken,
-
         String refreshToken,
-
         @JsonFormat(pattern = DateHelper.DATE_TIME_FORMAT) LocalDateTime issuedAt,
-
         String user) {
 }

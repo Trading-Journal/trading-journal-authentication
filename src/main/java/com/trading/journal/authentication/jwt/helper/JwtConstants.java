@@ -3,7 +3,6 @@ package com.trading.journal.authentication.jwt.helper;
 public final class JwtConstants {
 
     public static final String TOKEN_PREFIX = "Bearer ";
-    public static final String TOKEN_NAME = "Bearer";
     public static final String TOKEN_TYPE = "JWT";
     public static final String TOKEN_AUDIENCE = "trade-journal";
     public static final String TOKEN_ISSUER = "https://tradejournal.biz";

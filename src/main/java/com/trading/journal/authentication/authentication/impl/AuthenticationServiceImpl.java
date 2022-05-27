@@ -1,7 +1,5 @@
 package com.trading.journal.authentication.authentication.impl;
 
-import javax.validation.Valid;
-
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authentication.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
@@ -12,8 +10,8 @@ import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.user.ApplicationUserService;
-
 import com.trading.journal.authentication.user.UserInfo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -21,25 +19,18 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
+
 @Service
+@RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final ApplicationUserService applicationUserService;
     private final ReactiveAuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtTokenReader jwtTokenReader;
-
-    public AuthenticationServiceImpl(ApplicationUserService applicationUserService,
-            ReactiveAuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider,
-            JwtTokenReader jwtTokenReader) {
-        this.applicationUserService = applicationUserService;
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.jwtTokenReader = jwtTokenReader;
-    }
 
     @Override
     public Mono<LoginResponse> signIn(@Valid Login login) {

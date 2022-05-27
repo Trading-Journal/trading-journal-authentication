@@ -1,24 +1,17 @@
 package com.trading.journal.authentication.jwt.impl;
 
-import java.io.IOException;
-import java.security.Key;
-
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.jwt.JwtException;
 import com.trading.journal.authentication.jwt.JwtTokenParser;
 import com.trading.journal.authentication.jwt.PublicKeyProvider;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
-
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.SignatureException;
+import java.io.IOException;
+import java.security.Key;
 
 @Component
 public class JwtTokenParserImpl implements JwtTokenParser {
@@ -29,7 +22,7 @@ public class JwtTokenParserImpl implements JwtTokenParser {
         try {
             this.publicKey = publicKeyProvider.provide(properties.publicKey());
         } catch (IOException e) {
-            throw (JwtException) new JwtException(e.getMessage()).initCause(e);
+            throw new JwtException(e.getMessage(), e);
         }
     }
 

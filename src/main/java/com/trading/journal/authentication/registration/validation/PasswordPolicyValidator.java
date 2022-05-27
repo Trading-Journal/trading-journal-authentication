@@ -5,19 +5,17 @@ import java.util.Objects;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import lombok.RequiredArgsConstructor;
 import org.passay.PasswordData;
 import org.passay.PasswordValidator;
 import org.passay.RuleResult;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class PasswordPolicyValidator implements ConstraintValidator<PasswordPolicy, String> {
 
     private final PasswordValidator passwordValidator;
-
-    public PasswordPolicyValidator(PasswordValidator passwordValidator) {
-        this.passwordValidator = passwordValidator;
-    }
 
     @Override
     public boolean isValid(String password, ConstraintValidatorContext context) {

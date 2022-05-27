@@ -1,28 +1,23 @@
 package com.trading.journal.authentication.api;
 
-import javax.validation.Valid;
-
 import com.trading.journal.authentication.authentication.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.registration.service.RegistrationService;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
+
 @RestController
+@RequiredArgsConstructor
 public class AuthenticationController implements AuthenticationApi {
 
     private final RegistrationService registrationService;
     private final AuthenticationService authenticationService;
-
-    public AuthenticationController(RegistrationService signupService, AuthenticationService authenticationService) {
-        this.registrationService = signupService;
-        this.authenticationService = authenticationService;
-    }
 
     @Override
     public Mono<ResponseEntity<Void>> signup(@Valid UserRegistration registration) {

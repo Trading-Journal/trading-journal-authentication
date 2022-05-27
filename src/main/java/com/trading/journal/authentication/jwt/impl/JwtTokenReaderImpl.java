@@ -8,6 +8,7 @@ import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,14 +24,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class JwtTokenReaderImpl implements JwtTokenReader {
 
     private final JwtTokenParser tokenParser;
-
-    public JwtTokenReaderImpl(JwtTokenParser tokenParser) {
-        this.tokenParser = tokenParser;
-    }
 
     @Override
     public Authentication getAuthentication(String token) {
