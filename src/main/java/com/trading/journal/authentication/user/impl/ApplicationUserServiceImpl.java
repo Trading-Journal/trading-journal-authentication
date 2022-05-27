@@ -4,7 +4,10 @@ import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.authority.UserAuthorityService;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.*;
+import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.ApplicationUserService;
+import com.trading.journal.authentication.user.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -74,7 +77,8 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
                 .flatMap(applicationUserRepository::save)
                 .flatMap(userAuthorityService::saveCommonUserAuthorities)
                 .map(UserAuthority::getUserId)
-                .flatMap(applicationUserRepository::findById);
+                .flatMap(applicationUserRepository::findById)
+                .name("create_new_user").metrics();
     }
 
     @Override
@@ -102,7 +106,8 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
                     UserInfo userInfo = userInfoAndAuthorities.getT1();
                     userInfo.loadAuthorities(userInfoAndAuthorities.getT2().stream().map(UserAuthority::getName).collect(Collectors.toList()));
                     return userInfo;
-                });
+                })
+                .name("get_me_info").metrics();
     }
 
     private Consumer<List<SimpleGrantedAuthority>> checkForEmptyAuthorities() {

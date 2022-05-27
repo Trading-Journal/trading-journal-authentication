@@ -2,18 +2,16 @@ package com.trading.journal.authentication.jwt.impl;
 
 import com.trading.journal.authentication.jwt.JwtTokenReader;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebConfigArgumentResolvers implements WebFluxConfigurer {
 
     private final JwtTokenReader tokenReader;
-
-    public WebConfigArgumentResolvers(JwtTokenReader tokenReader) {
-        this.tokenReader = tokenReader;
-    }
 
     @Override
     public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {

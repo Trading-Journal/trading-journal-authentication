@@ -1,23 +1,20 @@
 package com.trading.journal.authentication.configuration;
 
-import java.nio.charset.StandardCharsets;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Component
-public class ServerAuthenticationExceptionEntryPoint implements ServerAuthenticationEntryPoint {
+import java.nio.charset.StandardCharsets;
 
-    private final Logger log = LoggerFactory.getLogger(ServerAuthenticationEntryPoint.class);
+@Component
+@Slf4j
+public class ServerAuthenticationExceptionEntryPoint implements ServerAuthenticationEntryPoint {
 
     @Override
     public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException authException) {

@@ -2,7 +2,6 @@
 
 ## Pending
 
-* Add name and metrics for all Mono/Flux
 * Secure token better
   * Rename JWT Properties to something meaningful and generic 
   * Change some constant values to configuration
@@ -114,3 +113,14 @@ There are two ways to handle Authority/Roles:
 This configuration can be changed using the property **journal.authentication.authority.type** with none is defined, the default behavior is **STATIC**
   * **journal.authentication.authority.type** *e.g. STATIC*
   * **journal.authentication.authority.type** *e.g. DATABASE*
+
+
+## Metrics
+
+### Retrieve reactive metrics
+
+* http://localhost:8080/metrics/signup_user.flow.duration - Data about Signing Up process
+* http://localhost:8080/metrics/create_new_user.flow.duration - Data about Creating a new User process
+* http://localhost:8080/metrics/signing_user.flow.duration - Data about Signing In process
+* http://localhost:8080/metrics/refresh_token.flow.duration - Data about Refreshing Token process
+* http://localhost:8080/metrics/get_me_info.flow.duration - Data about Getting Current User Information process
