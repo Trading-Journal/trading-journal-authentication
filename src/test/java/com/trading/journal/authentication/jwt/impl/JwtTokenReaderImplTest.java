@@ -24,6 +24,7 @@ import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.data.ServiceType;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,17 +44,27 @@ public class JwtTokenReaderImplTest {
     PublicKeyProvider publicKeyProvider;
 
     @Mock
+    JwtProperties properties;
+
+    @Mock
     JwtTokenParser tokenParser;
+
+    @BeforeEach
+    void setUp() {
+        when(properties.getIssuer()).thenReturn("TOKEN_ISSUER");
+        when(properties.getAudience()).thenReturn("TOKEN_AUDIENCE");
+    }
 
     @Test
     @DisplayName("Given access token return Authentication")
     void authentication() {
         KeyPair keyPair = mockKeyPair();
+        assert keyPair != null;
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setIssuer("TOKEN_ISSUER")
+                .setAudience("TOKEN_AUDIENCE")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
                         .toInstant()))
@@ -65,13 +76,13 @@ public class JwtTokenReaderImplTest {
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
-        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
         Authentication authentication = jwtTokenReader.getAuthentication(token);
         assertThat(authentication).isInstanceOf(UsernamePasswordAuthenticationToken.class);
-        assertThat(((UsernamePasswordAuthenticationToken) authentication).getCredentials()).isEqualTo(token);
+        assertThat(authentication.getCredentials()).isEqualTo(token);
         assertThat(((UsernamePasswordAuthenticationToken) authentication).getAuthorities()).hasSize(1);
-        assertThat(((UsernamePasswordAuthenticationToken) authentication).getPrincipal())
+        assertThat(authentication.getPrincipal())
                 .isInstanceOf(ContextUser.class);
     }
 
@@ -79,11 +90,12 @@ public class JwtTokenReaderImplTest {
     @DisplayName("Given access token without tenancy when getting Authentication return exception")
     void authenticationException() {
         KeyPair keyPair = mockKeyPair();
+        assert keyPair != null;
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setIssuer("TOKEN_ISSUER")
+                .setAudience("TOKEN_AUDIENCE")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
                         .toInstant()))
@@ -94,7 +106,7 @@ public class JwtTokenReaderImplTest {
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
-        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
         AuthenticationServiceException exception = assertThrows(AuthenticationServiceException.class,
                 () -> jwtTokenReader.getAuthentication(token));
@@ -105,11 +117,12 @@ public class JwtTokenReaderImplTest {
     @DisplayName("Given access token when getting Token Info return info")
     void accessTokenInfo() {
         KeyPair keyPair = mockKeyPair();
+        assert keyPair != null;
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setIssuer("TOKEN_ISSUER")
+                .setAudience("TOKEN_AUDIENCE")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
                         .toInstant()))
@@ -121,7 +134,7 @@ public class JwtTokenReaderImplTest {
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
-        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
         AccessTokenInfo accessTokenInfo = jwtTokenReader.getAccessTokenInfo(token);
         assertThat(accessTokenInfo.userName()).isEqualTo("user_name");
@@ -133,11 +146,12 @@ public class JwtTokenReaderImplTest {
     @DisplayName("Given access token without tenancy when getting Token Info return exception")
     void accessTokenInfoException() {
         KeyPair keyPair = mockKeyPair();
+        assert keyPair != null;
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setIssuer("TOKEN_ISSUER")
+                .setAudience("TOKEN_AUDIENCE")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
                         .toInstant()))
@@ -148,7 +162,7 @@ public class JwtTokenReaderImplTest {
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
-        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
         AuthenticationServiceException exception = assertThrows(AuthenticationServiceException.class,
                 () -> jwtTokenReader.getAccessTokenInfo(token));
@@ -159,11 +173,12 @@ public class JwtTokenReaderImplTest {
     @DisplayName("Given access token return it is valid")
     void validToken() {
         KeyPair keyPair = mockKeyPair();
+        assert keyPair != null;
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setIssuer("TOKEN_ISSUER")
+                .setAudience("TOKEN_AUDIENCE")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
                         .toInstant()))
@@ -175,7 +190,7 @@ public class JwtTokenReaderImplTest {
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
-        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
         boolean tokenValid = jwtTokenReader.isTokenValid(token);
         assertThat(tokenValid).isTrue();
@@ -185,11 +200,12 @@ public class JwtTokenReaderImplTest {
     @DisplayName("Given access token return it is invalid because it is expired 2 seconds ago")
     void invalidToken() {
         KeyPair keyPair = mockKeyPair();
+        assert keyPair != null;
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setIssuer("TOKEN_ISSUER")
+                .setAudience("TOKEN_AUDIENCE")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
                         .toInstant()))
@@ -201,7 +217,7 @@ public class JwtTokenReaderImplTest {
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
-        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
         boolean tokenValid = jwtTokenReader.isTokenValid(token);
         assertThat(tokenValid).isFalse();
@@ -211,11 +227,12 @@ public class JwtTokenReaderImplTest {
     @DisplayName("Given access token return it is invalid because it has different issuer")
     void invalidTokenIssuer() {
         KeyPair keyPair = mockKeyPair();
+        assert keyPair != null;
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
                 .setIssuer("another_issuer")
-                .setAudience(JwtConstants.TOKEN_AUDIENCE)
+                .setAudience("TOKEN_AUDIENCE")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
                         .toInstant()))
@@ -227,7 +244,7 @@ public class JwtTokenReaderImplTest {
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
-        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
         boolean tokenValid = jwtTokenReader.isTokenValid(token);
         assertThat(tokenValid).isFalse();
@@ -237,10 +254,11 @@ public class JwtTokenReaderImplTest {
     @DisplayName("Given access token return it is invalid because it has different audience")
     void invalidTokenAudience() {
         KeyPair keyPair = mockKeyPair();
+        assert keyPair != null;
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
+                .setIssuer("TOKEN_ISSUER")
                 .setAudience("another_audience")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
@@ -253,7 +271,7 @@ public class JwtTokenReaderImplTest {
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
-        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
         boolean tokenValid = jwtTokenReader.isTokenValid(token);
         assertThat(tokenValid).isFalse();
@@ -263,10 +281,12 @@ public class JwtTokenReaderImplTest {
     @DisplayName("Given refresh token when getting Token Info return info")
     void refreshTokenInfo() {
         KeyPair keyPair = mockKeyPair();
+        assert keyPair != null;
         String token = Jwts.builder()
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer(JwtConstants.TOKEN_ISSUER)
+                .setIssuer("TOKEN_ISSUER")
+                .setAudience("TOKEN_AUDIENCE")
                 .setSubject("user_name")
                 .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
                         .toInstant()))
@@ -277,7 +297,7 @@ public class JwtTokenReaderImplTest {
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
-        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
         AccessTokenInfo accessTokenInfo = jwtTokenReader.getRefreshTokenInfo(token);
         assertThat(accessTokenInfo.userName()).isEqualTo("user_name");
@@ -287,7 +307,7 @@ public class JwtTokenReaderImplTest {
 
     private JwtTokenParser mockParser(KeyPair keyPair) {
         JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 3600L,
-                86400L);
+                86400L, "issuer", "audience");
         try {
             when(publicKeyProvider.provide(new File("arg"))).thenReturn(keyPair.getPublic());
         } catch (IOException e) {

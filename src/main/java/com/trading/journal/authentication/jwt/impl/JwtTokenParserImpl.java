@@ -20,7 +20,7 @@ public class JwtTokenParserImpl implements JwtTokenParser {
 
     public JwtTokenParserImpl(PublicKeyProvider publicKeyProvider, JwtProperties properties) {
         try {
-            this.publicKey = publicKeyProvider.provide(properties.publicKey());
+            this.publicKey = publicKeyProvider.provide(properties.getPublicKey());
         } catch (IOException e) {
             throw new JwtException(e.getMessage(), e);
         }

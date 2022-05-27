@@ -21,9 +21,9 @@ public class JwtPropertiesProviderTest {
     @DisplayName("JwtProperties for provider service type")
     @Test
     void provider() {
-        assertThat(properties.serviceType()).isEqualTo(ServiceType.PROVIDER);
-        assertThat(properties.privateKey()).isNotNull();
-        assertThat(properties.publicKey()).isNotNull();
-        assertThat(properties.accessTokenExpiration()).isEqualTo(3600L);
+        assertThat(properties.getServiceType()).isEqualTo(ServiceType.PROVIDER);
+        assertThat(properties.getPrivateKey()).isNotNull();
+        assertThat(properties.getPublicKey()).isNotNull();
+        assertThat(properties.getAccessTokenExpiration()).isEqualTo(3600L);
     }
 }

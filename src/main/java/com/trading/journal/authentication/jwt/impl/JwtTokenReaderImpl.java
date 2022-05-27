@@ -5,6 +5,7 @@ import com.trading.journal.authentication.jwt.JwtTokenParser;
 import com.trading.journal.authentication.jwt.JwtTokenReader;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.data.ContextUser;
+import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -30,6 +31,8 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
 
     private final JwtTokenParser tokenParser;
 
+    private final JwtProperties properties;
+
     @Override
     public Authentication getAuthentication(String token) {
         Jws<Claims> jwsClaims = tokenParser.parseToken(token);
@@ -42,7 +45,7 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
     @Override
     public AccessTokenInfo getAccessTokenInfo(String token) {
         Jws<Claims> jwsClaims = tokenParser.parseToken(token);
-        List<String> authorities = getAuthorities(jwsClaims).stream().map(a -> a.getAuthority())
+        List<String> authorities = getAuthorities(jwsClaims).stream().map(SimpleGrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         String tenancy = getTenancy(jwsClaims);
         return new AccessTokenInfo(jwsClaims.getBody().getSubject(), tenancy, authorities);
@@ -51,7 +54,7 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
     @Override
     public AccessTokenInfo getRefreshTokenInfo(String token) {
         Jws<Claims> jwsClaims = tokenParser.parseToken(token);
-        List<String> authorities = getAuthorities(jwsClaims).stream().map(a -> a.getAuthority())
+        List<String> authorities = getAuthorities(jwsClaims).stream().map(SimpleGrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         return new AccessTokenInfo(jwsClaims.getBody().getSubject(), null, authorities);
     }
@@ -62,8 +65,8 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
         try {
             Jws<Claims> claims = tokenParser.parseToken(token);
             boolean notExpired = !claims.getBody().getExpiration().before(new Date());
-            boolean sameIssuer = JwtConstants.TOKEN_ISSUER.equals(claims.getBody().getIssuer());
-            boolean sameAudience = JwtConstants.TOKEN_AUDIENCE.equals(claims.getBody().getAudience());
+            boolean sameIssuer = properties.getIssuer().equals(claims.getBody().getIssuer());
+            boolean sameAudience = properties.getAudience().equals(claims.getBody().getAudience());
             isValid = notExpired && sameIssuer && sameAudience;
         } catch (ApplicationException e) {
             log.info("Invalid JWT token.");

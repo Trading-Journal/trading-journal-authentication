@@ -40,7 +40,7 @@ public class JwtTokenProviderImplTest {
     @BeforeEach
     public void setUp() throws NoSuchAlgorithmException, IOException {
         JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 3600L,
-                86400L);
+                86400L, "issuer", "audience");
         when(privateKeyProvider.provide(new File("arg"))).thenReturn(mockPrivateKey());
         tokenProvider = new JwtTokenProviderImpl(properties, privateKeyProvider);
     }
