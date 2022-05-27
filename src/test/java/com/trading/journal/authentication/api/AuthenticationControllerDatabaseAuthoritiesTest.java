@@ -4,6 +4,7 @@ import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.authority.UserAuthorityRepository;
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,9 +35,13 @@ public class AuthenticationControllerDatabaseAuthoritiesTest {
 
     private WebTestClient webTestClient;
 
+    @Autowired
+    ApplicationUserRepository applicationUserRepository;
+
     @BeforeEach
     public void setUp() {
         webTestClient = WebTestClient.bindToApplicationContext(context).build();
+        applicationUserRepository.deleteAll().block();
     }
 
     @Test
