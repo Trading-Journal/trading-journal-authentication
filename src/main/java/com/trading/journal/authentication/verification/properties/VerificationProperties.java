@@ -1,11 +1,17 @@
 package com.trading.journal.authentication.verification.properties;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
+import org.springframework.context.annotation.Configuration;
 
 @ConfigurationProperties("journal.authentication.verification")
-@ConstructorBinding
-public record VerificationProperties(
-        boolean enabled
-) {
+@Configuration
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class VerificationProperties {
+
+    private boolean enabled;
 }

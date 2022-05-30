@@ -20,6 +20,6 @@ class VerificationPropertiesEnabledTest {
     @DisplayName("VerificationProperties not enabled")
     @Test
     void enabled() {
-        assertThat(properties.enabled()).isEqualTo(true);
+        assertThat(properties.isEnabled()).isEqualTo(true);
     }
 }

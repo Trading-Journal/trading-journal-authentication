@@ -8,6 +8,7 @@ import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.ApplicationUserService;
 import com.trading.journal.authentication.user.UserInfo;
+import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -34,6 +35,8 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     private final UserAuthorityService userAuthorityService;
 
     private final PasswordEncoder encoder;
+
+    private final VerificationProperties verificationProperties;
 
     @Override
     public Mono<UserDetails> findByUsername(String email) {
@@ -125,14 +128,15 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     }
 
     private Mono<ApplicationUser> buildNewUser(UserRegistration userRegistration) {
+        boolean enabledAndVerified = !verificationProperties.isEnabled();
         return Mono.just(ApplicationUser.builder()
                 .userName(userRegistration.userName())
                 .password(encoder.encode(userRegistration.password()))
                 .firstName(userRegistration.firstName())
                 .lastName(userRegistration.lastName())
                 .email(userRegistration.email())
-                .enabled(true)
-                .verified(true)
+                .enabled(enabledAndVerified)
+                .verified(enabledAndVerified)
                 .createdAt(LocalDateTime.now())
                 .build());
     }

@@ -6,6 +6,7 @@ import com.trading.journal.authentication.authority.UserAuthorityService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,11 +42,14 @@ public class ApplicationUserServiceImplTest {
     @Mock
     PasswordEncoder encoder;
 
+    @Mock
+    VerificationProperties verificationProperties;
+
     @InjectMocks
     ApplicationUserServiceImpl applicationUserServiceImpl;
 
     @Test
-    @DisplayName("When create user return user response")
+    @DisplayName("When create user and the verification is disabled return user response enabled and verified")
     void createUser() {
         UserRegistration userRegistration = new UserRegistration(
                 "firstName",
@@ -73,9 +77,55 @@ public class ApplicationUserServiceImplTest {
         when(encoder.encode(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(Mono.just(appUser));
         when(applicationUserRepository.findById(anyLong())).thenReturn(Mono.just(appUser));
+        when(verificationProperties.isEnabled()).thenReturn(false);
 
         Mono<ApplicationUser> userMono = applicationUserServiceImpl.createNewUser(userRegistration);
-        StepVerifier.create(userMono).expectNextCount(1).verifyComplete();
+        StepVerifier.create(userMono)
+                .assertNext(applicationUser -> {
+                    assertThat(applicationUser.getEnabled()).isTrue();
+                    assertThat(applicationUser.getVerified()).isTrue();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("When create user and the verification is enabled return user response disabled and not verified")
+    void createUserDisabled() {
+        UserRegistration userRegistration = new UserRegistration(
+                "firstName",
+                "lastName",
+                "UserName",
+                "mail@mail.com",
+                "123456",
+                "123456");
+
+        ApplicationUser appUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "sdsa54ds56a4ds564d",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                false,
+                false,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(0));
+        when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(0));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(Mono.just(new UserAuthority(1L, 1L, 1L, "USER")));
+        when(encoder.encode(anyString())).thenReturn("sdsa54ds56a4ds564d");
+        when(applicationUserRepository.save(any())).thenReturn(Mono.just(appUser));
+        when(applicationUserRepository.findById(anyLong())).thenReturn(Mono.just(appUser));
+        when(verificationProperties.isEnabled()).thenReturn(true);
+
+        Mono<ApplicationUser> userMono = applicationUserServiceImpl.createNewUser(userRegistration);
+        StepVerifier.create(userMono)
+                .assertNext(applicationUser -> {
+                    assertThat(applicationUser.getEnabled()).isFalse();
+                    assertThat(applicationUser.getVerified()).isFalse();
+                })
+                .verifyComplete();
     }
 
     @Test
