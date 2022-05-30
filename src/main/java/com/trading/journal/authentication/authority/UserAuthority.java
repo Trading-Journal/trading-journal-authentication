@@ -4,6 +4,9 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -17,8 +20,10 @@ public class UserAuthority {
 
     private Long userId;
 
+    @NotNull
     private Long authorityId;
 
+    @NotBlank
     private String name;
 
     public UserAuthority(Long userId, String name, Long authorityId) {

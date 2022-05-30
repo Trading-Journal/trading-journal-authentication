@@ -30,5 +30,15 @@ CREATE TABLE `UserAuthorities` (
   KEY `authorityIdFk_idx` (`authorityId`),
   CONSTRAINT `authorityIdFk` FOREIGN KEY (`authorityId`) REFERENCES `Authorities` (`id`) ON DELETE CASCADE,
   CONSTRAINT `userIdFk` FOREIGN KEY (`userId`) REFERENCES `Users` (`id`) ON DELETE CASCADE
-)
+);
+
+CREATE TABLE `Verifications` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(150) NOT NULL,
+  `type` varchar(45) NOT NULL,
+  `status` varchar(45) NOT NULL,
+  `hash` varchar(2000) NOT NULL,
+  `lastChange` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+);
 

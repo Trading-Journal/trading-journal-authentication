@@ -5,7 +5,7 @@
 * Email verification
   * Configuration to enable email verification
   * Send again
-* Change password
+  * Change password
 * Admin on start up
   * Must change password
 * Admin endpoints
@@ -42,8 +42,21 @@
 
 ### Container Dependencies
 
+#### MySql
+
 ```bash
 docker run -d -e MYSQL_USER=trade-journal -e MYSQL_PASSWORD=trade-journal -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=trade-journal -p 3306:3306 mysql:latest
+```
+
+#### SMTP Server
+
+```bash
+docker run -d -p 587:587 --name mail \
+    -e RELAY_HOST=smtp.example.com \
+    -e RELAY_PORT=587 \
+    -e RELAY_USERNAME=alice@example.com \
+    -e RELAY_PASSWORD=secretpassword \
+    -d bytemark/smtp
 ```
 
 ### Keys Dependencies
@@ -92,7 +105,17 @@ CREATE TABLE `UserAuthorities` (
   KEY `authorityIdFk_idx` (`authorityId`),
   CONSTRAINT `authorityIdFk` FOREIGN KEY (`authorityId`) REFERENCES `Authorities` (`id`) ON DELETE CASCADE,
   CONSTRAINT `userIdFk` FOREIGN KEY (`userId`) REFERENCES `Users` (`id`) ON DELETE CASCADE
-)
+);
+
+CREATE TABLE `Verifications` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(150) NOT NULL,
+  `type` varchar(45) NOT NULL,
+  `status` varchar(45) NOT NULL,
+  `hash` varchar(2000) NOT NULL,
+  `lastChange` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+);
 ```
 
 ## Configurations
@@ -108,12 +131,15 @@ CREATE TABLE `UserAuthorities` (
 ### Handle Authority/Roles
 
 There are two ways to handle Authority/Roles:
-  * STATIC: No authorities are persisted in the database, there are initially two possible roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
-  * DATABASE: Authorities will be persisted and retrieved from database, a initial load is made in the table  **Authorities** with roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
+* STATIC: No authorities are persisted in the database, there are initially two possible roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
+ * DATABASE: Authorities will be persisted and retrieved from database, a initial load is made in the table  **Authorities** with roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
 This configuration can be changed using the property **journal.authentication.authority.type** with none is defined, the default behavior is **STATIC**
-  * **journal.authentication.authority.type** *e.g. STATIC*
-  * **journal.authentication.authority.type** *e.g. DATABASE*
+ * **journal.authentication.authority.type** *e.g. STATIC*
+ * **journal.authentication.authority.type** *e.g. DATABASE*
 
+### Email Verification
+In case there is need for new users confirm their emails, then enable the configuration property:
+* **journal.authentication.verification.enabled** *e.g. true*
 
 ## Metrics
 
