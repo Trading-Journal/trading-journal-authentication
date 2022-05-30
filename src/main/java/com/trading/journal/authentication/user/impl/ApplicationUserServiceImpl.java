@@ -113,6 +113,19 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
                 .name("get_me_info").metrics();
     }
 
+    @Override
+    public Mono<Void> verifyNewUser(String email) {
+        return applicationUserRepository.findByEmail(email)
+                .switchIfEmpty(Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
+                .map(applicationUser -> {
+                    applicationUser.enable();
+                    applicationUser.verify();
+                    return applicationUser;
+                })
+                .flatMap(applicationUserRepository::save)
+                .then();
+    }
+
     private Consumer<List<SimpleGrantedAuthority>> checkForEmptyAuthorities() {
         return authorities -> ofNullable(authorities)
                 .filter(list -> !list.isEmpty())

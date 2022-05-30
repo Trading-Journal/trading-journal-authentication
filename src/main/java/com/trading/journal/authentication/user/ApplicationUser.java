@@ -1,10 +1,7 @@
 package com.trading.journal.authentication.user;
 
 import com.trading.journal.authentication.authority.UserAuthority;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
@@ -17,6 +14,7 @@ import java.util.List;
 @Getter
 @Builder
 @Table("Users")
+@EqualsAndHashCode
 public class ApplicationUser {
 
     @Id
@@ -43,5 +41,13 @@ public class ApplicationUser {
 
     public void loadAuthorities(List<UserAuthority> authorities) {
         this.authorities = authorities;
+    }
+
+    public void enable() {
+        this.enabled = true;
+    }
+
+    public void verify() {
+        this.verified = true;
     }
 }

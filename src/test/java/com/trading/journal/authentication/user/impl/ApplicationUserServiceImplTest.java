@@ -129,6 +129,53 @@ public class ApplicationUserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Enable and verify user")
+    void enableAndVerify() {
+        ApplicationUser disabledUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "sdsa54ds56a4ds564d",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                false,
+                false,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.of(2022, 2, 1, 10, 30, 50));
+
+        ApplicationUser enabledUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "sdsa54ds56a4ds564d",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.of(2022, 2, 1, 10, 30, 50));
+
+        when(applicationUserRepository.findByEmail(disabledUser.getEmail())).thenReturn(Mono.just(disabledUser));
+        when(applicationUserRepository.save(enabledUser)).thenReturn(Mono.just(enabledUser));
+
+        Mono<Void> userMono = applicationUserServiceImpl.verifyNewUser(disabledUser.getEmail());
+        StepVerifier.create(userMono)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Enable and verify user that does not exist, return an exception")
+    void enableAndVerifyException() {
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Mono.empty());
+        Mono<Void> userMono = applicationUserServiceImpl.verifyNewUser("mail@mail.com");
+
+        StepVerifier.create(userMono)
+                .expectErrorMatches(throwable -> throwable instanceof UsernameNotFoundException
+                        && throwable.getMessage().equals("User mail@mail.com does not exist"))
+                .verify();
+    }
+
+    @Test
     @DisplayName("When create user and user name already exist return exception")
     void userNameAlreadyExist() {
         UserRegistration userRegistration = new UserRegistration(
@@ -274,7 +321,7 @@ public class ApplicationUserServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L,"ROLE_USER")),
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
         when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(Mono.just(applicationUser));
