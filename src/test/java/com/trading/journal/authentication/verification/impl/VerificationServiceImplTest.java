@@ -3,7 +3,9 @@ package com.trading.journal.authentication.verification.impl;
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.verification.*;
+import com.trading.journal.authentication.verification.Verification;
+import com.trading.journal.authentication.verification.VerificationStatus;
+import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
 import com.trading.journal.authentication.verification.service.VerificationRepository;
 import com.trading.journal.authentication.verification.service.impl.VerificationServiceImpl;
@@ -19,7 +21,8 @@ import reactor.test.StepVerifier;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @ExtendWith(SpringExtension.class)
@@ -37,13 +40,6 @@ class VerificationServiceImplTest {
     @DisplayName("Given verification type REGISTRATION and application user send the verification to user email and never execute delete because previous verification did not exist")
     @Test
     void registrationVerification() {
-        Verification verificationToSave = Verification.builder()
-                .email("mail@mail.com")
-                .hash("12456")
-                .status(VerificationStatus.PENDING)
-                .type(VerificationType.REGISTRATION)
-                .build();
-
         Verification verificationSaved = new Verification(1L,
                 "mail@mail.com",
                 VerificationType.REGISTRATION,
@@ -64,27 +60,18 @@ class VerificationServiceImplTest {
                 LocalDateTime.now());
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Mono.empty());
-        when(verificationRepository.save(verificationToSave)).thenReturn(Mono.just(verificationSaved));
-        when(verificationEmailService.sendEmail(verificationSaved, applicationUser)).thenReturn(Mono.empty());
+        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
+        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> voidMono = verificationService.send(VerificationType.REGISTRATION, applicationUser);
         StepVerifier.create(voidMono)
                 .expectNextCount(0)
                 .verifyComplete();
-
-        verify(verificationRepository, never()).delete(any());
     }
 
     @DisplayName("Given verification type REGISTRATION and application user send the verification to user email and execute delete because previous verification did exist")
     @Test
     void registrationVerificationDeletePrevious() {
-        Verification verificationToSave = Verification.builder()
-                .email("mail@mail.com")
-                .hash("12456")
-                .status(VerificationStatus.PENDING)
-                .type(VerificationType.REGISTRATION)
-                .build();
-
         Verification verificationSaved = new Verification(1L,
                 "mail@mail.com",
                 VerificationType.REGISTRATION,
@@ -105,16 +92,13 @@ class VerificationServiceImplTest {
                 LocalDateTime.now());
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Mono.just(verificationSaved));
-        when(verificationRepository.delete(verificationSaved)).thenReturn(Mono.empty());
-        when(verificationRepository.save(verificationToSave)).thenReturn(Mono.just(verificationSaved));
-        when(verificationEmailService.sendEmail(verificationSaved, applicationUser)).thenReturn(Mono.empty());
+        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
+        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> voidMono = verificationService.send(VerificationType.REGISTRATION, applicationUser);
         StepVerifier.create(voidMono)
                 .expectNextCount(0)
                 .verifyComplete();
-
-        verify(verificationRepository).delete(any());
     }
 
     @DisplayName("Given hash and email find current Verification")

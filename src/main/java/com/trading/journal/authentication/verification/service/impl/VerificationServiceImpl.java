@@ -2,7 +2,8 @@ package com.trading.journal.authentication.verification.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.verification.*;
+import com.trading.journal.authentication.verification.Verification;
+import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
 import com.trading.journal.authentication.verification.service.VerificationRepository;
 import com.trading.journal.authentication.verification.service.VerificationService;
@@ -21,8 +22,8 @@ public class VerificationServiceImpl implements VerificationService {
     @Override
     public Mono<Void> send(VerificationType verificationType, ApplicationUser applicationUser) {
         return verificationRepository.getByTypeAndEmail(verificationType, applicationUser.getEmail())
-                .map(verificationRepository::delete)
-                .then(create(verificationType, applicationUser))
+                .switchIfEmpty(create(verificationType, applicationUser))
+                .map(Verification::renew)
                 .flatMap(verificationRepository::save)
                 .flatMap(verification -> verificationEmailService.sendEmail(verification, applicationUser));
     }
@@ -41,8 +42,6 @@ public class VerificationServiceImpl implements VerificationService {
     private Mono<Verification> create(VerificationType verificationType, ApplicationUser applicationUser) {
         return Mono.just(Verification.builder()
                 .email(applicationUser.getEmail())
-                .hash("12456")
-                .status(VerificationStatus.PENDING)
                 .type(verificationType)
                 .build());
     }

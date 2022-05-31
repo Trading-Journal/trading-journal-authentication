@@ -1,7 +1,6 @@
 package com.trading.journal.authentication.verification;
 
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -32,6 +31,12 @@ public class Verification {
     @NotBlank
     private String hash;
 
-    @CreatedDate
     private LocalDateTime lastChange;
+
+    public Verification renew() {
+        this.status = VerificationStatus.PENDING;
+        this.lastChange = LocalDateTime.now();
+        this.hash = "123456";
+        return this;
+    }
 }

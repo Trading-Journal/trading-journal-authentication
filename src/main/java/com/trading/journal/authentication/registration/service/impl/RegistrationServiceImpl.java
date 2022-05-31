@@ -30,18 +30,15 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     private Mono<SignUpResponse> sendVerification(ApplicationUser applicationUser) {
-//        SignUpResponse signUpResponse = new SignUpResponse(applicationUser.getEmail(), applicationUser.getEnabled());
-
-        return Mono.just(applicationUser.getEnabled())
-                .filter(aBoolean -> aBoolean.equals(false))
-                .doOnNext(unused -> verificationService.send(VerificationType.REGISTRATION, applicationUser))
-                .then(Mono.just(new SignUpResponse(applicationUser.getEmail(), applicationUser.getEnabled())));
-
-//        if (applicationUser.getEnabled().equals(false)) {
-//            return verificationService.send(VerificationType.REGISTRATION, applicationUser)
-//                    .then(Mono.just(signUpResponse));
-//        }
-//        return Mono.just(signUpResponse);
+        SignUpResponse signUpResponse = new SignUpResponse(applicationUser.getEmail(), applicationUser.getEnabled());
+        Mono<SignUpResponse> signUpResponseMono;
+        if (applicationUser.getEnabled().equals(false)) {
+            signUpResponseMono = verificationService.send(VerificationType.REGISTRATION, applicationUser)
+                    .thenReturn(signUpResponse);
+        } else {
+            signUpResponseMono = Mono.just(signUpResponse);
+        }
+        return signUpResponseMono;
     }
 
 }
