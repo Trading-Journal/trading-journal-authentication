@@ -1,6 +1,7 @@
 package com.trading.journal.authentication.email.impl;
 
 import com.trading.journal.authentication.email.EmailField;
+import com.trading.journal.authentication.email.service.impl.TemplateFormatImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

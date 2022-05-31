@@ -16,13 +16,14 @@ import java.util.UUID;
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
-import com.trading.journal.authentication.jwt.JwtTokenProvider;
-import com.trading.journal.authentication.jwt.JwtTokenReader;
+import com.trading.journal.authentication.authentication.service.impl.AuthenticationServiceImpl;
+import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
+import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.ApplicationUserService;
+import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.user.UserInfo;
 
 import org.junit.jupiter.api.DisplayName;

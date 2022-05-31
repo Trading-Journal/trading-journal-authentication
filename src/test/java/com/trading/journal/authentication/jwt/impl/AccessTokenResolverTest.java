@@ -6,10 +6,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
-import com.trading.journal.authentication.jwt.JwtTokenReader;
+import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 
+import com.trading.journal.authentication.jwt.service.impl.AccessTokenResolver;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

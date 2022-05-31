@@ -2,10 +2,11 @@ package com.trading.journal.authentication.user.impl;
 
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authority.UserAuthority;
-import com.trading.journal.authentication.authority.UserAuthorityService;
+import com.trading.journal.authentication.authority.service.UserAuthorityService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.service.ApplicationUserRepository;
+import com.trading.journal.authentication.user.service.impl.ApplicationUserServiceImpl;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

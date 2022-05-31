@@ -15,15 +15,17 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
 
-import com.trading.journal.authentication.jwt.JwtTokenParser;
-import com.trading.journal.authentication.jwt.JwtTokenReader;
-import com.trading.journal.authentication.jwt.PublicKeyProvider;
+import com.trading.journal.authentication.jwt.service.JwtTokenParser;
+import com.trading.journal.authentication.jwt.service.JwtTokenReader;
+import com.trading.journal.authentication.jwt.service.PublicKeyProvider;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.data.ServiceType;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 
+import com.trading.journal.authentication.jwt.service.impl.JwtTokenParserImpl;
+import com.trading.journal.authentication.jwt.service.impl.JwtTokenReaderImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

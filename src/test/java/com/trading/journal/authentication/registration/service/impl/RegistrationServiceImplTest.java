@@ -7,7 +7,7 @@ import java.util.Collections;
 
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.ApplicationUserService;
+import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.authority.UserAuthority;
 
 import org.junit.jupiter.api.DisplayName;

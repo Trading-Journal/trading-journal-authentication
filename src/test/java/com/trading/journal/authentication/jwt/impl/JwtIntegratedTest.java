@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.jwt.JwtTokenParser;
-import com.trading.journal.authentication.jwt.JwtTokenProvider;
+import com.trading.journal.authentication.jwt.service.JwtTokenParser;
+import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.user.ApplicationUser;
