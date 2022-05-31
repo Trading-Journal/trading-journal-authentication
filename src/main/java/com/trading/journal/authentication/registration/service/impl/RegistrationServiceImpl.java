@@ -1,8 +1,12 @@
 package com.trading.journal.authentication.registration.service.impl;
 
+import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.registration.service.RegistrationService;
+import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.verification.VerificationType;
+import com.trading.journal.authentication.verification.service.VerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -15,9 +19,29 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private final ApplicationUserService applicationUserService;
 
+    private final VerificationService verificationService;
+
     @Override
-    public Mono<Void> signUp(@Valid UserRegistration userRegistration) {
-        return applicationUserService.createNewUser(userRegistration).then().name("signup_user").metrics();
+    public Mono<SignUpResponse> signUp(@Valid UserRegistration userRegistration) {
+        return applicationUserService.createNewUser(userRegistration)
+                .flatMap(this::sendVerification)
+                .name("signup_user")
+                .metrics();
+    }
+
+    private Mono<SignUpResponse> sendVerification(ApplicationUser applicationUser) {
+//        SignUpResponse signUpResponse = new SignUpResponse(applicationUser.getEmail(), applicationUser.getEnabled());
+
+        return Mono.just(applicationUser.getEnabled())
+                .filter(aBoolean -> aBoolean.equals(false))
+                .doOnNext(unused -> verificationService.send(VerificationType.REGISTRATION, applicationUser))
+                .then(Mono.just(new SignUpResponse(applicationUser.getEmail(), applicationUser.getEnabled())));
+
+//        if (applicationUser.getEnabled().equals(false)) {
+//            return verificationService.send(VerificationType.REGISTRATION, applicationUser)
+//                    .then(Mono.just(signUpResponse));
+//        }
+//        return Mono.just(signUpResponse);
     }
 
 }

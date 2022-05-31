@@ -3,6 +3,7 @@ package com.trading.journal.authentication.api;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
+import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.registration.service.RegistrationService;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +21,12 @@ public class AuthenticationController implements AuthenticationApi {
     private final AuthenticationService authenticationService;
 
     @Override
-    public Mono<ResponseEntity<Void>> signup(@Valid UserRegistration registration) {
+    public Mono<ResponseEntity<SignUpResponse>> signUp(@Valid UserRegistration registration) {
         return registrationService.signUp(registration).map(ResponseEntity::ok);
     }
 
     @Override
-    public Mono<ResponseEntity<LoginResponse>> signin(@Valid Login login) {
+    public Mono<ResponseEntity<LoginResponse>> signIn(@Valid Login login) {
         return authenticationService.signIn(login).map(ResponseEntity::ok);
     }
 

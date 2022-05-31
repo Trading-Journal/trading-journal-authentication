@@ -2,6 +2,7 @@ package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
+import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 
 import org.springframework.http.HttpStatus;
@@ -22,17 +23,17 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/authentication")
 public interface AuthenticationApi {
 
-    @ApiOperation(notes = "Sign up as a new user", value = "Sign up")
+    @ApiOperation(notes = "Sign up as a new user", value = "Sign up", response = SignUpResponse.class)
     @ApiResponses(@ApiResponse(code = 200, message = "New user created"))
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.OK)
-    Mono<ResponseEntity<Void>> signup(@RequestBody UserRegistration registration);
+    Mono<ResponseEntity<SignUpResponse>> signUp(@RequestBody UserRegistration registration);
 
     @ApiOperation(notes = "Sign in", value = "Sign in", response = LoginResponse.class)
     @ApiResponses(@ApiResponse(code = 200, message = "User logged in"))
     @PostMapping("/signin")
     @ResponseStatus(HttpStatus.OK)
-    Mono<ResponseEntity<LoginResponse>> signin(@RequestBody Login login);
+    Mono<ResponseEntity<LoginResponse>> signIn(@RequestBody Login login);
 
     @ApiOperation(notes = "Refresh token", value = "Refresh access token", response = LoginResponse.class)
     @ApiResponses(@ApiResponse(code = 200, message = "Access token refreshed"))

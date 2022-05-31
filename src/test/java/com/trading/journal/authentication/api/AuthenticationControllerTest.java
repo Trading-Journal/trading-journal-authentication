@@ -21,6 +21,7 @@ import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
+import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.service.ApplicationUserRepository;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
@@ -94,7 +95,12 @@ public class AuthenticationControllerTest {
                 .bodyValue(userRegistration)
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isOk()
+                .expectBody(SignUpResponse.class)
+                .value(response -> {
+                   assertThat(response.email()).isEqualTo("mail2@mail.com");
+                   assertThat(response.enabled()).isTrue();
+                });
 
         List<UserAuthority> userAuthorities = userAuthorityRepository.findAll().collectList().block();
         assert userAuthorities != null;
