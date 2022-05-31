@@ -19,7 +19,8 @@ public class VerificationServiceImpl implements VerificationService {
     public Mono<Void> send(VerificationType verificationType, ApplicationUser applicationUser) {
         return verificationRepository.getByTypeAndEmail(verificationType, applicationUser.getEmail())
                 .map(verificationRepository::delete)
-                .then(verificationRepository.save(create(verificationType, applicationUser)))
+                .then(create(verificationType, applicationUser))
+                .flatMap(verificationRepository::save)
                 .flatMap(verification -> verificationEmailService.sendEmail(verification, applicationUser));
     }
 
@@ -34,12 +35,12 @@ public class VerificationServiceImpl implements VerificationService {
         return verificationRepository.delete(verification);
     }
 
-    private Verification create(VerificationType verificationType, ApplicationUser applicationUser) {
-        return Verification.builder()
+    private Mono<Verification> create(VerificationType verificationType, ApplicationUser applicationUser) {
+        return Mono.just(Verification.builder()
                 .email(applicationUser.getEmail())
                 .hash("12456")
                 .status(VerificationStatus.PENDING)
                 .type(verificationType)
-                .build();
+                .build());
     }
 }

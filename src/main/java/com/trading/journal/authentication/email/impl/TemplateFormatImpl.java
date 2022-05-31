@@ -2,6 +2,7 @@ package com.trading.journal.authentication.email.impl;
 
 import com.trading.journal.authentication.email.EmailConstants;
 import com.trading.journal.authentication.email.EmailField;
+import com.trading.journal.authentication.email.TemplateFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,9 @@ import static java.util.stream.Collectors.joining;
 
 @Component
 @Slf4j
-public class TemplateFormat {
+public class TemplateFormatImpl implements TemplateFormat {
+
+    @Override
     public String format(String resourceName, List<EmailField> fields) {
         final String template = getResource(resourceName);
         return ofNullable(fields)
@@ -29,31 +32,22 @@ public class TemplateFormat {
                 .reduce(template, (s, e) -> s.replace(e.name(), e.value().toString()), (s1, s2) -> null);
     }
 
-    public  String addBodyToEmail(String body) {
+    @Override
+    public String addBodyToEmail(String body) {
         List<EmailField> fields = singletonList(new EmailField(EmailConstants.TemplateFields.MESSAGE_BODY, body));
         return format(EmailConstants.Resources.EMAIL_TEMPLATE, fields);
     }
 
     private String getResource(String resourceName) {
-        BufferedReader bufferedReader = null;
-        InputStream resourceAsStream = null;
-        String template;
-        try {
-            resourceAsStream = TemplateFormat.class.getResourceAsStream(resourceName);
+        String template = null;
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        try (InputStream resourceAsStream = classLoader.getResourceAsStream(resourceName)) {
             requireNonNull(resourceAsStream, "Resource folder is not accessible.");
-            bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream, UTF_8));
-            template = bufferedReader.lines().collect(joining());
-        } finally {
-            try {
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-                if (resourceAsStream != null) {
-                    resourceAsStream.close();
-                }
-            } catch (IOException e) {
-                log.error("Error closing the resource", e);
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream, UTF_8))) {
+                template = bufferedReader.lines().collect(joining());
             }
+        } catch (IOException e) {
+            log.error("Error closing the resource", e);
         }
         return template;
     }

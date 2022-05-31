@@ -4,6 +4,7 @@ import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.email.EmailProperties;
 import com.trading.journal.authentication.email.EmailRequest;
 import com.trading.journal.authentication.email.EmailSender;
+import com.trading.journal.authentication.email.TemplateFormat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
