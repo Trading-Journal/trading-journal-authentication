@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.verification.service.impl;
 
+import com.trading.journal.authentication.configuration.properties.HostProperties;
 import com.trading.journal.authentication.email.EmailField;
 import com.trading.journal.authentication.email.EmailRequest;
 import com.trading.journal.authentication.email.service.EmailSender;
@@ -23,6 +24,8 @@ public class VerificationEmailServiceImpl implements VerificationEmailService {
 
     private final EmailSender emailSender;
 
+    private final HostProperties hostProperties;
+
     @Override
     public Mono<Void> sendEmail(Verification verification, ApplicationUser applicationUser) {
         EmailRequest emailRequest = buildEmailRequest(verification, applicationUser);
@@ -32,7 +35,7 @@ public class VerificationEmailServiceImpl implements VerificationEmailService {
     private EmailRequest buildEmailRequest(Verification verification, ApplicationUser applicationUser) {
         String name = applicationUser.getFirstName().concat(" ").concat(applicationUser.getLastName());
         String url = UriComponentsBuilder.newInstance()
-                .uri(URI.create("http://localhost:8080"))
+                .uri(URI.create(hostProperties.getBackEnd()))
                 .path(VerificationFields.PATH.getValue())
                 .queryParam(VerificationFields.HASH.getValue(), verification.getHash())
                 .build()

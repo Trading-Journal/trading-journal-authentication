@@ -1,4 +1,4 @@
-package com.trading.journal.authentication.configuration;
+package com.trading.journal.authentication.configuration.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;

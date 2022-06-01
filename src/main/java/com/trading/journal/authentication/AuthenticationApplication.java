@@ -1,7 +1,7 @@
 package com.trading.journal.authentication;
 
 import com.trading.journal.authentication.authority.properties.AuthorityProperties;
-import com.trading.journal.authentication.configuration.DatasourceProperties;
+import com.trading.journal.authentication.configuration.properties.DatasourceProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration;

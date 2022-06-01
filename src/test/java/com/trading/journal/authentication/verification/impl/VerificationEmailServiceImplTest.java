@@ -1,6 +1,7 @@
 package com.trading.journal.authentication.verification.impl;
 
 import com.trading.journal.authentication.authority.UserAuthority;
+import com.trading.journal.authentication.configuration.properties.HostProperties;
 import com.trading.journal.authentication.email.EmailField;
 import com.trading.journal.authentication.email.EmailRequest;
 import com.trading.journal.authentication.email.service.EmailSender;
@@ -33,6 +34,9 @@ class VerificationEmailServiceImplTest {
     @Mock
     EmailSender emailSender;
 
+    @Mock
+    HostProperties hostProperties;
+
     @InjectMocks
     VerificationEmailServiceImpl verificationEmailService;
 
@@ -41,6 +45,7 @@ class VerificationEmailServiceImplTest {
     void sendEmail() {
         String hash = UUID.randomUUID().toString();
 
+        when(hostProperties.getBackEnd()).thenReturn("http://site.com");
         Verification verification = new Verification(1L, "mail@mail.com", VerificationType.REGISTRATION, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
         ApplicationUser applicationUser = new ApplicationUser(
@@ -55,7 +60,7 @@ class VerificationEmailServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        String url = String.format("http://localhost:8080/authentication/verify?hash=%s", hash);
+        String url = String.format("http://site.com/authentication/verify?hash=%s", hash);
         List<EmailField> fields = Arrays.asList(
                 new EmailField("$NAME", "User Admin"),
                 new EmailField("$URL", url)

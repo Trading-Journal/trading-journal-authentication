@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.configuration.mysql;
 
-import com.trading.journal.authentication.configuration.DatasourceProperties;
+import com.trading.journal.authentication.configuration.properties.DatasourceProperties;
 import io.jsonwebtoken.lang.Assert;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;

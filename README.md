@@ -141,6 +141,10 @@ This configuration can be changed using the property **journal.authentication.au
 In case there is need for new users confirm their emails, then enable the configuration property:
 * **journal.authentication.verification.enabled** *e.g. true*
 
+### Generic Properties
+* **journal.authentication.hosts.front-end** *e.g. http://localhost:8080* to be able to proper redirect the user to the page of confirm registration or change password
+* **journal.authentication.hosts.back-end** *e.g. http://localhost:8080* to be able to proper redirect the user confirmation of registration check
+
 ## Metrics
 
 ### Retrieve reactive metrics
