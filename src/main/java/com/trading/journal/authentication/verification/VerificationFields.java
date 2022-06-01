@@ -11,7 +11,6 @@ public enum VerificationFields {
     USER_NAME("$NAME"),
     URL("$URL"),
     HASH("hash"),
-    EMAIL("email"),
     PATH("authentication/verify");
 
     private final String value;

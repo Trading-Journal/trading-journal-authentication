@@ -139,9 +139,36 @@ public class JwtTokenReaderImplTest {
         JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
         AccessTokenInfo accessTokenInfo = jwtTokenReader.getAccessTokenInfo(token);
-        assertThat(accessTokenInfo.userName()).isEqualTo("user_name");
+        assertThat(accessTokenInfo.subject()).isEqualTo("user_name");
         assertThat(accessTokenInfo.tenancy()).isEqualTo("tenancy_1");
         assertThat(accessTokenInfo.scopes()).containsExactly("ROLE_USER");
+    }
+
+    @Test
+    @DisplayName("Given temporary token return Subject")
+    void getTemporaryTokenInfo() {
+        KeyPair keyPair = mockKeyPair();
+        assert keyPair != null;
+        String token = Jwts.builder()
+                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
+                .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
+                .setIssuer(properties.getIssuer())
+                .setAudience(properties.getAudience())
+                .setSubject("email@mail.com")
+                .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
+                        .toInstant()))
+                .setExpiration(Date.from(LocalDateTime.now().plusSeconds(360)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()))
+                .claim(JwtConstants.SCOPES, Collections.singletonList(JwtConstants.TEMPORARY_TOKEN))
+                .compact();
+
+        JwtTokenParser mockParser = mockParser(keyPair);
+        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
+
+        AccessTokenInfo tokenInfo = jwtTokenReader.getTokenInfo(token);
+        assertThat(tokenInfo.subject()).isEqualTo("email@mail.com");
+        assertThat(tokenInfo.scopes()).containsExactly("TEMPORARY_TOKEN");
     }
 
     @Test
@@ -301,8 +328,8 @@ public class JwtTokenReaderImplTest {
         JwtTokenParser mockParser = mockParser(keyPair);
         JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
-        AccessTokenInfo accessTokenInfo = jwtTokenReader.getRefreshTokenInfo(token);
-        assertThat(accessTokenInfo.userName()).isEqualTo("user_name");
+        AccessTokenInfo accessTokenInfo = jwtTokenReader.getTokenInfo(token);
+        assertThat(accessTokenInfo.subject()).isEqualTo("user_name");
         assertThat(accessTokenInfo.tenancy()).isNull();
         assertThat(accessTokenInfo.scopes()).containsExactly("REFRESH_TOKEN");
     }

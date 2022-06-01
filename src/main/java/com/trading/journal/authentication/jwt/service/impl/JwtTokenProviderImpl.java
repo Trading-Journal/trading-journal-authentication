@@ -89,6 +89,24 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 issuedAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
     }
 
+    @Override
+    public TokenData generateTemporaryToken(String email) {
+        Date issuedAt = DateHelper.getUTCDatetimeAsDate();
+        String refreshToken = Jwts.builder()
+                .signWith(this.privateKey, SignatureAlgorithm.RS256)
+                .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
+                .setIssuer(properties.getIssuer())
+                .setAudience(properties.getAudience())
+                .setSubject(email)
+                .setIssuedAt(issuedAt)
+                .setExpiration(getExpirationDate(900L))
+                .claim(JwtConstants.SCOPES, Collections.singletonList(JwtConstants.TEMPORARY_TOKEN))
+                .compact();
+
+        return new TokenData(refreshToken,
+                issuedAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+    }
+
     private Date getExpirationDate(Long expireIn) {
         return Date.from(LocalDateTime.now().plusSeconds(expireIn)
                 .atZone(ZoneId.systemDefault())

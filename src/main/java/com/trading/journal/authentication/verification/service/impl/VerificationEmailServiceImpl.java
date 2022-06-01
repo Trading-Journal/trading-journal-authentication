@@ -35,7 +35,6 @@ public class VerificationEmailServiceImpl implements VerificationEmailService {
                 .uri(URI.create("http://localhost:8080"))
                 .path(VerificationFields.PATH.getValue())
                 .queryParam(VerificationFields.HASH.getValue(), verification.getHash())
-                .queryParam(VerificationFields.EMAIL.getValue(), verification.getEmail())
                 .build()
                 .toUriString();
 

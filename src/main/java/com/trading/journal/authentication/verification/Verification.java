@@ -33,10 +33,10 @@ public class Verification {
 
     private LocalDateTime lastChange;
 
-    public Verification renew() {
+    public Verification renew(String hash) {
         this.status = VerificationStatus.PENDING;
         this.lastChange = LocalDateTime.now();
-        this.hash = "123456";
+        this.hash = hash;
         return this;
     }
 }

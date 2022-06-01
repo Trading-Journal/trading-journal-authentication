@@ -56,7 +56,7 @@ public class AccessTokenResolverTest {
         AccessTokenInfo tokenInfo = (AccessTokenInfo) accessTokenResolver
                 .resolveArgument(parameter, bindingContext, exchange).block();
 
-        assertThat(tokenInfo.userName()).isEqualTo("UserAdm");
+        assertThat(tokenInfo.subject()).isEqualTo("UserAdm");
         assertThat(tokenInfo.tenancy()).isEqualTo("tenancy_1");
         assertThat(tokenInfo.scopes()).containsExactly("USER");
     }

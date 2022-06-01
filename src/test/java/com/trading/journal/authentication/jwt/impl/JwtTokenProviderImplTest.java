@@ -89,6 +89,15 @@ public class JwtTokenProviderImplTest {
     }
 
     @Test
+    @DisplayName("Given email generate a temporary token, return JWT token")
+    void generateTemporaryToken() {
+        String email = "mail@mail.com";
+        TokenData tokenData = tokenProvider.generateTemporaryToken(email);
+        assertThat(tokenData.token()).isNotEmpty();
+        assertThat(tokenData.issuedAt()).isBefore(LocalDateTime.now());
+    }
+
+    @Test
     @DisplayName("Given user with null roles when generateAccessToken, return exception")
     void nullRoles() {
         ApplicationUser appUser = new ApplicationUser(

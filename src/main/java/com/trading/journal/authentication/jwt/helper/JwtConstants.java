@@ -8,4 +8,6 @@ public final class JwtConstants {
     public static final String TENANCY = "tenancy";
     public static final String HEADER_TYP = "typ";
     public static final String REFRESH_TOKEN = "REFRESH_TOKEN";
+
+    public static final String TEMPORARY_TOKEN = "TEMPORARY_TOKEN";
 }

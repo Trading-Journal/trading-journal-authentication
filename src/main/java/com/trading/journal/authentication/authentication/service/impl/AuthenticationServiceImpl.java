@@ -77,12 +77,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             if (!jwtTokenReader.isTokenValid(refreshToken)) {
                 throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Refresh token is expired");
             }
-            AccessTokenInfo accessTokenInfo = jwtTokenReader.getRefreshTokenInfo(refreshToken);
+            AccessTokenInfo accessTokenInfo = jwtTokenReader.getTokenInfo(refreshToken);
             if (!accessTokenInfo.scopes().contains(JwtConstants.REFRESH_TOKEN)) {
                 throw new ApplicationException(HttpStatus.UNAUTHORIZED,
                         "Refresh token is invalid or is not a refresh token");
             }
-            return accessTokenInfo.userName();
+            return accessTokenInfo.subject();
         });
     }
 }

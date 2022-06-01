@@ -5,7 +5,7 @@
 * Email verification
   * Configuration to enable email verification
   * Send again
-  * Change password
+* Change password
 * Admin on start up
   * Must change password
 * Admin endpoints

@@ -17,7 +17,7 @@ public class MeController implements MeApi {
 
     @Override
     public Mono<ResponseEntity<UserInfo>> me(@AccessToken AccessTokenInfo accessTokenInfo) {
-        return applicationUserService.getUserInfo(accessTokenInfo.userName()).map(ResponseEntity::ok);
+        return applicationUserService.getUserInfo(accessTokenInfo.subject()).map(ResponseEntity::ok);
     }
 
 }

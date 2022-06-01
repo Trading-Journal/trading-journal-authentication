@@ -55,7 +55,7 @@ class VerificationEmailServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        String url = String.format("http://localhost:8080/authentication/verify?hash=%s&email=%s", hash, "mail@mail.com");
+        String url = String.format("http://localhost:8080/authentication/verify?hash=%s", hash);
         List<EmailField> fields = Arrays.asList(
                 new EmailField("$NAME", "User Admin"),
                 new EmailField("$URL", url)

@@ -8,4 +8,6 @@ public interface JwtTokenProvider {
     TokenData generateAccessToken(ApplicationUser applicationUser);
 
     TokenData generateRefreshToken(ApplicationUser applicationUser);
+
+    TokenData generateTemporaryToken(String email);
 }

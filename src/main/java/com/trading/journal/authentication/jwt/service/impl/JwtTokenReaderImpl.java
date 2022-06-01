@@ -1,12 +1,12 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.jwt.service.JwtTokenParser;
-import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
+import com.trading.journal.authentication.jwt.service.JwtTokenParser;
+import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +52,7 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
     }
 
     @Override
-    public AccessTokenInfo getRefreshTokenInfo(String token) {
+    public AccessTokenInfo getTokenInfo(String token) {
         Jws<Claims> jwsClaims = tokenParser.parseToken(token);
         List<String> authorities = getAuthorities(jwsClaims).stream().map(SimpleGrantedAuthority::getAuthority)
                 .collect(Collectors.toList());

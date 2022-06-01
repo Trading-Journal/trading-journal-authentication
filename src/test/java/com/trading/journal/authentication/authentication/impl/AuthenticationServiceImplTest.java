@@ -122,13 +122,13 @@ public class AuthenticationServiceImplTest {
 
         when(jwtTokenReader.isTokenValid(refreshToken)).thenReturn(true);
 
-        AccessTokenInfo tokenInfo = new AccessTokenInfo("userName", null,
+        AccessTokenInfo tokenInfo = new AccessTokenInfo("subject", null,
                 Collections.singletonList("REFRESH_TOKEN"));
-        when(jwtTokenReader.getRefreshTokenInfo(refreshToken)).thenReturn(tokenInfo);
+        when(jwtTokenReader.getTokenInfo(refreshToken)).thenReturn(tokenInfo);
 
-        UserInfo userInfo = new UserInfo(1L,"userName", "firstName", "lastName", "email@mail.com", true, true,
+        UserInfo userInfo = new UserInfo(1L,"subject", "firstName", "lastName", "email@mail.com", true, true,
                 Collections.singletonList("ROLE_USER"), LocalDateTime.now());
-        when(applicationUserService.getUserInfo("userName")).thenReturn(Mono.just(userInfo));
+        when(applicationUserService.getUserInfo("subject")).thenReturn(Mono.just(userInfo));
 
         ApplicationUser applicationUser = new ApplicationUser(
                 1L,
@@ -170,7 +170,7 @@ public class AuthenticationServiceImplTest {
                                 .equals("Refresh token is expired"))
                 .verify();
 
-        verify(jwtTokenReader, never()).getRefreshTokenInfo(anyString());
+        verify(jwtTokenReader, never()).getTokenInfo(anyString());
         verify(applicationUserService, never()).getUserInfo(anyString());
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(jwtTokenProvider, never()).generateAccessToken(any());
@@ -183,9 +183,9 @@ public class AuthenticationServiceImplTest {
 
         when(jwtTokenReader.isTokenValid(refreshToken)).thenReturn(true);
 
-        AccessTokenInfo tokenInfo = new AccessTokenInfo("userName", null,
+        AccessTokenInfo tokenInfo = new AccessTokenInfo("subject", null,
                 Collections.singletonList("USER_ROLE"));
-        when(jwtTokenReader.getRefreshTokenInfo(refreshToken)).thenReturn(tokenInfo);
+        when(jwtTokenReader.getTokenInfo(refreshToken)).thenReturn(tokenInfo);
 
         Mono<LoginResponse> response = authenticationService.refreshToken(refreshToken);
         StepVerifier.create(response)

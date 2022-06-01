@@ -9,7 +9,7 @@ public interface VerificationService {
 
     Mono<Void> send(VerificationType verificationType, ApplicationUser applicationUser);
 
-    Mono<Verification> retrieve(String hash, String email);
+    Mono<Verification> retrieve(String hash);
 
     Mono<Void> verify(Verification verification);
 }
