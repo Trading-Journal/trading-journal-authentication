@@ -2,9 +2,6 @@
 
 ## Pending
 
-* Email verification
-  * Configuration to enable email verification
-  * Send again
 * Change password
 * Admin on start up
   * Must change password
@@ -21,6 +18,7 @@
 * Postman Test run
 * Test Coverage with fail under X percent
 * Delete account
+* Set and document environment variables
 * Test Container/Kubernetes deploy with adding keys files
 * One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
 * Lib for token validation to be used in other projects

@@ -6,6 +6,7 @@ import com.trading.journal.authentication.registration.service.RegistrationServi
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.verification.VerificationType;
+import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import com.trading.journal.authentication.verification.service.VerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,8 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final ApplicationUserService applicationUserService;
 
     private final VerificationService verificationService;
+
+    private final VerificationProperties verificationProperties;
 
     @Override
     public Mono<SignUpResponse> signUp(@Valid UserRegistration userRegistration) {
@@ -39,14 +42,31 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .metrics();
     }
 
+    @Override
+    public Mono<SignUpResponse> sendVerification(String email) {
+        SignUpResponse signUpResponse = new SignUpResponse(email, true);
+        Mono<SignUpResponse> methodReturn = Mono.just(signUpResponse);
+        if (verificationProperties.isEnabled()) {
+            methodReturn = applicationUserService.getUserByEmail(email)
+                    .flatMap(applicationUser -> {
+                        if (applicationUser.getEnabled()) {
+                            return Mono.just(signUpResponse);
+                        } else {
+                            return this.sendVerification(applicationUser);
+                        }
+                    });
+        }
+        return methodReturn;
+    }
+
     private Mono<SignUpResponse> sendVerification(ApplicationUser applicationUser) {
         SignUpResponse signUpResponse = new SignUpResponse(applicationUser.getEmail(), applicationUser.getEnabled());
         Mono<SignUpResponse> signUpResponseMono;
-        if (applicationUser.getEnabled().equals(false)) {
+        if (verificationProperties.isDisabled() || applicationUser.getEnabled().equals(true)) {
+            signUpResponseMono = Mono.just(signUpResponse);
+        } else {
             signUpResponseMono = verificationService.send(VerificationType.REGISTRATION, applicationUser)
                     .thenReturn(signUpResponse);
-        } else {
-            signUpResponseMono = Mono.just(signUpResponse);
         }
         return signUpResponseMono;
     }

@@ -40,4 +40,8 @@ public class AuthenticationController implements AuthenticationApi {
         return registrationService.verify(hash).map(ResponseEntity::ok);
     }
 
+    @Override
+    public Mono<ResponseEntity<SignUpResponse>> sendVerification(String email) {
+        return registrationService.sendVerification(email).map(ResponseEntity::ok);
+    }
 }

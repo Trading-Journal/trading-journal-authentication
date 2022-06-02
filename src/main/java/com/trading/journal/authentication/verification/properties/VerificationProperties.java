@@ -14,4 +14,8 @@ import org.springframework.context.annotation.Configuration;
 public class VerificationProperties {
 
     private boolean enabled;
+
+    public boolean isDisabled(){
+        return !this.enabled;
+    }
 }

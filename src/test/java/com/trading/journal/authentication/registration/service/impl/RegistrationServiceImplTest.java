@@ -17,6 +17,7 @@ import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationStatus;
 import com.trading.journal.authentication.verification.VerificationType;
+import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import com.trading.journal.authentication.verification.service.VerificationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ public class RegistrationServiceImplTest {
 
     @Mock
     VerificationService verificationService;
+
+    @Mock
+    VerificationProperties verificationProperties;
 
     @InjectMocks
     RegistrationServiceImpl registrationService;
@@ -61,10 +65,11 @@ public class RegistrationServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L,"ROLE_USER")),
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
         when(applicationUserService.createNewUser(userRegistration)).thenReturn(Mono.just(applicationUser));
+        when(verificationProperties.isEnabled()).thenReturn(false);
 
         Mono<SignUpResponse> responseMono = registrationService.signUp(userRegistration);
 
@@ -98,10 +103,11 @@ public class RegistrationServiceImplTest {
                 "mail@mail.com",
                 false,
                 false,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L,"ROLE_USER")),
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
         when(applicationUserService.createNewUser(userRegistration)).thenReturn(Mono.just(applicationUser));
+        when(verificationProperties.isEnabled()).thenReturn(true);
         when(verificationService.send(VerificationType.REGISTRATION, applicationUser)).thenReturn(Mono.empty());
 
         Mono<SignUpResponse> responseMono = registrationService.signUp(userRegistration);
@@ -118,7 +124,7 @@ public class RegistrationServiceImplTest {
 
     @Test
     @DisplayName("Process email verification")
-    void emailVerification(){
+    void emailVerification() {
         String hash = UUID.randomUUID().toString();
         String email = "mail@mail.com";
         Verification verification = new Verification(1L,
@@ -140,7 +146,7 @@ public class RegistrationServiceImplTest {
 
     @Test
     @DisplayName("Process email verification return exception when retrieving the hash values do not execute all process")
-    void emailVerificationError(){
+    void emailVerificationError() {
         String hash = UUID.randomUUID().toString();
         when(verificationService.retrieve(hash)).thenReturn(Mono.error(new ApplicationException("any error message")));
 
@@ -152,5 +158,84 @@ public class RegistrationServiceImplTest {
 
         verify(applicationUserService, never()).verifyNewUser(any());
         verify(verificationService, never()).verify(any());
+    }
+
+    @Test
+    @DisplayName("Send new email verification")
+    void newEmailVerification() {
+        String email = "mail@mail.com";
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "sdsa54ds56a4ds564d",
+                "firstName",
+                "lastName",
+                email,
+                false,
+                false,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        when(verificationProperties.isEnabled()).thenReturn(true);
+        when(applicationUserService.getUserByEmail(email)).thenReturn(Mono.just(applicationUser));
+        when(verificationService.send(VerificationType.REGISTRATION, applicationUser)).thenReturn(Mono.empty());
+
+        Mono<SignUpResponse> responseMono = registrationService.sendVerification(email);
+        StepVerifier.create(responseMono)
+                .assertNext(response -> {
+                    assertThat(response.email()).isEqualTo(email);
+                    assertThat(response.enabled()).isFalse();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Send new email verification when verification process is disabled, do dot send verification email")
+    void newEmailVerificationDisabled() {
+        String email = "mail@mail.com";
+        when(verificationProperties.isEnabled()).thenReturn(false);
+
+        Mono<SignUpResponse> responseMono = registrationService.sendVerification(email);
+        StepVerifier.create(responseMono)
+                .assertNext(response -> {
+                    assertThat(response.email()).isEqualTo(email);
+                    assertThat(response.enabled()).isTrue();
+                })
+                .verifyComplete();
+
+        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(verificationService, never()).send(any(), any());
+    }
+
+    @Test
+    @DisplayName("Send new email verification when user is already enabled, do dot send verification email")
+    void newEmailVerificationUserEnabled() {
+        String email = "mail@mail.com";
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "sdsa54ds56a4ds564d",
+                "firstName",
+                "lastName",
+                email,
+                true,
+                true,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        when(verificationProperties.isEnabled()).thenReturn(true);
+        when(applicationUserService.getUserByEmail(email)).thenReturn(Mono.just(applicationUser));
+
+        Mono<SignUpResponse> responseMono = registrationService.sendVerification(email);
+        StepVerifier.create(responseMono)
+                .assertNext(response -> {
+                    assertThat(response.email()).isEqualTo(email);
+                    assertThat(response.enabled()).isTrue();
+                })
+                .verifyComplete();
+
+        verify(verificationService, never()).send(any(), any());
     }
 }

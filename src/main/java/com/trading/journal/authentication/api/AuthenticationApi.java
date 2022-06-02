@@ -39,6 +39,11 @@ public interface AuthenticationApi {
     @ApiResponses({
             @ApiResponse(code = 200, message = "User verified"),
             @ApiResponse(code = 400, message = "Verification does not exist or is invalid")})
-    @GetMapping("/verify")
+    @PostMapping("/verify")
     Mono<ResponseEntity<Void>> verify(@RequestParam("hash") String hash);
+
+    @ApiOperation(notes = "Send verification link for new user again", value = "Send verification link", response = SignUpResponse.class)
+    @ApiResponses(@ApiResponse(code = 200, message = "Verification sent"))
+    @PostMapping("/verify/send")
+    Mono<ResponseEntity<SignUpResponse>> sendVerification(@RequestParam("email") String email);
 }

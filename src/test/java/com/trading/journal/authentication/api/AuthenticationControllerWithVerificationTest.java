@@ -17,16 +17,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -136,10 +137,100 @@ public class AuthenticationControllerWithVerificationTest {
         assert verification != null;
 
         webTestClient
-                .get()
+                .post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/authentication/verify")
                         .queryParam("hash", verification.getHash())
+                        .build())
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        Mono<Verification> verificationMono = verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, "mail2@mail.com");
+        StepVerifier.create(verificationMono)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        Mono<ApplicationUser> userMono = applicationUserRepository.findByEmail("mail2@mail.com");
+        StepVerifier.create(userMono)
+                .assertNext(applicationUser -> {
+                    assertThat(applicationUser.getEnabled()).isTrue();
+                    assertThat(applicationUser.getVerified()).isTrue();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Receive the verification URL, request another verification code and verify the user")
+    void verifyUserWithSecondVerification() throws InterruptedException {
+        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+
+        UserRegistration userRegistration = new UserRegistration(
+                "firstName",
+                "lastName",
+                "UserName2",
+                "mail2@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+
+        webTestClient
+                .post()
+                .uri("/authentication/signup")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userRegistration)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(SignUpResponse.class)
+                .value(response -> {
+                    assertThat(response.email()).isEqualTo("mail2@mail.com");
+                    assertThat(response.enabled()).isFalse();
+                });
+
+        Flux<Verification> verificationsFlux = verificationRepository.findAll();
+        StepVerifier.create(verificationsFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        Mono<Verification> verificationByEmail = verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, "mail2@mail.com");
+        AtomicReference<String> firstHash = new AtomicReference<>();
+        StepVerifier.create(verificationByEmail)
+                .assertNext(verification -> {
+                    firstHash.set(verification.getHash());
+                })
+                .verifyComplete();
+
+        Thread.sleep(1000);// if it runs right way generated the same hash
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/authentication/verify/send")
+                        .queryParam("email", "mail2@mail.com")
+                        .build())
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        verificationsFlux = verificationRepository.findAll();
+        StepVerifier.create(verificationsFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+        AtomicReference<String> secondHash = new AtomicReference<>();
+        Mono<Verification> secondVerificationByEmail = verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, "mail2@mail.com");
+        StepVerifier.create(secondVerificationByEmail)
+                .assertNext(verification -> {
+                    secondHash.set(verification.getHash());
+                })
+                .verifyComplete();
+
+        assertThat(firstHash.get()).isNotEqualTo(secondHash.get());
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/authentication/verify")
+                        .queryParam("hash", secondHash.get())
                         .build())
                 .exchange()
                 .expectStatus()

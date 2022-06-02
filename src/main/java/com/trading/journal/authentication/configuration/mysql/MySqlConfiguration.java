@@ -34,6 +34,7 @@ public class MySqlConfiguration extends AbstractR2dbcConfiguration {
                 .database(datasourceProperties.database())
                 .username(datasourceProperties.username())
                 .password(datasourceProperties.password())
+                .allowPublicKeyRetrieval(true)
                 .build();
         return new MariadbConnectionFactory(conf);
     }
