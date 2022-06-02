@@ -2,10 +2,12 @@ package com.trading.journal.authentication.user.impl;
 
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authority.UserAuthority;
-import com.trading.journal.authentication.authority.UserAuthorityService;
+import com.trading.journal.authentication.authority.service.UserAuthorityService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.service.ApplicationUserRepository;
+import com.trading.journal.authentication.user.service.impl.ApplicationUserServiceImpl;
+import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,11 +43,14 @@ public class ApplicationUserServiceImplTest {
     @Mock
     PasswordEncoder encoder;
 
+    @Mock
+    VerificationProperties verificationProperties;
+
     @InjectMocks
     ApplicationUserServiceImpl applicationUserServiceImpl;
 
     @Test
-    @DisplayName("When create user return user response")
+    @DisplayName("When create user and the verification is disabled return user response enabled and verified")
     void createUser() {
         UserRegistration userRegistration = new UserRegistration(
                 "firstName",
@@ -73,9 +78,102 @@ public class ApplicationUserServiceImplTest {
         when(encoder.encode(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(Mono.just(appUser));
         when(applicationUserRepository.findById(anyLong())).thenReturn(Mono.just(appUser));
+        when(verificationProperties.isEnabled()).thenReturn(false);
 
         Mono<ApplicationUser> userMono = applicationUserServiceImpl.createNewUser(userRegistration);
-        StepVerifier.create(userMono).expectNextCount(1).verifyComplete();
+        StepVerifier.create(userMono)
+                .assertNext(applicationUser -> {
+                    assertThat(applicationUser.getEnabled()).isTrue();
+                    assertThat(applicationUser.getVerified()).isTrue();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("When create user and the verification is enabled return user response disabled and not verified")
+    void createUserDisabled() {
+        UserRegistration userRegistration = new UserRegistration(
+                "firstName",
+                "lastName",
+                "UserName",
+                "mail@mail.com",
+                "123456",
+                "123456");
+
+        ApplicationUser appUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "sdsa54ds56a4ds564d",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                false,
+                false,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(0));
+        when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(0));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(Mono.just(new UserAuthority(1L, 1L, 1L, "USER")));
+        when(encoder.encode(anyString())).thenReturn("sdsa54ds56a4ds564d");
+        when(applicationUserRepository.save(any())).thenReturn(Mono.just(appUser));
+        when(applicationUserRepository.findById(anyLong())).thenReturn(Mono.just(appUser));
+        when(verificationProperties.isEnabled()).thenReturn(true);
+
+        Mono<ApplicationUser> userMono = applicationUserServiceImpl.createNewUser(userRegistration);
+        StepVerifier.create(userMono)
+                .assertNext(applicationUser -> {
+                    assertThat(applicationUser.getEnabled()).isFalse();
+                    assertThat(applicationUser.getVerified()).isFalse();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Enable and verify user")
+    void enableAndVerify() {
+        ApplicationUser disabledUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "sdsa54ds56a4ds564d",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                false,
+                false,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.of(2022, 2, 1, 10, 30, 50));
+
+        ApplicationUser enabledUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "sdsa54ds56a4ds564d",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.of(2022, 2, 1, 10, 30, 50));
+
+        when(applicationUserRepository.findByEmail(disabledUser.getEmail())).thenReturn(Mono.just(disabledUser));
+        when(applicationUserRepository.save(enabledUser)).thenReturn(Mono.just(enabledUser));
+
+        Mono<Void> userMono = applicationUserServiceImpl.verifyNewUser(disabledUser.getEmail());
+        StepVerifier.create(userMono)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Enable and verify user that does not exist, return an exception")
+    void enableAndVerifyException() {
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Mono.empty());
+        Mono<Void> userMono = applicationUserServiceImpl.verifyNewUser("mail@mail.com");
+
+        StepVerifier.create(userMono)
+                .expectErrorMatches(throwable -> throwable instanceof UsernameNotFoundException
+                        && throwable.getMessage().equals("User mail@mail.com does not exist"))
+                .verify();
     }
 
     @Test
@@ -224,7 +322,7 @@ public class ApplicationUserServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L,"ROLE_USER")),
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
         when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(Mono.just(applicationUser));

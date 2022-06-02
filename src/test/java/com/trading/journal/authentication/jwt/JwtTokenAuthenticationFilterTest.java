@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 
+import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

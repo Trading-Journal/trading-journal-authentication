@@ -1,7 +1,8 @@
 package com.trading.journal.authentication.authority;
 
-import com.trading.journal.authentication.authority.impl.AuthorityServiceDatabaseImpl;
-import com.trading.journal.authentication.authority.impl.AuthorityServiceStaticImpl;
+import com.trading.journal.authentication.authority.service.impl.AuthorityServiceDatabaseImpl;
+import com.trading.journal.authentication.authority.service.impl.AuthorityServiceStaticImpl;
+import com.trading.journal.authentication.authority.service.AuthorityRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

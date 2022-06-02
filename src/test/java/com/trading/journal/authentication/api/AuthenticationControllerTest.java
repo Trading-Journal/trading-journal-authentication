@@ -12,18 +12,19 @@ import java.util.List;
 import java.util.Map;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.authentication.AuthenticationService;
+import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authority.UserAuthority;
-import com.trading.journal.authentication.authority.UserAuthorityRepository;
-import com.trading.journal.authentication.jwt.PrivateKeyProvider;
+import com.trading.journal.authentication.authority.service.UserAuthorityRepository;
+import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
+import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
-import com.trading.journal.authentication.user.ApplicationUserService;
+import com.trading.journal.authentication.user.service.ApplicationUserRepository;
+import com.trading.journal.authentication.user.service.ApplicationUserService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -94,7 +95,12 @@ public class AuthenticationControllerTest {
                 .bodyValue(userRegistration)
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isOk()
+                .expectBody(SignUpResponse.class)
+                .value(response -> {
+                   assertThat(response.email()).isEqualTo("mail2@mail.com");
+                   assertThat(response.enabled()).isTrue();
+                });
 
         List<UserAuthority> userAuthorities = userAuthorityRepository.findAll().collectList().block();
         assert userAuthorities != null;

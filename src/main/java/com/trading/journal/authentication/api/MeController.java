@@ -2,7 +2,7 @@ package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.jwt.data.AccessToken;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
-import com.trading.journal.authentication.user.ApplicationUserService;
+import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.user.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ public class MeController implements MeApi {
 
     @Override
     public Mono<ResponseEntity<UserInfo>> me(@AccessToken AccessTokenInfo accessTokenInfo) {
-        return applicationUserService.getUserInfo(accessTokenInfo.userName()).map(ResponseEntity::ok);
+        return applicationUserService.getUserInfo(accessTokenInfo.subject()).map(ResponseEntity::ok);
     }
 
 }

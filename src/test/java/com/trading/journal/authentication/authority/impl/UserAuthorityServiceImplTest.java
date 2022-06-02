@@ -1,6 +1,9 @@
 package com.trading.journal.authentication.authority.impl;
 
 import com.trading.journal.authentication.authority.*;
+import com.trading.journal.authentication.authority.service.AuthorityService;
+import com.trading.journal.authentication.authority.service.UserAuthorityRepository;
+import com.trading.journal.authentication.authority.service.impl.UserAuthorityServiceImpl;
 import com.trading.journal.authentication.user.ApplicationUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

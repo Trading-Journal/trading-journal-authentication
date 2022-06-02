@@ -1,11 +1,11 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.authentication.AuthenticationService;
+import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUserService;
+import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.user.UserInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,22 +1,14 @@
 package com.trading.journal.authentication.jwt.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.jwt.JwtTokenParser;
-import com.trading.journal.authentication.jwt.JwtTokenProvider;
+import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
+import com.trading.journal.authentication.jwt.service.JwtTokenParser;
+import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.authority.UserAuthority;
-
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +17,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Testcontainers
@@ -39,9 +37,9 @@ public class JwtIntegratedTest {
     @Autowired
     private JwtTokenParser jwtTokenParser;
 
-    @DisplayName("Generate and read tokens")
+    @DisplayName("Generate and read access token")
     @Test
-    void provider() {
+    void generateAndReadAccessToken() {
         ApplicationUser appUser = new ApplicationUser(
                 1L,
                 "UserAdm",
@@ -51,7 +49,7 @@ public class JwtIntegratedTest {
                 "mail@mail.com",
                 true,
                 true,
-                Arrays.asList(new UserAuthority(1L, 1L, 1L,"ROLE_USER"), new UserAuthority(1L, 1L, 1L,"ROLE_ADMIN")),
+                Arrays.asList(new UserAuthority(1L, 1L, 1L, "ROLE_USER"), new UserAuthority(1L, 1L, 1L, "ROLE_ADMIN")),
                 LocalDateTime.now());
 
         TokenData accessToken = jwtTokenProvider.generateAccessToken(appUser);
@@ -71,23 +69,61 @@ public class JwtIntegratedTest {
                 .map(SimpleGrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         assertThat(scopes).containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
+    }
+
+    @DisplayName("Generate and read refresh token")
+    @Test
+    void generateAndReadRefreshToken() {
+        ApplicationUser appUser = new ApplicationUser(
+                1L,
+                "UserAdm",
+                "123456",
+                "user",
+                "admin",
+                "mail@mail.com",
+                true,
+                true,
+                Arrays.asList(new UserAuthority(1L, 1L, 1L, "ROLE_USER"), new UserAuthority(1L, 1L, 1L, "ROLE_ADMIN")),
+                LocalDateTime.now());
 
         TokenData refreshToken = jwtTokenProvider.generateRefreshToken(appUser);
         assertThat(refreshToken.token()).isNotBlank();
         Jws<Claims> refreshTokenClaims = jwtTokenParser.parseToken(refreshToken.token());
         assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo(appUser.getUserName());
         assertThat(refreshTokenClaims.getBody().get(JwtConstants.TENANCY)).isNull();
-        assertThat(accessTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
-        assertThat(accessTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
+        assertThat(refreshTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
         assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
-        start = Date.from(LocalDateTime.now().plusSeconds(86300L).atZone(ZoneId.systemDefault()).toInstant());
-        end = Date.from(LocalDateTime.now().plusSeconds(86400L).atZone(ZoneId.systemDefault()).toInstant());
+        assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
+        Date start = Date.from(LocalDateTime.now().plusSeconds(86300L).atZone(ZoneId.systemDefault()).toInstant());
+        Date end = Date.from(LocalDateTime.now().plusSeconds(86400L).atZone(ZoneId.systemDefault()).toInstant());
         assertThat(refreshTokenClaims.getBody().getExpiration()).isBetween(start, end);
-        scopes = ((List<?>) refreshTokenClaims.getBody().get(JwtConstants.SCOPES))
+        List<String> scopes = ((List<?>) refreshTokenClaims.getBody().get(JwtConstants.SCOPES))
                 .stream()
                 .map(authority -> new SimpleGrantedAuthority((String) authority))
                 .map(SimpleGrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         assertThat(scopes).containsExactly("REFRESH_TOKEN");
+    }
+
+    @DisplayName("Generate and read temporary token")
+    @Test
+    void generateAndReadTemporaryToken() {
+        TokenData refreshToken = jwtTokenProvider.generateTemporaryToken("mail@mail.com");
+        assertThat(refreshToken.token()).isNotBlank();
+        Jws<Claims> refreshTokenClaims = jwtTokenParser.parseToken(refreshToken.token());
+        assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo("mail@mail.com");
+        assertThat(refreshTokenClaims.getBody().get(JwtConstants.TENANCY)).isNull();
+        assertThat(refreshTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
+        assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
+        assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
+        Date start = Date.from(LocalDateTime.now().plusSeconds(890).atZone(ZoneId.systemDefault()).toInstant());
+        Date end = Date.from(LocalDateTime.now().plusSeconds(905).atZone(ZoneId.systemDefault()).toInstant());
+        assertThat(refreshTokenClaims.getBody().getExpiration()).isBetween(start, end);
+        List<String> scopes = ((List<?>) refreshTokenClaims.getBody().get(JwtConstants.SCOPES))
+                .stream()
+                .map(authority -> new SimpleGrantedAuthority((String) authority))
+                .map(SimpleGrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        assertThat(scopes).containsExactly("TEMPORARY_TOKEN");
     }
 }

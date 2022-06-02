@@ -1,9 +1,6 @@
 package com.trading.journal.authentication.configuration;
 
-import java.util.stream.Stream;
-
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.stream.Stream;
 
 @SpringBootTest
 @Testcontainers
@@ -36,7 +35,7 @@ public class SecurityConfigurationTest {
     void anonymously() {
         webTestClient
                 .get()
-                .uri("/health")
+                .uri("/swagger-ui/index.html")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()

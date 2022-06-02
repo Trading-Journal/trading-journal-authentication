@@ -4,9 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.UUID;
 
-import com.trading.journal.authentication.jwt.JwtResolveToken;
+import com.trading.journal.authentication.jwt.service.JwtResolveToken;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 
+import com.trading.journal.authentication.jwt.service.impl.JwtResolveTokenHttpHeader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

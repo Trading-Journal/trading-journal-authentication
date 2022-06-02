@@ -20,7 +20,7 @@
     </rule>
     <rule ref="category/java/codestyle.xml/TooManyStaticImports">
         <properties>
-            <property name="maximumStaticImports" value="5" />
+            <property name="maximumStaticImports" value="10" />
         </properties>
     </rule>
     <rule ref="category/java/design.xml">

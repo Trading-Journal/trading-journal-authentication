@@ -1,7 +1,9 @@
 package com.trading.journal.authentication.jwt;
 
-import com.trading.journal.authentication.jwt.impl.JwtResolveTokenHttpHeader;
+import com.trading.journal.authentication.jwt.service.impl.JwtResolveTokenHttpHeader;
 
+import com.trading.journal.authentication.jwt.service.JwtResolveToken;
+import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;

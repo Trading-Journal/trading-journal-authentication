@@ -14,11 +14,12 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.jwt.JwtTokenProvider;
-import com.trading.journal.authentication.jwt.PrivateKeyProvider;
+import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
+import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.data.ServiceType;
 import com.trading.journal.authentication.jwt.data.TokenData;
+import com.trading.journal.authentication.jwt.service.impl.JwtTokenProviderImpl;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.authority.UserAuthority;
 
@@ -83,6 +84,15 @@ public class JwtTokenProviderImplTest {
 
         TokenData tokenData = tokenProvider.generateRefreshToken(appUser);
 
+        assertThat(tokenData.token()).isNotEmpty();
+        assertThat(tokenData.issuedAt()).isBefore(LocalDateTime.now());
+    }
+
+    @Test
+    @DisplayName("Given email generate a temporary token, return JWT token")
+    void generateTemporaryToken() {
+        String email = "mail@mail.com";
+        TokenData tokenData = tokenProvider.generateTemporaryToken(email);
         assertThat(tokenData.token()).isNotEmpty();
         assertThat(tokenData.issuedAt()).isBefore(LocalDateTime.now());
     }
