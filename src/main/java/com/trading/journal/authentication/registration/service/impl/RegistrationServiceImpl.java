@@ -29,6 +29,16 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .metrics();
     }
 
+    @Override
+    public Mono<Void> verify(String hash) {
+        return verificationService.retrieve(hash)
+                .flatMap(verification -> applicationUserService.verifyNewUser(verification.getEmail())
+                        .then(verificationService.verify(verification))
+                )
+                .name("verify_new_user")
+                .metrics();
+    }
+
     private Mono<SignUpResponse> sendVerification(ApplicationUser applicationUser) {
         SignUpResponse signUpResponse = new SignUpResponse(applicationUser.getEmail(), applicationUser.getEnabled());
         Mono<SignUpResponse> signUpResponseMono;

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @NoArgsConstructor
 public class HostProperties {
 
-    private String backEnd;
-
     private String frontEnd;
+
+    private String verificationPage;
 }

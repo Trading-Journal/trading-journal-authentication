@@ -10,8 +10,7 @@ public enum VerificationFields {
     EMAIL_TEMPLATE("mail/verification.html"),
     USER_NAME("$NAME"),
     URL("$URL"),
-    HASH("hash"),
-    PATH("authentication/verify");
+    HASH("hash");
 
     private final String value;
 }

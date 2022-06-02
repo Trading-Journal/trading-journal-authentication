@@ -1,8 +1,8 @@
 package com.trading.journal.authentication.api;
 
-import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
+import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.registration.service.RegistrationService;
@@ -33,6 +33,11 @@ public class AuthenticationController implements AuthenticationApi {
     @Override
     public Mono<ResponseEntity<LoginResponse>> refreshToken(String refreshToken) {
         return authenticationService.refreshToken(refreshToken).map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<Void>> verify(String hash) {
+        return registrationService.verify(hash).map(ResponseEntity::ok);
     }
 
 }

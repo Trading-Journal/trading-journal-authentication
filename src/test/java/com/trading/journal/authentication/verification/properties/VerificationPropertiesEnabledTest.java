@@ -30,7 +30,7 @@ class VerificationPropertiesEnabledTest {
     @DisplayName("Host properties have back end and front end")
     @Test
     void host() {
-        assertThat(hostProperties.getBackEnd()).isEqualTo("http://server.com:8080");
         assertThat(hostProperties.getFrontEnd()).isEqualTo("http://site.com:8081");
+        assertThat(hostProperties.getVerificationPage()).isEqualTo("auth/email-verified");
     }
 }

@@ -154,3 +154,4 @@ In case there is need for new users confirm their emails, then enable the config
 * http://localhost:8080/metrics/signing_user.flow.duration - Data about Signing In process
 * http://localhost:8080/metrics/refresh_token.flow.duration - Data about Refreshing Token process
 * http://localhost:8080/metrics/get_me_info.flow.duration - Data about Getting Current User Information process
+* http://localhost:8080/metrics/verify_new_user.flow.duration - Data about Email Verification for new users

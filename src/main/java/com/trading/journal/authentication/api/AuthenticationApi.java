@@ -4,19 +4,13 @@ import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @Api(tags = "Authentication Api")
@@ -40,4 +34,11 @@ public interface AuthenticationApi {
     @PostMapping("/refresh-token")
     @ResponseStatus(HttpStatus.OK)
     Mono<ResponseEntity<LoginResponse>> refreshToken(@RequestHeader("refresh-token") String refreshToken);
+
+    @ApiOperation(notes = "Verification for new user", value = "Email verification")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "User verified"),
+            @ApiResponse(code = 400, message = "Verification does not exist or is invalid")})
+    @GetMapping("/verify")
+    Mono<ResponseEntity<Void>> verify(@RequestParam("hash") String hash);
 }

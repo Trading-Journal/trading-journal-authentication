@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -100,6 +101,60 @@ public class AuthenticationControllerWithVerificationTest {
                 .assertNext(applicationUser -> {
                     assertThat(applicationUser.getEnabled()).isFalse();
                     assertThat(applicationUser.getVerified()).isFalse();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Receive the verification URL and verify the user")
+    void verifyUser() {
+        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+
+        UserRegistration userRegistration = new UserRegistration(
+                "firstName",
+                "lastName",
+                "UserName2",
+                "mail2@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+
+        webTestClient
+                .post()
+                .uri("/authentication/signup")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userRegistration)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(SignUpResponse.class)
+                .value(response -> {
+                    assertThat(response.email()).isEqualTo("mail2@mail.com");
+                    assertThat(response.enabled()).isFalse();
+                });
+
+        Verification verification = verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, "mail2@mail.com").block();
+        assert verification != null;
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/authentication/verify")
+                        .queryParam("hash", verification.getHash())
+                        .build())
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        Mono<Verification> verificationMono = verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, "mail2@mail.com");
+        StepVerifier.create(verificationMono)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        Mono<ApplicationUser> userMono = applicationUserRepository.findByEmail("mail2@mail.com");
+        StepVerifier.create(userMono)
+                .assertNext(applicationUser -> {
+                    assertThat(applicationUser.getEnabled()).isTrue();
+                    assertThat(applicationUser.getVerified()).isTrue();
                 })
                 .verifyComplete();
     }

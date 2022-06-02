@@ -45,7 +45,8 @@ class VerificationEmailServiceImplTest {
     void sendEmail() {
         String hash = UUID.randomUUID().toString();
 
-        when(hostProperties.getBackEnd()).thenReturn("http://site.com");
+        when(hostProperties.getFrontEnd()).thenReturn("http://site.com");
+        when(hostProperties.getVerificationPage()).thenReturn("auth/email-verified");
         Verification verification = new Verification(1L, "mail@mail.com", VerificationType.REGISTRATION, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
         ApplicationUser applicationUser = new ApplicationUser(
@@ -60,7 +61,7 @@ class VerificationEmailServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        String url = String.format("http://site.com/authentication/verify?hash=%s", hash);
+        String url = String.format("http://site.com/auth/email-verified?hash=%s", hash);
         List<EmailField> fields = Arrays.asList(
                 new EmailField("$NAME", "User Admin"),
                 new EmailField("$URL", url)

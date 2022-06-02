@@ -35,8 +35,8 @@ public class VerificationEmailServiceImpl implements VerificationEmailService {
     private EmailRequest buildEmailRequest(Verification verification, ApplicationUser applicationUser) {
         String name = applicationUser.getFirstName().concat(" ").concat(applicationUser.getLastName());
         String url = UriComponentsBuilder.newInstance()
-                .uri(URI.create(hostProperties.getBackEnd()))
-                .path(VerificationFields.PATH.getValue())
+                .uri(URI.create(hostProperties.getFrontEnd()))
+                .path(hostProperties.getVerificationPage())
                 .queryParam(VerificationFields.HASH.getValue(), verification.getHash())
                 .build()
                 .toUriString();
