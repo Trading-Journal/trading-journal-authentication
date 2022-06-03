@@ -9,6 +9,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Component
@@ -23,7 +24,7 @@ public class AuthorityFeedStartup implements ApplicationListener<ApplicationRead
         Flux.fromArray(AuthoritiesHelper.values())
                 .map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()))
                 .map(authority -> authorityRepository.getByName(authority.getName())
-                        .switchIfEmpty(authorityRepository.save(authority))
-                ).subscribe(authorityMono -> authorityMono.subscribe(authority -> log.info("Authority available {}", authority.getName())));
+                        .switchIfEmpty(Mono.defer(() -> authorityRepository.save(authority)))
+                        ).subscribe(authorityMono -> authorityMono.subscribe(authority -> log.info("Authority available {}", authority.getName())));
     }
 }
