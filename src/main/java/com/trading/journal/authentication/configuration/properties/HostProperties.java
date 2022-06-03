@@ -16,4 +16,6 @@ public class HostProperties {
     private String frontEnd;
 
     private String verificationPage;
+
+    private String changePasswordPage;
 }

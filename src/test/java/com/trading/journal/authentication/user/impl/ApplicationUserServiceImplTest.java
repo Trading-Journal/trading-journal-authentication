@@ -415,4 +415,52 @@ public class ApplicationUserServiceImplTest {
                         && throwable.getMessage().equals("User mail@mail.com does not exist"))
                 .verify();
     }
+
+    @Test
+    @DisplayName("Change password")
+    void changePassword() {
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "password",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                emptyList(),
+                LocalDateTime.of(2022,12,12,12,12,12));
+
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Mono.just(applicationUser));
+        when(encoder.encode("password")).thenReturn("new_password_encoded");
+
+        ApplicationUser applicationUserWithNewPassword = new ApplicationUser(
+                1L,
+                "UserName",
+                "new_password_encoded",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                emptyList(),
+                LocalDateTime.of(2022,12,12,12,12,12));
+        when(applicationUserRepository.save(applicationUserWithNewPassword)).thenReturn(Mono.just(applicationUserWithNewPassword));
+
+        Mono<ApplicationUser> monoVoid = applicationUserServiceImpl.changePassword("mail@mail.com", "password");
+        StepVerifier.create(monoVoid)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Change password when user email does not exist return exception")
+    void changePasswordException() {
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Mono.empty());
+        Mono<ApplicationUser> monoVoid = applicationUserServiceImpl.changePassword("mail@mail.com", "password");
+        StepVerifier.create(monoVoid)
+                .expectErrorMatches(throwable -> throwable instanceof UsernameNotFoundException
+                        && throwable.getMessage().equals("User mail@mail.com does not exist"))
+                .verify();
+    }
 }

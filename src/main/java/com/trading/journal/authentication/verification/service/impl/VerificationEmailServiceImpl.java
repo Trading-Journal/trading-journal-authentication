@@ -34,21 +34,33 @@ public class VerificationEmailServiceImpl implements VerificationEmailService {
 
     private EmailRequest buildEmailRequest(Verification verification, ApplicationUser applicationUser) {
         String name = applicationUser.getFirstName().concat(" ").concat(applicationUser.getLastName());
-        String url = UriComponentsBuilder.newInstance()
-                .uri(URI.create(hostProperties.getFrontEnd()))
-                .path(hostProperties.getVerificationPage())
-                .queryParam(VerificationFields.HASH.getValue(), verification.getHash())
-                .build()
-                .toUriString();
-
-        return new EmailRequest(
-                "Confirme seu endereço de e-mail",
-                VerificationFields.EMAIL_TEMPLATE.getValue(),
-                Arrays.asList(
-                        new EmailField(VerificationFields.USER_NAME.getValue(), name),
-                        new EmailField(VerificationFields.URL.getValue(), url)
-                ),
-                singletonList(applicationUser.getEmail())
-        );
+        return switch (verification.getType()) {
+            case REGISTRATION -> new EmailRequest(
+                    "Confirme seu endereço de e-mail",
+                    VerificationFields.REGISTRATION_EMAIL_TEMPLATE.getValue(),
+                    Arrays.asList(
+                            new EmailField(VerificationFields.USER_NAME.getValue(), name),
+                            new EmailField(VerificationFields.URL.getValue(), UriComponentsBuilder.newInstance()
+                                    .uri(URI.create(hostProperties.getFrontEnd()))
+                                    .path(hostProperties.getVerificationPage())
+                                    .queryParam(VerificationFields.HASH.getValue(), verification.getHash())
+                                    .build()
+                                    .toUriString())
+                    ),
+                    singletonList(applicationUser.getEmail()));
+            case CHANGE_PASSWORD -> new EmailRequest(
+                    "Confirmação para alterar sua senha",
+                    VerificationFields.CHANGE_PASSWORD_EMAIL_TEMPLATE.getValue(),
+                    Arrays.asList(
+                            new EmailField(VerificationFields.USER_NAME.getValue(), name),
+                            new EmailField(VerificationFields.URL.getValue(), UriComponentsBuilder.newInstance()
+                                    .uri(URI.create(hostProperties.getFrontEnd()))
+                                    .path(hostProperties.getChangePasswordPage())
+                                    .queryParam(VerificationFields.HASH.getValue(), verification.getHash())
+                                    .build()
+                                    .toUriString())
+                    ),
+                    singletonList(applicationUser.getEmail()));
+        };
     }
 }

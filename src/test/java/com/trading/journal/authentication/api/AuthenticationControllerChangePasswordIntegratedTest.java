@@ -1,0 +1,319 @@
+package com.trading.journal.authentication.api;
+
+import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.authentication.ChangePassword;
+import com.trading.journal.authentication.email.EmailField;
+import com.trading.journal.authentication.email.EmailRequest;
+import com.trading.journal.authentication.email.service.EmailSender;
+import com.trading.journal.authentication.jwt.data.TokenData;
+import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
+import com.trading.journal.authentication.registration.SignUpResponse;
+import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.user.service.ApplicationUserRepository;
+import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.verification.Verification;
+import com.trading.journal.authentication.verification.VerificationFields;
+import com.trading.journal.authentication.verification.VerificationStatus;
+import com.trading.journal.authentication.verification.VerificationType;
+import com.trading.journal.authentication.verification.service.VerificationEmailService;
+import com.trading.journal.authentication.verification.service.VerificationRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@SpringBootTest
+@Testcontainers
+@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@TestPropertySource(properties = {"journal.authentication.authority.type=STATIC"})
+public class AuthenticationControllerChangePasswordIntegratedTest {
+
+    @Autowired
+    private ApplicationContext context;
+
+    @Autowired
+    private ApplicationUserService applicationUserService;
+
+    @Autowired
+    ApplicationUserRepository applicationUserRepository;
+
+    @Autowired
+    VerificationRepository verificationRepository;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    VerificationEmailService verificationEmailService;
+
+    @MockBean
+    EmailSender emailSender;
+
+    private WebTestClient webTestClient;
+
+    @BeforeEach
+    public void setUp() {
+        webTestClient = WebTestClient.bindToApplicationContext(context).build();
+        applicationUserRepository.deleteAll().block();
+        verificationRepository.deleteAll().block();
+    }
+
+    @Test
+    @DisplayName("Create and send the password change request")
+    void requestPasswordChange() {
+        String email = "mail@mail.com";
+
+        UserRegistration user = new UserRegistration(
+                "allan",
+                "weber",
+                "allanweber",
+                email,
+                "dad231#$#4",
+                "dad231#$#4");
+
+        applicationUserService.createNewUser(user).block();
+
+        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/authentication/change-password/request")
+                        .queryParam("email", email)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        Mono<Verification> verificationByEmail = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email);
+        StepVerifier.create(verificationByEmail)
+                .assertNext(verification -> {
+                    assertThat(verification.getStatus()).isEqualTo(VerificationStatus.PENDING);
+                    assertThat(verification.getHash()).isNotBlank();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Create password change request when user do not exist return exception")
+    void requestPasswordChangeException() {
+        String email = "mail@mail.com";
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/authentication/change-password/request")
+                        .queryParam("email", email)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User mail@mail.com does not exist")
+                );
+
+        Mono<Verification> verificationByEmail = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email);
+        StepVerifier.create(verificationByEmail)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        verify(verificationEmailService, never()).sendEmail(any(), any());
+    }
+
+    @Test
+    @DisplayName("Change password with invalid inputs return exception")
+    void changePasswordInvalidInputs() {
+        ChangePassword changePassword = new ChangePassword(null, null, null, null);
+
+        webTestClient
+                .post()
+                .uri("/authentication/change-password")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(changePassword)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> {
+                    assertThat(response.get("email")).isEqualTo("Email is required");
+                    assertThat(response.get("hash")).isEqualTo("Hash is required");
+                    assertThat(response.get("password")).matches(message -> message.equals("Password is required") || message.equals("Password is not valid"));
+                    assertThat(response.get("confirmPassword")).isEqualTo("Password confirmation is required");
+                });
+    }
+
+    @Test
+    @DisplayName("Change password with invalid email return exception")
+    void changePasswordInvalidEmail() {
+        ChangePassword changePassword = new ChangePassword("mail", "null", "dad231#$#4", "dad231#$#4");
+
+        webTestClient
+                .post()
+                .uri("/authentication/change-password")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(changePassword)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("email")).isEqualTo("Email is invalid")
+                );
+    }
+
+    @Test
+    @DisplayName("Change password with password and confirmation different return exception")
+    void changePasswordInvalidPasswords() {
+        ChangePassword changePassword = new ChangePassword("mail@email.com", "null", "dad231#$#4", "dad231#$#4123");
+
+        webTestClient
+                .post()
+                .uri("/authentication/change-password")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(changePassword)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("changePassword")).isEqualTo("Password and confirmation must be equal")
+                );
+    }
+
+    @Test
+    @DisplayName("Change password with hash that does not exist return exception")
+    void changePasswordInvalidHash() {
+        TokenData tokenData = jwtTokenProvider.generateTemporaryToken("mail@email.com");
+        ChangePassword changePassword = new ChangePassword("mail@email.com", tokenData.token(), "dad231#$#4", "dad231#$#4");
+
+        webTestClient
+                .post()
+                .uri("/authentication/change-password")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(changePassword)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("Request is invalid")
+                );
+    }
+
+    @Test
+    @DisplayName("Change password with hash for another email return exception")
+    void changePasswordInvalidHashEmail() {
+        TokenData tokenData = jwtTokenProvider.generateTemporaryToken("anotheremail@email.com");
+
+        verificationRepository.save(Verification.builder()
+                .hash(tokenData.token())
+                .email("anotheremail@email.com")
+                .type(VerificationType.CHANGE_PASSWORD)
+                .status(VerificationStatus.PENDING)
+                .lastChange(LocalDateTime.now())
+                .build()
+        ).block();
+
+        ChangePassword changePassword = new ChangePassword("mail@email.com", tokenData.token(), "dad231#$#4", "dad231#$#4");
+
+        webTestClient
+                .post()
+                .uri("/authentication/change-password")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(changePassword)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("Change password request is invalid")
+                );
+    }
+
+    @Test
+    @DisplayName("Change password")
+    void changePassword() {
+        String email = "mail@email.com";
+        UserRegistration user = new UserRegistration(
+                "allan",
+                "weber",
+                "allanweber",
+                email,
+                "dad231#$#4",
+                "dad231#$#4");
+
+        applicationUserService.createNewUser(user).block();
+
+        TokenData tokenData = jwtTokenProvider.generateTemporaryToken(email);
+        verificationRepository.save(Verification.builder()
+                .hash(tokenData.token())
+                .email(email)
+                .type(VerificationType.CHANGE_PASSWORD)
+                .status(VerificationStatus.PENDING)
+                .lastChange(LocalDateTime.now())
+                .build()
+        ).block();
+
+        ChangePassword changePassword = new ChangePassword(email, tokenData.token(), "&UeK0j@tYRnhVGS&S64d", "&UeK0j@tYRnhVGS&S64d");
+
+        String oldPasswordEncoded = Objects.requireNonNull(applicationUserRepository.findByEmail(email).block()).getPassword();
+        assertThat(oldPasswordEncoded).isNotBlank();
+
+
+        EmailRequest emailRequest = new EmailRequest(
+                "Confirmação de alteração senha",
+                "mail/change-password-confirmation.html",
+                singletonList(new EmailField("$NAME", "allan weber")),
+                singletonList(email)
+        );
+        when(emailSender.send(emailRequest)).thenReturn(Mono.empty());
+
+        webTestClient
+                .post()
+                .uri("/authentication/change-password")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(changePassword)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        List<Verification> verifications = Objects.requireNonNull(verificationRepository.findAll().collectList().block());
+        assertThat(verifications).isEmpty();
+
+        String newPasswordEncoded = Objects.requireNonNull(applicationUserRepository.findByEmail(email).block()).getPassword();
+        assertThat(newPasswordEncoded).isNotBlank();
+
+        assertThat(oldPasswordEncoded).isNotEqualTo(newPasswordEncoded);
+    }
+}

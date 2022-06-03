@@ -76,6 +76,40 @@ class VerificationServiceImplTest {
                 .verifyComplete();
     }
 
+    @DisplayName("Given verification type CHANGE_PASSWORD and application user send the verification to user email and never execute delete because previous verification did not exist")
+    @Test
+    void changePasswordVerification() {
+        String hash = UUID.randomUUID().toString();
+        Verification verificationSaved = new Verification(1L,
+                "mail@mail.com",
+                VerificationType.CHANGE_PASSWORD,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserAdm",
+                "123456",
+                "User",
+                "Admin",
+                "mail@mail.com",
+                true,
+                true,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Mono.empty());
+        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
+        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+
+        Mono<Void> voidMono = verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
+        StepVerifier.create(voidMono)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
     @DisplayName("Given verification type REGISTRATION and application user send the verification to user email and execute delete because previous verification did exist")
     @Test
     void registrationVerificationDeletePrevious() {
@@ -110,14 +144,70 @@ class VerificationServiceImplTest {
                 .verifyComplete();
     }
 
-    @DisplayName("Given hash and email find current Verification")
+    @DisplayName("Given verification type CHANGE_PASSWORD and application user send the verification to user email and execute delete because previous verification did exist")
     @Test
-    void retrieve() {
+    void changePasswordVerificationDeletePrevious() {
+        String hash = UUID.randomUUID().toString();
+        Verification verificationSaved = new Verification(1L,
+                "mail@mail.com",
+                VerificationType.CHANGE_PASSWORD,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserAdm",
+                "123456",
+                "User",
+                "Admin",
+                "mail@mail.com",
+                true,
+                true,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Mono.just(verificationSaved));
+        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
+        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+
+        Mono<Void> voidMono = verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
+        StepVerifier.create(voidMono)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @DisplayName("Given hash and email find current Verification REGISTRATION")
+    @Test
+    void retrieveRegistration() {
         String hash = "12456";
         String email = "mail@mail.com";
         Verification verificationSaved = new Verification(1L,
                 email,
                 VerificationType.REGISTRATION,
+                VerificationStatus.PENDING,
+                hash,
+                LocalDateTime.now());
+
+        when(hashProvider.readHashValue(hash)).thenReturn(email);
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Mono.just(verificationSaved));
+
+        Mono<Verification> verificationMono = verificationService.retrieve(hash);
+
+        StepVerifier.create(verificationMono)
+                .expectNext(verificationSaved)
+                .verifyComplete();
+    }
+
+    @DisplayName("Given hash and email find current Verification CHANGE_PASSWORD")
+    @Test
+    void retrieveChangePassword() {
+        String hash = "12456";
+        String email = "mail@mail.com";
+        Verification verificationSaved = new Verification(1L,
+                email,
+                VerificationType.CHANGE_PASSWORD,
                 VerificationStatus.PENDING,
                 hash,
                 LocalDateTime.now());
@@ -151,12 +241,31 @@ class VerificationServiceImplTest {
                 .verify();
     }
 
-    @DisplayName("Given Verification delete it when Verify")
+    @DisplayName("Given Verification REGISTRATION delete it when Verify")
     @Test
-    void delete() {
+    void deleteRegistration() {
         Verification verificationSaved = new Verification(1L,
                 "mail@mail.com",
                 VerificationType.REGISTRATION,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        when(verificationRepository.delete(verificationSaved)).thenReturn(Mono.empty());
+
+        Mono<Void> voidMono = verificationService.verify(verificationSaved);
+
+        StepVerifier.create(voidMono)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @DisplayName("Given Verification CHANGE_PASSWORD delete it when Verify")
+    @Test
+    void deleteChangePassword() {
+        Verification verificationSaved = new Verification(1L,
+                "mail@mail.com",
+                VerificationType.CHANGE_PASSWORD,
                 VerificationStatus.PENDING,
                 "12456",
                 LocalDateTime.now());

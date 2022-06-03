@@ -27,4 +27,6 @@ public interface ApplicationUserService extends ReactiveUserDetailsService {
     Mono<UserInfo> getUserInfo(String userName);
 
     Mono<Void> verifyNewUser(String email);
+
+    Mono<ApplicationUser> changePassword(String email, String password);
 }

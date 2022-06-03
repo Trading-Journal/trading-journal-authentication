@@ -5,14 +5,12 @@ import java.util.Optional;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.trading.journal.authentication.registration.UserRegistration;
-
-public class PasswordConfirmedValidator implements ConstraintValidator<PasswordConfirmed, UserRegistration> {
+public class PasswordConfirmedValidator implements ConstraintValidator<PasswordConfirmed, PasswordAndConfirmation> {
 
     @Override
-    public boolean isValid(UserRegistration userRegistration, ConstraintValidatorContext context) {
-        String password = Optional.ofNullable(userRegistration).map(UserRegistration::password).orElse("");
-        String confirmedPassword = Optional.ofNullable(userRegistration).map(UserRegistration::confirmPassword)
+    public boolean isValid(PasswordAndConfirmation userRegistration, ConstraintValidatorContext context) {
+        String password = Optional.ofNullable(userRegistration).map(PasswordAndConfirmation::getPassword).orElse("");
+        String confirmedPassword = Optional.ofNullable(userRegistration).map(PasswordAndConfirmation::getConfirmPassword)
                 .orElse("");
         return password.equals(confirmedPassword);
     }

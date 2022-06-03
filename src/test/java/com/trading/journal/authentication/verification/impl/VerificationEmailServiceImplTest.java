@@ -40,9 +40,9 @@ class VerificationEmailServiceImplTest {
     @InjectMocks
     VerificationEmailServiceImpl verificationEmailService;
 
-    @DisplayName("Given verification and application user end and email with correct URL")
+    @DisplayName("Given verification REGISTRATION and application user end and email with correct URL")
     @Test
-    void sendEmail() {
+    void sendRegistration() {
         String hash = UUID.randomUUID().toString();
 
         when(hostProperties.getFrontEnd()).thenReturn("http://site.com");
@@ -70,6 +70,48 @@ class VerificationEmailServiceImplTest {
         EmailRequest emailRequest = new EmailRequest(
                 "Confirme seu endereço de e-mail",
                 "mail/verification.html",
+                fields,
+                singletonList("mail@mail.com")
+        );
+
+        when(emailSender.send(emailRequest)).thenReturn(Mono.empty());
+
+        Mono<Void> voidMono = verificationEmailService.sendEmail(verification, applicationUser);
+
+        StepVerifier.create(voidMono)
+                .verifyComplete();
+    }
+
+    @DisplayName("Given verification CHANGE_PASSWORD and application user end and email with correct URL")
+    @Test
+    void sendChangePassword() {
+        String hash = UUID.randomUUID().toString();
+
+        when(hostProperties.getFrontEnd()).thenReturn("http://site.com");
+        when(hostProperties.getChangePasswordPage()).thenReturn("auth/change-password");
+        Verification verification = new Verification(1L, "mail@mail.com", VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, hash, LocalDateTime.now());
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserAdm",
+                "123456",
+                "User",
+                "Admin",
+                "mail@mail.com",
+                true,
+                true,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        String url = String.format("http://site.com/auth/change-password?hash=%s", hash);
+        List<EmailField> fields = Arrays.asList(
+                new EmailField("$NAME", "User Admin"),
+                new EmailField("$URL", url)
+        );
+
+        EmailRequest emailRequest = new EmailRequest(
+                "Confirmação para alterar sua senha",
+                "mail/change-password.html",
                 fields,
                 singletonList("mail@mail.com")
         );
