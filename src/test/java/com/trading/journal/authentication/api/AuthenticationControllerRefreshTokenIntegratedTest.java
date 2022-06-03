@@ -1,31 +1,18 @@
 package com.trading.journal.authentication.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.security.Key;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
-import com.trading.journal.authentication.authority.UserAuthority;
-import com.trading.journal.authentication.authority.service.UserAuthorityRepository;
-import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
+import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
-import com.trading.journal.authentication.registration.SignUpResponse;
+import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.service.ApplicationUserRepository;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
-
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,14 +26,21 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import java.io.IOException;
+import java.security.Key;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 @TestPropertySource(properties = {"journal.authentication.authority.type=STATIC"})
-public class AuthenticationControllerTest {
+public class AuthenticationControllerRefreshTokenIntegratedTest {
 
     @Autowired
     private ApplicationContext context;
@@ -64,9 +58,6 @@ public class AuthenticationControllerTest {
     private JwtProperties properties;
 
     @Autowired
-    private UserAuthorityRepository userAuthorityRepository;
-
-    @Autowired
     ApplicationUserRepository applicationUserRepository;
 
     private WebTestClient webTestClient;
@@ -75,112 +66,6 @@ public class AuthenticationControllerTest {
     public void setUp() {
         webTestClient = WebTestClient.bindToApplicationContext(context).build();
         applicationUserRepository.deleteAll().block();
-    }
-
-    @Test
-    @DisplayName("When signUp as new user return success and the UserAuthority entity has AuthorityId because the authorities are static")
-    void signUp() {
-        UserRegistration userRegistration = new UserRegistration(
-                "firstName",
-                "lastName",
-                "UserName2",
-                "mail2@mail.com",
-                "dad231#$#4",
-                "dad231#$#4");
-
-        webTestClient
-                .post()
-                .uri("/authentication/signup")
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(userRegistration)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(SignUpResponse.class)
-                .value(response -> {
-                   assertThat(response.email()).isEqualTo("mail2@mail.com");
-                   assertThat(response.enabled()).isTrue();
-                });
-
-        List<UserAuthority> userAuthorities = userAuthorityRepository.findAll().collectList().block();
-        assert userAuthorities != null;
-        userAuthorities.forEach(userAuthority -> assertThat(userAuthority.getAuthorityId()).isNull());
-    }
-
-    @Test
-    @DisplayName("When signIn user return success and token")
-    void signIn() {
-        UserRegistration userRegistration = new UserRegistration(
-                "firstName",
-                "lastName",
-                "UserName",
-                "mail@mail.com",
-                "dad231#$#4",
-                "dad231#$#4");
-
-        applicationUserService.createNewUser(userRegistration).block();
-
-        Login login = new Login("mail@mail.com", "dad231#$#4");
-
-        webTestClient
-                .post()
-                .uri("/authentication/signin")
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(login)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(LoginResponse.class)
-                .value(response -> {
-                    assertThat(response.accessToken()).isNotBlank();
-                    assertThat(response.refreshToken()).isNotBlank();
-                });
-    }
-
-    @Test
-    @DisplayName("When signIn user that does not exist, return 401")
-    void signInFails() {
-        Login login = new Login("mail3@mail.com", "dad231#$#4");
-
-        webTestClient
-                .post()
-                .uri("/authentication/signin")
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(login)
-                .exchange()
-                .expectStatus()
-                .isUnauthorized()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .value(response -> assertThat(response.get("error")).isEqualTo("User mail3@mail.com does not exist"));
-    }
-
-    @Test
-    @DisplayName("When signIn with wrong password, return 401")
-    void signInFailsPassword() {
-        UserRegistration userRegistration = new UserRegistration(
-                "firstName",
-                "lastName",
-                "UserName4",
-                "mail4@mail.com",
-                "dad231#$#4",
-                "dad231#$#4");
-
-        applicationUserService.createNewUser(userRegistration).block();
-
-        Login login = new Login("mail4@mail.com", "wrong_password");
-
-        webTestClient
-                .post()
-                .uri("/authentication/signin")
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(login)
-                .exchange()
-                .expectStatus()
-                .isUnauthorized()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .value(response -> assertThat(response.get("error")).isEqualTo("Invalid Credentials"));
     }
 
     @Test

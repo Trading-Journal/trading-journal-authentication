@@ -5,12 +5,11 @@ import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.authority.service.UserAuthorityService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.ApplicationUserRepository;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
-import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,10 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -42,10 +40,12 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     public Mono<UserDetails> findByUsername(String email) {
         return applicationUserRepository
                 .findByEmail(email)
-                .switchIfEmpty(Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
+                .switchIfEmpty(Mono.error(userNotFound(email)))
                 .flatMap(applicationUser ->
                         userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)
-                                .doOnSuccess(checkForEmptyAuthorities())
+                                .doOnSuccess(authorities -> ofNullable(authorities)
+                                        .filter(list -> !list.isEmpty())
+                                        .orElseThrow(() -> new ApplicationException("There is no authorities for this user")))
                                 .onErrorResume(Mono::error)
                                 .map(simpleGrantedAuthorities -> User.withUsername(applicationUser.getEmail())
                                         .password(applicationUser.getPassword())
@@ -59,11 +59,11 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     }
 
     @Override
-    public Mono<ApplicationUser> getUserByEmail(String email) {
+    public Mono<ApplicationUser> getUserByEmail(@NotBlank String email) {
         return applicationUserRepository
                 .findByEmail(email)
                 .zipWhen(userAuthorityService::loadList)
-                .switchIfEmpty(Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
+                .switchIfEmpty(Mono.error(userNotFound(email)))
                 .map(userAndAuthorities -> {
                     ApplicationUser applicationUser = userAndAuthorities.getT1();
                     applicationUser.loadAuthorities(userAndAuthorities.getT2());
@@ -74,7 +74,11 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     @Override
     public Mono<ApplicationUser> createNewUser(@NotNull UserRegistration userRegistration) {
         return validateNewUser(userRegistration.userName(), userRegistration.email())
-                .doOnSuccess(checkForInvalidUser())
+                .doOnSuccess(valid -> {
+                    if (!valid) {
+                        throw new ApplicationException("User name or email already exist");
+                    }
+                })
                 .onErrorResume(Mono::error)
                 .then(buildNewUser(userRegistration))
                 .flatMap(applicationUserRepository::save)
@@ -85,24 +89,24 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     }
 
     @Override
-    public Mono<Boolean> validateNewUser(@NotNull String userName, String email) {
+    public Mono<Boolean> validateNewUser(@NotNull String userName, @NotBlank String email) {
         Mono<Boolean> userNameExists = userNameExists(userName);
         Mono<Boolean> emailExists = emailExists(email);
         return userNameExists.zipWith(emailExists).map(result -> !result.getT1() && !result.getT2());
     }
 
     @Override
-    public Mono<Boolean> userNameExists(String userName) {
+    public Mono<Boolean> userNameExists(@NotBlank String userName) {
         return applicationUserRepository.countByUserName(userName).map(count -> count > 0);
     }
 
     @Override
-    public Mono<Boolean> emailExists(String email) {
+    public Mono<Boolean> emailExists(@NotBlank String email) {
         return applicationUserRepository.countByEmail(email).map(count -> count > 0);
     }
 
     @Override
-    public Mono<UserInfo> getUserInfo(String userName) {
+    public Mono<UserInfo> getUserInfo(@NotBlank String userName) {
         return applicationUserRepository.findByUserName(userName)
                 .zipWhen(userInfo -> userAuthorityService.loadList(userInfo.getId()))
                 .map(userInfoAndAuthorities -> {
@@ -114,9 +118,9 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     }
 
     @Override
-    public Mono<Void> verifyNewUser(String email) {
+    public Mono<Void> verifyNewUser(@NotBlank String email) {
         return applicationUserRepository.findByEmail(email)
-                .switchIfEmpty(Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
+                .switchIfEmpty(Mono.error(userNotFound(email)))
                 .map(applicationUser -> {
                     applicationUser.enable();
                     applicationUser.verify();
@@ -126,18 +130,15 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
                 .then();
     }
 
-    private Consumer<List<SimpleGrantedAuthority>> checkForEmptyAuthorities() {
-        return authorities -> ofNullable(authorities)
-                .filter(list -> !list.isEmpty())
-                .orElseThrow(() -> new ApplicationException("There is no authorities for this user"));
-    }
-
-    private Consumer<Boolean> checkForInvalidUser() {
-        return valid -> {
-            if (!valid) {
-                throw new ApplicationException("User name or email already exist");
-            }
-        };
+    @Override
+    public Mono<ApplicationUser> changePassword(@NotBlank String email, @NotBlank String password) {
+        return applicationUserRepository.findByEmail(email)
+                .switchIfEmpty(Mono.error(userNotFound(email)))
+                .map(applicationUser -> {
+                    applicationUser.changePassword(encoder.encode(password));
+                    return applicationUser;
+                })
+                .flatMap(applicationUserRepository::save);
     }
 
     private Mono<ApplicationUser> buildNewUser(UserRegistration userRegistration) {
@@ -152,5 +153,9 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
                 .verified(enabledAndVerified)
                 .createdAt(LocalDateTime.now())
                 .build());
+    }
+
+    private UsernameNotFoundException userNotFound(String email) {
+        return new UsernameNotFoundException(String.format("User %s does not exist", email));
     }
 }

@@ -9,6 +9,7 @@ import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import com.trading.journal.authentication.verification.service.VerificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -48,6 +49,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         Mono<SignUpResponse> methodReturn = Mono.just(signUpResponse);
         if (verificationProperties.isEnabled()) {
             methodReturn = applicationUserService.getUserByEmail(email)
+                    .switchIfEmpty(Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
                     .flatMap(applicationUser -> {
                         if (applicationUser.getEnabled()) {
                             return Mono.just(signUpResponse);

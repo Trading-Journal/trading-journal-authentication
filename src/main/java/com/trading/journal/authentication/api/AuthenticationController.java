@@ -1,7 +1,9 @@
 package com.trading.journal.authentication.api;
 
+import com.trading.journal.authentication.authentication.ChangePassword;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
+import com.trading.journal.authentication.authentication.service.PasswordService;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
@@ -19,6 +21,8 @@ public class AuthenticationController implements AuthenticationApi {
 
     private final RegistrationService registrationService;
     private final AuthenticationService authenticationService;
+
+    private final PasswordService passwordService;
 
     @Override
     public Mono<ResponseEntity<SignUpResponse>> signUp(@Valid UserRegistration registration) {
@@ -43,5 +47,15 @@ public class AuthenticationController implements AuthenticationApi {
     @Override
     public Mono<ResponseEntity<SignUpResponse>> sendVerification(String email) {
         return registrationService.sendVerification(email).map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<Void>> requestPasswordChange(String email) {
+        return passwordService.requestPasswordChange(email).map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<Void>> changePassword(@Valid ChangePassword changePassword) {
+        return passwordService.changePassword(changePassword).map(ResponseEntity::ok);
     }
 }

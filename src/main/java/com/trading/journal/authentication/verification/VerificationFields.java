@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum VerificationFields {
 
-    EMAIL_TEMPLATE("mail/verification.html"),
+    REGISTRATION_EMAIL_TEMPLATE("mail/verification.html"),
+    CHANGE_PASSWORD_EMAIL_TEMPLATE("mail/change-password.html"),
     USER_NAME("$NAME"),
     URL("$URL"),
     HASH("hash");

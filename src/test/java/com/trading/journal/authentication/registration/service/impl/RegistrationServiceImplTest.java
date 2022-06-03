@@ -238,4 +238,21 @@ public class RegistrationServiceImplTest {
 
         verify(verificationService, never()).send(any(), any());
     }
+
+    @Test
+    @DisplayName("Send new email verification throws exception because user does not exist")
+    void newEmailVerificationException() {
+        String email = "mail@mail.com";
+
+        when(verificationProperties.isEnabled()).thenReturn(true);
+        when(applicationUserService.getUserByEmail(email)).thenReturn(Mono.empty());
+
+        Mono<SignUpResponse> responseMono = registrationService.sendVerification(email);
+        StepVerifier.create(responseMono)
+                .expectErrorMatches(throwable -> throwable instanceof UsernameNotFoundException
+                        && throwable.getMessage().contains(String.format("User %s does not exist", email)))
+                .verify();
+
+        verify(verificationService, never()).send(any(), any());
+    }
 }

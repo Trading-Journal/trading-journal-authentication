@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.api;
 
+import com.trading.journal.authentication.authentication.ChangePassword;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.registration.SignUpResponse;
@@ -46,4 +47,15 @@ public interface AuthenticationApi {
     @ApiResponses(@ApiResponse(code = 200, message = "Verification sent"))
     @PostMapping("/verify/send")
     Mono<ResponseEntity<SignUpResponse>> sendVerification(@RequestParam("email") String email);
+
+    @ApiOperation(notes = "Request a url to change password", value = "Request to change password")
+    @ApiResponses(@ApiResponse(code = 200, message = "Change password url sent"))
+    @PostMapping("/change-password/request")
+    Mono<ResponseEntity<Void>> requestPasswordChange(@RequestParam("email") String email);
+
+    @ApiOperation(notes = "Change user password", value = "Change user password")
+    @ApiResponses(@ApiResponse(code = 200, message = "User logged password changes"))
+    @PostMapping("/change-password")
+    @ResponseStatus(HttpStatus.OK)
+    Mono<ResponseEntity<Void>> changePassword(@RequestBody ChangePassword changePassword);
 }

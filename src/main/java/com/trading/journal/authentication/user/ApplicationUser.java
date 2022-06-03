@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -49,5 +50,9 @@ public class ApplicationUser {
 
     public void verify() {
         this.verified = true;
+    }
+
+    public void changePassword(@NotBlank String newPassword) {
+        this.password = newPassword;
     }
 }
