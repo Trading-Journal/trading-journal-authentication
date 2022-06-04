@@ -9,6 +9,8 @@ public enum VerificationFields {
 
     REGISTRATION_EMAIL_TEMPLATE("mail/verification.html"),
     CHANGE_PASSWORD_EMAIL_TEMPLATE("mail/change-password.html"),
+
+    ADMIN_REGISTRATION_EMAIL_TEMPLATE("mail/admin-registration.html"),
     USER_NAME("$NAME"),
     URL("$URL"),
     HASH("hash");

@@ -11,6 +11,8 @@ public interface UserAuthorityService {
 
     Mono<UserAuthority> saveCommonUserAuthorities(ApplicationUser applicationUser);
 
+    Mono<UserAuthority> saveAdminUserAuthorities(ApplicationUser applicationUser);
+
     Mono<List<UserAuthority>> loadList(ApplicationUser applicationUser);
 
     Mono<List<UserAuthority>> loadList(Long userId);

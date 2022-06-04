@@ -6,6 +6,8 @@ import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 public interface ApplicationUserRepository extends ReactiveCrudRepository<ApplicationUser, Long> {
 
     Mono<Integer> countByUserName(String userName);
@@ -16,4 +18,7 @@ public interface ApplicationUserRepository extends ReactiveCrudRepository<Applic
 
     @Query("select id, userName, firstName, lastName, email, enabled, verified, createdAt from Users where userName = :userName")
     Mono<UserInfo> findByUserName(String userName);
+
+    @Query("SELECT COUNT(Users.id) FROM Users inner join UserAuthorities where Users.id = UserAuthorities.userId and UserAuthorities.name in (:roles)")
+    Mono<Integer> countAdmins(List<String> roles);
 }

@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 @Service
@@ -18,9 +19,13 @@ public class AuthorityServiceStaticImpl implements AuthorityService {
 
     @Override
     public Flux<Authority> getAuthoritiesByCategory(AuthorityCategory category) {
-        Stream<Authority> authorities = AuthoritiesHelper.getByCategory(category)
-                .stream()
-                .map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()));
+        Stream<Authority> authorities = AuthoritiesHelper.getByCategory(category).stream().map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()));
+        return Flux.fromStream(authorities);
+    }
+
+    @Override
+    public Flux<Authority> getAll() {
+        Stream<Authority> authorities = Arrays.stream(AuthoritiesHelper.values()).map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()));
         return Flux.fromStream(authorities);
     }
 }

@@ -10,9 +10,9 @@
     * Disable
     * Delete
     * Change authorities
-  * Manage Authorities via API
-    * Admin access only
-    * Validate if entity authorities is enabled before manage
+* Manage Authorities via API when Database authorities (ConditionalOnProperty???)
+  * Admin access only
+  * Validate if entity authorities is enabled before manage
   * Manage user authorities
 * Postman Test run
 * Test Coverage with fail under X percent
@@ -119,9 +119,9 @@ CREATE TABLE `Verifications` (
 
 ### Database connection
 
-* **journal.authentication.datasource.host** *e.g. localhost* 
+* **journal.authentication.datasource.host** *e.g. localhost*
 * **journal.authentication.datasource.port** *e.g. 3306*
-* **journal.authentication.datasource.database** *e.g. dbname* 
+* **journal.authentication.datasource.database** *e.g. dbname*
 * **journal.authentication.datasource.username** *e.g. user*
 * **journal.authentication.datasource.password** *e.g. root*
 
@@ -129,10 +129,10 @@ CREATE TABLE `Verifications` (
 
 There are two ways to handle Authority/Roles:
 * STATIC: No authorities are persisted in the database, there are initially two possible roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
- * DATABASE: Authorities will be persisted and retrieved from database, a initial load is made in the table  **Authorities** with roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
-This configuration can be changed using the property **journal.authentication.authority.type** with none is defined, the default behavior is **STATIC**
- * **journal.authentication.authority.type** *e.g. STATIC*
- * **journal.authentication.authority.type** *e.g. DATABASE*
+* DATABASE: Authorities will be persisted and retrieved from database, a initial load is made in the table  **Authorities** with roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
+  This configuration can be changed using the property **journal.authentication.authority.type** with none is defined, the default behavior is **STATIC**
+* **journal.authentication.authority.type** *e.g. STATIC*
+* **journal.authentication.authority.type** *e.g. DATABASE*
 
 ### Email Verification
 In case there is need for new users confirm their emails, then enable the configuration property:

@@ -20,4 +20,9 @@ public class AuthorityServiceDatabaseImpl implements AuthorityService {
     public Flux<Authority> getAuthoritiesByCategory(AuthorityCategory category) {
         return authorityRepository.getByCategory(category);
     }
+
+    @Override
+    public Flux<Authority> getAll() {
+        return authorityRepository.findAll();
+    }
 }

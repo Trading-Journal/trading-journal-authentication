@@ -29,6 +29,14 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     }
 
     @Override
+    public Mono<UserAuthority> saveAdminUserAuthorities(ApplicationUser applicationUser) {
+        return authorityService.getAll()
+                .map(authority -> new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId()))
+                .flatMap(userAuthorityRepository::save)
+                .last();
+    }
+
+    @Override
     public Mono<List<UserAuthority>> loadList(ApplicationUser applicationUser) {
         return userAuthorityRepository.findByUserId(applicationUser.getId()).collectList();
     }

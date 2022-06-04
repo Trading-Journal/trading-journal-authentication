@@ -97,6 +97,38 @@ class UserAuthorityServiceImplTest {
         verify(userAuthorityRepository, times(2)).save(any());
     }
 
+    @DisplayName("Given application user for admin authority when saving admin authorities, save user authorities")
+    @Test
+    void saveOneAdminAuthority() {
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "12345679",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                Collections.emptyList(),
+                LocalDateTime.now());
+
+        Authority authorityAdmin = Authority.builder().id(1L).category(AuthorityCategory.ADMINISTRATOR).name("ADMIN").build();
+        Authority authorityUser = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
+        when(authorityService.getAll()).thenReturn(Flux.just(authorityAdmin, authorityUser));
+
+        UserAuthority userAuthorityUser = new UserAuthority(applicationUser.getId(), authorityAdmin.getName(), authorityAdmin.getId());
+        UserAuthority userAuthorityAdmin = new UserAuthority(applicationUser.getId(), authorityUser.getName(), authorityUser.getId());
+        when(userAuthorityRepository.save(userAuthorityUser)).thenReturn(Mono.just(userAuthorityUser));
+        when(userAuthorityRepository.save(userAuthorityAdmin)).thenReturn(Mono.just(userAuthorityAdmin));
+
+        Mono<UserAuthority> mono = userAuthorityService.saveAdminUserAuthorities(applicationUser);
+        StepVerifier.create(mono)
+                .expectNextCount(1L)
+                .verifyComplete();
+
+        verify(userAuthorityRepository, times(2)).save(any());
+    }
+
     @DisplayName("Given application user to load one authority, return a list of authorities with one item")
     @Test
     void loadOneAuthorityFromApplicationUser() {

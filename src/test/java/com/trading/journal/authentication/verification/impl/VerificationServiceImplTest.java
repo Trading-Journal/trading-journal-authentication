@@ -3,6 +3,7 @@ package com.trading.journal.authentication.verification.impl;
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationStatus;
 import com.trading.journal.authentication.verification.VerificationType;
@@ -23,8 +24,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.UUID;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static java.util.Collections.emptyList;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @ExtendWith(SpringExtension.class)
@@ -35,6 +36,9 @@ class VerificationServiceImplTest {
 
     @Mock
     VerificationEmailService verificationEmailService;
+
+    @Mock
+    ApplicationUserService applicationUserService;
 
     @Mock
     HashProvider hashProvider;
@@ -110,6 +114,40 @@ class VerificationServiceImplTest {
                 .verifyComplete();
     }
 
+    @DisplayName("Given verification type ADMIN_REGISTRATION and application user send the verification to user email and never execute delete because previous verification did not exist")
+    @Test
+    void adminRegistrationVerification() {
+        String hash = UUID.randomUUID().toString();
+        Verification verificationSaved = new Verification(1L,
+                "mail@mail.com",
+                VerificationType.ADMIN_REGISTRATION,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserAdm",
+                "123456",
+                "User",
+                "Admin",
+                "mail@mail.com",
+                true,
+                true,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Mono.empty());
+        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
+        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+
+        Mono<Void> voidMono = verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
+        StepVerifier.create(voidMono)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
     @DisplayName("Given verification type REGISTRATION and application user send the verification to user email and execute delete because previous verification did exist")
     @Test
     void registrationVerificationDeletePrevious() {
@@ -178,6 +216,40 @@ class VerificationServiceImplTest {
                 .verifyComplete();
     }
 
+    @DisplayName("Given verification type ADMIN_REGISTRATION and application user send the verification to user email and execute delete because previous verification did exist")
+    @Test
+    void adminRegistrationVerificationDeletePrevious() {
+        String hash = UUID.randomUUID().toString();
+        Verification verificationSaved = new Verification(1L,
+                "mail@mail.com",
+                VerificationType.ADMIN_REGISTRATION,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserAdm",
+                "123456",
+                "User",
+                "Admin",
+                "mail@mail.com",
+                true,
+                true,
+                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Mono.just(verificationSaved));
+        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
+        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+
+        Mono<Void> voidMono = verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
+        StepVerifier.create(voidMono)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
     @DisplayName("Given hash and email find current Verification REGISTRATION")
     @Test
     void retrieveRegistration() {
@@ -208,6 +280,28 @@ class VerificationServiceImplTest {
         Verification verificationSaved = new Verification(1L,
                 email,
                 VerificationType.CHANGE_PASSWORD,
+                VerificationStatus.PENDING,
+                hash,
+                LocalDateTime.now());
+
+        when(hashProvider.readHashValue(hash)).thenReturn(email);
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Mono.just(verificationSaved));
+
+        Mono<Verification> verificationMono = verificationService.retrieve(hash);
+
+        StepVerifier.create(verificationMono)
+                .expectNext(verificationSaved)
+                .verifyComplete();
+    }
+
+    @DisplayName("Given hash and email find current Verification ADMIN_REGISTRATION")
+    @Test
+    void retrieveAdminRegistration() {
+        String hash = "12456";
+        String email = "mail@mail.com";
+        Verification verificationSaved = new Verification(1L,
+                email,
+                VerificationType.ADMIN_REGISTRATION,
                 VerificationStatus.PENDING,
                 hash,
                 LocalDateTime.now());
@@ -258,6 +352,11 @@ class VerificationServiceImplTest {
         StepVerifier.create(voidMono)
                 .expectNextCount(0)
                 .verifyComplete();
+
+        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(hashProvider, never()).generateHash(anyString());
+        verify(verificationRepository, never()).save(any());
+        verify(verificationEmailService, never()).sendEmail(any(), any());
     }
 
     @DisplayName("Given Verification CHANGE_PASSWORD delete it when Verify")
@@ -273,6 +372,57 @@ class VerificationServiceImplTest {
         when(verificationRepository.delete(verificationSaved)).thenReturn(Mono.empty());
 
         Mono<Void> voidMono = verificationService.verify(verificationSaved);
+
+        StepVerifier.create(voidMono)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(hashProvider, never()).generateHash(anyString());
+        verify(verificationRepository, never()).save(any());
+        verify(verificationEmailService, never()).sendEmail(any(), any());
+    }
+
+    @DisplayName("Given Verification ADMIN_REGISTRATION delete it when Verify")
+    @Test
+    void verifyAndDeleteAdminRegistration() {
+        String hash = UUID.randomUUID().toString();
+        String email = "mail@mail.com";
+
+        Verification adminRegistration = new Verification(1L,
+                email,
+                VerificationType.ADMIN_REGISTRATION,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        Verification changerPassword = new Verification(1L,
+                email,
+                VerificationType.CHANGE_PASSWORD,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserAdm",
+                "123456",
+                "User",
+                "Admin",
+                email,
+                false,
+                false,
+                emptyList(),
+                LocalDateTime.now());
+
+        when(applicationUserService.getUserByEmail(email)).thenReturn(Mono.just(applicationUser));
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(Mono.empty());
+        when(hashProvider.generateHash(email)).thenReturn(hash);
+        when(verificationRepository.save(any())).thenReturn(Mono.just(changerPassword));
+        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+        when(verificationRepository.delete(adminRegistration)).thenReturn(Mono.empty());
+
+        Mono<Void> voidMono = verificationService.verify(adminRegistration);
 
         StepVerifier.create(voidMono)
                 .expectNextCount(0)

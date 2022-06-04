@@ -7,4 +7,6 @@ import reactor.core.publisher.Flux;
 public interface AuthorityService {
 
     Flux<Authority> getAuthoritiesByCategory(AuthorityCategory category);
+
+    Flux<Authority> getAll();
 }

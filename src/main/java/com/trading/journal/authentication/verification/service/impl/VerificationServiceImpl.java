@@ -2,6 +2,7 @@ package com.trading.journal.authentication.verification.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.HashProvider;
@@ -19,6 +20,8 @@ public class VerificationServiceImpl implements VerificationService {
 
     private final VerificationRepository verificationRepository;
     private final VerificationEmailService verificationEmailService;
+
+    private final ApplicationUserService applicationUserService;
 
     private final HashProvider hashProvider;
 
@@ -40,7 +43,13 @@ public class VerificationServiceImpl implements VerificationService {
 
     @Override
     public Mono<Void> verify(Verification verification) {
-        return verificationRepository.delete(verification);
+        Mono<Void> delete = verificationRepository.delete(verification);
+        if(VerificationType.ADMIN_REGISTRATION.equals(verification.getType())){
+            delete = applicationUserService.getUserByEmail(verification.getEmail())
+                    .map(applicationUser -> this.send(VerificationType.CHANGE_PASSWORD, applicationUser))
+                    .then(delete);
+        }
+        return delete;
     }
 
     private Mono<Verification> create(VerificationType verificationType, ApplicationUser applicationUser) {
