@@ -3,7 +3,7 @@ package com.trading.journal.authentication.user.service.impl;
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.authority.service.UserAuthorityRepository;
-import com.trading.journal.authentication.registration.AdminRegistration;
+import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.properties.AdminUserProperties;
 import com.trading.journal.authentication.user.service.ApplicationAdminUserService;
@@ -66,7 +66,7 @@ class ApplicationAdminUserServiceImplIntegratedTest {
     void addAdmin() {
         when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
 
-        AdminRegistration adminRegistration = new AdminRegistration("Admin", "Administrator", "admin", adminUserProperties.email());
+        UserRegistration adminRegistration = new UserRegistration("Admin", "Administrator", "admin", adminUserProperties.email(), null, null);
 
         Mono<Boolean> thereIsAdmin = applicationAdminUserService.thereIsAdmin();
         StepVerifier.create(thereIsAdmin)

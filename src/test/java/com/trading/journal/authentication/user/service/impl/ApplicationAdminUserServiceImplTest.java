@@ -2,7 +2,7 @@ package com.trading.journal.authentication.user.service.impl;
 
 import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.authority.service.UserAuthorityService;
-import com.trading.journal.authentication.registration.AdminRegistration;
+import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.service.ApplicationUserRepository;
 import com.trading.journal.authentication.verification.VerificationType;
@@ -74,7 +74,7 @@ class ApplicationAdminUserServiceImplTest {
     @DisplayName("Given admin registration create admin user and send the verification email")
     @Test
     void createAdmin() {
-        AdminRegistration adminRegistration = new AdminRegistration("john", "rambo", "admin", "mail@mail.com");
+        UserRegistration adminRegistration = new UserRegistration("john", "rambo", "admin", "mail@mail.com", null, null);
 
         ApplicationUser applicationUser = new ApplicationUser(
                 1L,

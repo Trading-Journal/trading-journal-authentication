@@ -4,7 +4,7 @@ import com.trading.journal.authentication.authority.AuthoritiesHelper;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.authority.service.UserAuthorityService;
-import com.trading.journal.authentication.registration.AdminRegistration;
+import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.service.ApplicationAdminUserService;
 import com.trading.journal.authentication.user.service.ApplicationUserRepository;
@@ -39,8 +39,8 @@ public class ApplicationAdminUserServiceImpl implements ApplicationAdminUserServ
     }
 
     @Override
-    public Mono<Void> createAdmin(@Valid AdminRegistration adminRegistration) {
-        return adminUser(adminRegistration)
+    public Mono<Void> createAdmin(@Valid UserRegistration userRegistration) {
+        return adminUser(userRegistration)
                 .flatMap(applicationUserRepository::save)
                 .flatMap(userAuthorityService::saveAdminUserAuthorities)
                 .map(UserAuthority::getUserId)
@@ -48,13 +48,13 @@ public class ApplicationAdminUserServiceImpl implements ApplicationAdminUserServ
                 .flatMap(applicationUser -> verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser));
     }
 
-    private Mono<ApplicationUser> adminUser(AdminRegistration adminRegistration) {
+    private Mono<ApplicationUser> adminUser(UserRegistration userRegistration) {
         return Mono.just(ApplicationUser.builder()
-                .userName(adminRegistration.userName())
-                .password(encoder.encode(adminRegistration.email()))
-                .firstName(adminRegistration.firstName())
-                .lastName(adminRegistration.lastName())
-                .email(adminRegistration.email())
+                .userName(userRegistration.userName())
+                .password(encoder.encode(userRegistration.email()))
+                .firstName(userRegistration.firstName())
+                .lastName(userRegistration.lastName())
+                .email(userRegistration.email())
                 .enabled(false)
                 .verified(false)
                 .createdAt(LocalDateTime.now())
