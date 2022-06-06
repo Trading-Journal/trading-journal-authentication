@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 @TestPropertySource(properties = {"journal.authentication.verification.enabled=true"})
@@ -47,20 +47,19 @@ public class AuthenticationControllerWithVerificationTest {
     @MockBean
     VerificationEmailService verificationEmailService;
 
+    @Autowired
     private WebTestClient webTestClient;
 
     @BeforeEach
     public void setUp() {
-        webTestClient = WebTestClient.bindToApplicationContext(context).build();
         applicationUserRepository.deleteAll();
         verificationRepository.deleteAll();
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
     }
 
     @Test
     @DisplayName("When signUp as new user with verification enabled user must be created disabled")
     void signUp() {
-        doNothing().when(verificationEmailService).sendEmail(any(), any());
-
         UserRegistration userRegistration = new UserRegistration(
                 "firstName",
                 "lastName",
@@ -96,8 +95,6 @@ public class AuthenticationControllerWithVerificationTest {
     @Test
     @DisplayName("Receive the verification URL and verify the user")
     void verifyUser() {
-        doNothing().when(verificationEmailService).sendEmail(any(), any());
-
         UserRegistration userRegistration = new UserRegistration(
                 "firstName",
                 "lastName",
@@ -144,8 +141,6 @@ public class AuthenticationControllerWithVerificationTest {
     @Test
     @DisplayName("Receive the verification URL, request another verification code and verify the user")
     void verifyUserWithSecondVerification() throws InterruptedException {
-        doNothing().when(verificationEmailService).sendEmail(any(), any());
-
         UserRegistration userRegistration = new UserRegistration(
                 "firstName",
                 "lastName",

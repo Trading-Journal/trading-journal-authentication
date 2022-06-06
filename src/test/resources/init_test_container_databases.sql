@@ -5,8 +5,8 @@ CREATE TABLE `Users` (
   `firstName` varchar(45) NOT NULL,
   `lastName` varchar(45) NOT NULL,
   `email` varchar(150) NOT NULL,
-  `enabled` tinyint NOT NULL,
-  `verified` tinyint NOT NULL,
+  `enabled` tinyint(1) NOT NULL,
+  `verified` tinyint(1) NOT NULL,
   `createdAt` datetime NOT NULL,
   `authorities` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)

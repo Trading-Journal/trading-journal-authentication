@@ -7,6 +7,7 @@
   * Make Entity relationships works
   * Redo the metrics and document them
   * Check @Transactional
+  * spring.jpa.hibernate.ddl-auto
 * Admin on start up
   * Must change password - Registration and Change password must be only one email doing both at the same time
 * Admin endpoints
@@ -82,8 +83,8 @@ CREATE TABLE `Users` (
   `firstName` varchar(45) NOT NULL,
   `lastName` varchar(45) NOT NULL,
   `email` varchar(150) NOT NULL,
-  `enabled` tinyint NOT NULL,
-  `verified` tinyint NOT NULL,
+  `enabled` tinyint(1) NOT NULL,
+  `verified` tinyint(1) NOT NULL,
   `createdAt` datetime NOT NULL,
   `authorities` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)

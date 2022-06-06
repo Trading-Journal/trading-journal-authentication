@@ -44,6 +44,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             ApplicationUser applicationUser = applicationUserService.getUserByEmail(email);
             if (!applicationUser.getEnabled()) {
                 verificationService.send(VerificationType.REGISTRATION, applicationUser);
+                signUpResponse = new SignUpResponse(email, false);
             }
         }
         return signUpResponse;

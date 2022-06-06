@@ -44,7 +44,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
                 .password(applicationUser.getPassword())
                 .authorities(authorities)
                 .accountExpired(!applicationUser.getEnabled())
-                .credentialsExpired(!applicationUser.getEnabled())
+                .credentialsExpired(!applicationUser.getVerified())
                 .disabled(!applicationUser.getEnabled())
                 .accountLocked(!applicationUser.getVerified())
                 .build();
