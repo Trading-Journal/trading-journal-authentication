@@ -18,15 +18,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -72,21 +72,17 @@ public class ApplicationUserServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(0));
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(0));
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(Mono.just(new UserAuthority(1L, 1L, 1L, "USER")));
+        when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
+        when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(new UserAuthority(1L, 1L, 1L, "USER"));
         when(encoder.encode(anyString())).thenReturn("sdsa54ds56a4ds564d");
-        when(applicationUserRepository.save(any())).thenReturn(Mono.just(appUser));
-        when(applicationUserRepository.findById(anyLong())).thenReturn(Mono.just(appUser));
+        when(applicationUserRepository.save(any())).thenReturn(appUser);
+        when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));
         when(verificationProperties.isEnabled()).thenReturn(false);
 
-        Mono<ApplicationUser> userMono = applicationUserServiceImpl.createNewUser(userRegistration);
-        StepVerifier.create(userMono)
-                .assertNext(applicationUser -> {
-                    assertThat(applicationUser.getEnabled()).isTrue();
-                    assertThat(applicationUser.getVerified()).isTrue();
-                })
-                .verifyComplete();
+        ApplicationUser newUser = applicationUserServiceImpl.createNewUser(userRegistration);
+        assertThat(newUser.getEnabled()).isTrue();
+        assertThat(newUser.getVerified()).isTrue();
     }
 
     @Test
@@ -112,21 +108,17 @@ public class ApplicationUserServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(0));
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(0));
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(Mono.just(new UserAuthority(1L, 1L, 1L, "USER")));
+        when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
+        when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(new UserAuthority(1L, 1L, 1L, "USER"));
         when(encoder.encode(anyString())).thenReturn("sdsa54ds56a4ds564d");
-        when(applicationUserRepository.save(any())).thenReturn(Mono.just(appUser));
-        when(applicationUserRepository.findById(anyLong())).thenReturn(Mono.just(appUser));
+        when(applicationUserRepository.save(any())).thenReturn(appUser);
+        when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));
         when(verificationProperties.isEnabled()).thenReturn(true);
 
-        Mono<ApplicationUser> userMono = applicationUserServiceImpl.createNewUser(userRegistration);
-        StepVerifier.create(userMono)
-                .assertNext(applicationUser -> {
-                    assertThat(applicationUser.getEnabled()).isFalse();
-                    assertThat(applicationUser.getVerified()).isFalse();
-                })
-                .verifyComplete();
+        ApplicationUser newUser = applicationUserServiceImpl.createNewUser(userRegistration);
+        assertThat(newUser.getEnabled()).isFalse();
+        assertThat(newUser.getVerified()).isFalse();
     }
 
     @Test
@@ -156,24 +148,17 @@ public class ApplicationUserServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.of(2022, 2, 1, 10, 30, 50));
 
-        when(applicationUserRepository.findByEmail(disabledUser.getEmail())).thenReturn(Mono.just(disabledUser));
-        when(applicationUserRepository.save(enabledUser)).thenReturn(Mono.just(enabledUser));
+        when(applicationUserRepository.findByEmail(disabledUser.getEmail())).thenReturn(disabledUser);
+        when(applicationUserRepository.save(enabledUser)).thenReturn(enabledUser);
 
-        Mono<Void> userMono = applicationUserServiceImpl.verifyNewUser(disabledUser.getEmail());
-        StepVerifier.create(userMono)
-                .verifyComplete();
+        applicationUserServiceImpl.verifyNewUser(disabledUser.getEmail());
     }
 
     @Test
     @DisplayName("Enable and verify user that does not exist, return an exception")
     void enableAndVerifyException() {
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Mono.empty());
-        Mono<Void> userMono = applicationUserServiceImpl.verifyNewUser("mail@mail.com");
-
-        StepVerifier.create(userMono)
-                .expectErrorMatches(throwable -> throwable instanceof UsernameNotFoundException
-                        && throwable.getMessage().equals("User mail@mail.com does not exist"))
-                .verify();
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(null);
+        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.verifyNewUser("mail@mail.com"), "User mail@mail.com does not exist");
     }
 
     @Test
@@ -187,17 +172,12 @@ public class ApplicationUserServiceImplTest {
                 "123456",
                 "123456");
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(1));
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(0));
+        when(applicationUserRepository.countByUserName(anyString())).thenReturn(1);
+        when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
 
-        Mono<ApplicationUser> userMono = applicationUserServiceImpl.createNewUser(userRegistration);
-        StepVerifier.create(userMono)
-                .expectErrorMatches(throwable -> throwable instanceof ApplicationException
-                        && ((ApplicationException) throwable).getStatusCode().equals(BAD_REQUEST)
-                        && ((ApplicationException) throwable)
-                        .getStatusText()
-                        .equals("User name or email already exist"))
-                .verify();
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
+        assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("User name or email already exist");
 
         verify(applicationUserRepository, never()).save(any());
     }
@@ -213,17 +193,12 @@ public class ApplicationUserServiceImplTest {
                 "123456",
                 "123456");
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(0));
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(1));
+        when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
+        when(applicationUserRepository.countByEmail(anyString())).thenReturn(1);
 
-        Mono<ApplicationUser> userMono = applicationUserServiceImpl.createNewUser(userRegistration);
-        StepVerifier.create(userMono)
-                .expectErrorMatches(throwable -> throwable instanceof ApplicationException
-                        && ((ApplicationException) throwable).getStatusCode().equals(BAD_REQUEST)
-                        && ((ApplicationException) throwable)
-                        .getStatusText()
-                        .equals("User name or email already exist"))
-                .verify();
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
+        assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("User name or email already exist");
 
         verify(applicationUserRepository, never()).save(any());
     }
@@ -239,17 +214,12 @@ public class ApplicationUserServiceImplTest {
                 "123456",
                 "123456");
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(1));
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(1));
+        when(applicationUserRepository.countByUserName(anyString())).thenReturn(1);
+        when(applicationUserRepository.countByEmail(anyString())).thenReturn(1);
 
-        Mono<ApplicationUser> userMono = applicationUserServiceImpl.createNewUser(userRegistration);
-        StepVerifier.create(userMono)
-                .expectErrorMatches(throwable -> throwable instanceof ApplicationException
-                        && ((ApplicationException) throwable).getStatusCode().equals(BAD_REQUEST)
-                        && ((ApplicationException) throwable)
-                        .getStatusText()
-                        .equals("User name or email already exist"))
-                .verify();
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
+        assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("User name or email already exist");
 
         verify(applicationUserRepository, never()).save(any());
     }
@@ -260,12 +230,11 @@ public class ApplicationUserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(0));
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(0));
+        when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
+        when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
 
-        Mono<Boolean> userValid = applicationUserServiceImpl.validateNewUser(userName, email);
-
-        StepVerifier.create(userValid).expectNext(true).verifyComplete();
+        Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
+        assertThat(userValid).isTrue();
     }
 
     @Test
@@ -274,12 +243,11 @@ public class ApplicationUserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(1));
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(0));
+        when(applicationUserRepository.countByUserName(anyString())).thenReturn(1);
+        when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
 
-        Mono<Boolean> userValid = applicationUserServiceImpl.validateNewUser(userName, email);
-
-        StepVerifier.create(userValid).expectNext(false).verifyComplete();
+        Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
+        assertThat(userValid).isFalse();
     }
 
     @Test
@@ -288,12 +256,11 @@ public class ApplicationUserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(0));
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(1));
+        when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
+        when(applicationUserRepository.countByEmail(anyString())).thenReturn(1);
 
-        Mono<Boolean> userValid = applicationUserServiceImpl.validateNewUser(userName, email);
-
-        StepVerifier.create(userValid).expectNext(false).verifyComplete();
+        Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
+        assertThat(userValid).isFalse();
     }
 
     @Test
@@ -302,12 +269,11 @@ public class ApplicationUserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(Mono.just(1));
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(Mono.just(1));
+        when(applicationUserRepository.countByUserName(anyString())).thenReturn(1);
+        when(applicationUserRepository.countByEmail(anyString())).thenReturn(1);
 
-        Mono<Boolean> userValid = applicationUserServiceImpl.validateNewUser(userName, email);
-
-        StepVerifier.create(userValid).expectNext(false).verifyComplete();
+        Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
+        assertThat(userValid).isFalse();
     }
 
     @Test
@@ -325,34 +291,23 @@ public class ApplicationUserServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(Mono.just(applicationUser));
+        when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(applicationUser);
+        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(singletonList(new SimpleGrantedAuthority("ROLE_USER")));
 
-        Mono<UserDetails> userDetailsMono = applicationUserServiceImpl.findByUsername(applicationUser.getEmail());
-        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(Mono.just(singletonList(new SimpleGrantedAuthority("ROLE_USER"))));
-
-        StepVerifier.create(userDetailsMono)
-                .assertNext(details -> {
-                    assertThat(details.isAccountNonExpired()).isTrue();
-                    assertThat(details.isCredentialsNonExpired()).isTrue();
-                    assertThat(details.isEnabled()).isTrue();
-                    assertThat(details.isAccountNonLocked()).isTrue();
-                    assertThat(details.getAuthorities().toArray()).hasSize(1);
-                    assertThat(details.getAuthorities().toArray())
-                            .contains(new SimpleGrantedAuthority("ROLE_USER"));
-                })
-                .verifyComplete();
+        UserDetails details = applicationUserServiceImpl.loadUserByUsername(applicationUser.getEmail());
+        assertThat(details.isAccountNonExpired()).isTrue();
+        assertThat(details.isCredentialsNonExpired()).isTrue();
+        assertThat(details.isEnabled()).isTrue();
+        assertThat(details.isAccountNonLocked()).isTrue();
+        assertThat(details.getAuthorities().toArray()).hasSize(1);
+        assertThat(details.getAuthorities().toArray()).contains(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Test
     @DisplayName("When find user by email that does not exist return exception")
     void findUserException() {
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Mono.empty());
-
-        Mono<UserDetails> responseMono = applicationUserServiceImpl.findByUsername("email@mail.com");
-        StepVerifier.create(responseMono)
-                .expectErrorMatches(throwable -> throwable instanceof UsernameNotFoundException
-                        && throwable.getMessage().equals("User email@mail.com does not exist"))
-                .verify();
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(null);
+        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.loadUserByUsername("email@mail.com"), "User email@mail.com does not exist");
     }
 
     @Test
@@ -370,18 +325,14 @@ public class ApplicationUserServiceImplTest {
                 null,
                 LocalDateTime.now());
 
-        when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(Mono.just(applicationUser));
-        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(Mono.just(emptyList()));
+        when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(applicationUser);
+        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(emptyList());
 
-        Mono<UserDetails> responseMono = applicationUserServiceImpl.findByUsername(applicationUser.getEmail());
-        StepVerifier.create(responseMono)
-                .expectErrorMatches(throwable -> throwable instanceof ApplicationException
-                        && throwable.getMessage().contains("There is no authorities for this user"))
-                .verify();
+        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.loadUserByUsername("email@mail.com"), "User email@mail.com does not exist");
     }
 
     @Test
-    @DisplayName("When find user by email and the authorities are empty return exception")
+    @DisplayName("When find user by email and the authorities are null return exception")
     void authoritiesEmptyReturnException() {
         ApplicationUser applicationUser = new ApplicationUser(
                 1L,
@@ -395,25 +346,10 @@ public class ApplicationUserServiceImplTest {
                 emptyList(),
                 LocalDateTime.now());
 
-        when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(Mono.just(applicationUser));
-        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(Mono.empty());
+        when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(applicationUser);
+        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(null);
 
-        Mono<UserDetails> responseMono = applicationUserServiceImpl.findByUsername(applicationUser.getEmail());
-        StepVerifier.create(responseMono)
-                .expectErrorMatches(throwable -> throwable instanceof ApplicationException
-                        && throwable.getMessage().contains("There is no authorities for this user"))
-                .verify();
-    }
-
-    @Test
-    @DisplayName("When get user by email that does not exist return exception")
-    void getUserByEmailException() {
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Mono.empty());
-        Mono<ApplicationUser> appUserMono = applicationUserServiceImpl.getUserByEmail("mail@mail.com");
-        StepVerifier.create(appUserMono)
-                .expectErrorMatches(throwable -> throwable instanceof UsernameNotFoundException
-                        && throwable.getMessage().equals("User mail@mail.com does not exist"))
-                .verify();
+        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.loadUserByUsername("email@mail.com"), "User email@mail.com does not exist");
     }
 
     @Test
@@ -429,9 +365,9 @@ public class ApplicationUserServiceImplTest {
                 true,
                 true,
                 emptyList(),
-                LocalDateTime.of(2022,12,12,12,12,12));
+                LocalDateTime.of(2022, 12, 12, 12, 12, 12));
 
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Mono.just(applicationUser));
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(applicationUser);
         when(encoder.encode("password")).thenReturn("new_password_encoded");
 
         ApplicationUser applicationUserWithNewPassword = new ApplicationUser(
@@ -444,23 +380,16 @@ public class ApplicationUserServiceImplTest {
                 true,
                 true,
                 emptyList(),
-                LocalDateTime.of(2022,12,12,12,12,12));
-        when(applicationUserRepository.save(applicationUserWithNewPassword)).thenReturn(Mono.just(applicationUserWithNewPassword));
+                LocalDateTime.of(2022, 12, 12, 12, 12, 12));
+        when(applicationUserRepository.save(applicationUserWithNewPassword)).thenReturn(applicationUserWithNewPassword);
 
-        Mono<ApplicationUser> monoVoid = applicationUserServiceImpl.changePassword("mail@mail.com", "password");
-        StepVerifier.create(monoVoid)
-                .expectNextCount(1)
-                .verifyComplete();
+        applicationUserServiceImpl.changePassword("mail@mail.com", "password");
     }
 
     @Test
     @DisplayName("Change password when user email does not exist return exception")
     void changePasswordException() {
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Mono.empty());
-        Mono<ApplicationUser> monoVoid = applicationUserServiceImpl.changePassword("mail@mail.com", "password");
-        StepVerifier.create(monoVoid)
-                .expectErrorMatches(throwable -> throwable instanceof UsernameNotFoundException
-                        && throwable.getMessage().equals("User mail@mail.com does not exist"))
-                .verify();
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(null);
+        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.changePassword("mail@mail.com", "password"), "User email@mail.com does not exist");
     }
 }

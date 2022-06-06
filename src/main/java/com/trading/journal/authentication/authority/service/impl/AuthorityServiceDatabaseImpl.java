@@ -7,7 +7,8 @@ import com.trading.journal.authentication.authority.service.AuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,12 +18,12 @@ public class AuthorityServiceDatabaseImpl implements AuthorityService {
     private final AuthorityRepository authorityRepository;
 
     @Override
-    public Flux<Authority> getAuthoritiesByCategory(AuthorityCategory category) {
+    public List<Authority> getAuthoritiesByCategory(AuthorityCategory category) {
         return authorityRepository.getByCategory(category);
     }
 
     @Override
-    public Flux<Authority> getAll() {
+    public List<Authority> getAll() {
         return authorityRepository.findAll();
     }
 }

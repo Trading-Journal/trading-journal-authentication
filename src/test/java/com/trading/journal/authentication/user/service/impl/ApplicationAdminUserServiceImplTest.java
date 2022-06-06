@@ -14,15 +14,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -48,13 +49,10 @@ class ApplicationAdminUserServiceImplTest {
     void thereIsAdmin() {
         List<String> roles = singletonList("ROLE_ADMIN");
 
-        when(applicationUserRepository.countAdmins(roles)).thenReturn(Mono.just(1));
+        when(applicationUserRepository.countAdmins(roles)).thenReturn(1);
 
-        Mono<Boolean> booleanMono = applicationAdminUserService.thereIsAdmin();
-
-        StepVerifier.create(booleanMono)
-                .expectNext(true)
-                .verifyComplete();
+        Boolean thereIsAdmin = applicationAdminUserService.thereIsAdmin();
+        assertThat(thereIsAdmin).isTrue();
     }
 
     @DisplayName("When count zero user admin false")
@@ -62,13 +60,10 @@ class ApplicationAdminUserServiceImplTest {
     void thereIsNoAdmin() {
         List<String> roles = singletonList("ROLE_ADMIN");
 
-        when(applicationUserRepository.countAdmins(roles)).thenReturn(Mono.just(0));
+        when(applicationUserRepository.countAdmins(roles)).thenReturn(0);
 
-        Mono<Boolean> booleanMono = applicationAdminUserService.thereIsAdmin();
-
-        StepVerifier.create(booleanMono)
-                .expectNext(false)
-                .verifyComplete();
+        Boolean thereIsAdmin = applicationAdminUserService.thereIsAdmin();
+        assertThat(thereIsAdmin).isFalse();
     }
 
     @DisplayName("Given admin registration create admin user and send the verification email")
@@ -91,14 +86,11 @@ class ApplicationAdminUserServiceImplTest {
         UserAuthority userAuthority = new UserAuthority(1L, "ADMIN", 1L);
 
         when(encoder.encode("mail@mail.com")).thenReturn("password_secret");
-        when(applicationUserRepository.save(any())).thenReturn(Mono.just(applicationUser));
-        when(userAuthorityService.saveAdminUserAuthorities(applicationUser)).thenReturn(Mono.just(userAuthority));
-        when(applicationUserRepository.findById(1L)).thenReturn(Mono.just(applicationUser));
-        when(verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser)).thenReturn(Mono.empty());
+        when(applicationUserRepository.save(any())).thenReturn(applicationUser);
+        when(userAuthorityService.saveAdminUserAuthorities(applicationUser)).thenReturn(userAuthority);
+        when(applicationUserRepository.findById(1L)).thenReturn(Optional.of(applicationUser));
+        doNothing().when(verificationService).send(VerificationType.ADMIN_REGISTRATION, applicationUser);
 
-        Mono<Void> voidMono = applicationAdminUserService.createAdmin(adminRegistration);
-        StepVerifier.create(voidMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        applicationAdminUserService.createAdmin(adminRegistration);
     }
 }

@@ -12,24 +12,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class SecurityConfiguration {
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final ApplicationUserService applicationUserService;
     private final PasswordEncoder passwordEncoder;
@@ -38,38 +38,35 @@ public class SecurityConfiguration {
 
     private final AuthorityService authorityService;
 
-    @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        ServerHttpSecurity serverHttpSecurity = http.csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
-                .cors()
+    @Override
+    protected void configure(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity
+                .exceptionHandling().authenticationEntryPoint(serverAuthenticationExceptionEntryPoint).and()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .antMatchers(getPublicPath()).permitAll()
                 .and()
-                .headers()
-                .frameOptions()
-                .disable()
-                .and()
-                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
-                .exceptionHandling()
-                .authenticationEntryPoint(serverAuthenticationExceptionEntryPoint)
-                .and()
-                .authorizeExchange(exchangeSpec -> exchangeSpec.pathMatchers(HttpMethod.OPTIONS, "/**")
-                        .permitAll()
-                        .pathMatchers(getPublicPath())
-                        .permitAll());
+                .addFilterBefore(new JwtTokenAuthenticationFilter(tokenReader), UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        httpSecurity.cors();
+        httpSecurity.csrf().disable();
+        httpSecurity.headers().frameOptions().disable();
 
         Map<AuthorityCategory, String[]> authorityCategoryMap = getAuthorityCategoryMap();
-        serverHttpSecurity.authorizeExchange(exchangeSpec -> exchangeSpec.pathMatchers(getAdminPath()).hasAnyAuthority(authorityCategoryMap.get(AuthorityCategory.ADMINISTRATOR)));
-        serverHttpSecurity.authorizeExchange(exchangeSpec -> exchangeSpec.anyExchange().hasAnyAuthority(authorityCategoryMap.get(AuthorityCategory.COMMON_USER)));
+        httpSecurity.authorizeRequests().antMatchers(getAdminPath()).hasAnyAuthority(authorityCategoryMap.get(AuthorityCategory.ADMINISTRATOR));
+        httpSecurity.authorizeRequests().anyRequest().hasAnyAuthority(authorityCategoryMap.get(AuthorityCategory.COMMON_USER));
+    }
 
-        return serverHttpSecurity.addFilterAt(new JwtTokenAuthenticationFilter(tokenReader), SecurityWebFiltersOrder.HTTP_BASIC).build();
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(applicationUserService).passwordEncoder(passwordEncoder);
     }
 
     @Bean
-    public ReactiveAuthenticationManager reactiveAuthenticationManager() {
-        UserDetailsRepositoryReactiveAuthenticationManager authenticationManager = new UserDetailsRepositoryReactiveAuthenticationManager(
-                applicationUserService);
-        authenticationManager.setPasswordEncoder(passwordEncoder);
-        return authenticationManager;
+    @Override
+    protected AuthenticationManager authenticationManager() throws Exception {
+        return super.authenticationManager();
     }
 
     private String[] getPublicPath() {
@@ -85,20 +82,21 @@ public class SecurityConfiguration {
 
     private Map<AuthorityCategory, String[]> getAuthorityCategoryMap() {
         Map<AuthorityCategory, String[]> categoryAuthorities = new ConcurrentHashMap<>();
+
         Arrays.stream(AuthorityCategory.values()).toList()
                 .forEach(category -> {
-                    String[] authorities = authorityService.getAuthoritiesByCategory(category).collectList().blockOptional()
-                            .filter(list -> !list.isEmpty())
-                            .orElseGet(() -> {
-                                log.info("No authorities found in the database for {} category, so it will use the default authorities.", category);
-                                return AuthoritiesHelper.getByCategory(category)
-                                        .stream()
-                                        .map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()))
-                                        .collect(Collectors.toList());
-                            })
-                            .stream()
-                            .map(Authority::getName)
-                            .toArray(String[]::new);
+                    String[] authorities;
+                    List<Authority> authoritiesByCategory = authorityService.getAuthoritiesByCategory(category);
+                    if (authoritiesByCategory.isEmpty()) {
+                        authorities = AuthoritiesHelper.getByCategory(category)
+                                .stream()
+                                .map(AuthoritiesHelper::getLabel)
+                                .toArray(String[]::new);
+                    } else {
+                        authorities = authoritiesByCategory.stream()
+                                .map(Authority::getName)
+                                .toArray(String[]::new);
+                    }
                     categoryAuthorities.put(category, authorities);
                 });
         return categoryAuthorities;

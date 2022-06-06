@@ -16,8 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -26,7 +24,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class VerificationEmailServiceImplTest {
@@ -74,12 +73,9 @@ class VerificationEmailServiceImplTest {
                 singletonList("mail@mail.com")
         );
 
-        when(emailSender.send(emailRequest)).thenReturn(Mono.empty());
+        doNothing().when(emailSender).send(emailRequest);
 
-        Mono<Void> voidMono = verificationEmailService.sendEmail(verification, applicationUser);
-
-        StepVerifier.create(voidMono)
-                .verifyComplete();
+        verificationEmailService.sendEmail(verification, applicationUser);
     }
 
     @DisplayName("Given verification CHANGE_PASSWORD and application user end and email with correct URL")
@@ -116,12 +112,9 @@ class VerificationEmailServiceImplTest {
                 singletonList("mail@mail.com")
         );
 
-        when(emailSender.send(emailRequest)).thenReturn(Mono.empty());
+        doNothing().when(emailSender).send(emailRequest);
 
-        Mono<Void> voidMono = verificationEmailService.sendEmail(verification, applicationUser);
-
-        StepVerifier.create(voidMono)
-                .verifyComplete();
+        verificationEmailService.sendEmail(verification, applicationUser);
     }
 
     @DisplayName("Given verification CHANGE_PASSWORD and application user end and email with correct URL")
@@ -158,11 +151,8 @@ class VerificationEmailServiceImplTest {
                 singletonList("mail@mail.com")
         );
 
-        when(emailSender.send(emailRequest)).thenReturn(Mono.empty());
+        doNothing().when(emailSender).send(emailRequest);
 
-        Mono<Void> voidMono = verificationEmailService.sendEmail(verification, applicationUser);
-
-        StepVerifier.create(voidMono)
-                .verifyComplete();
+        verificationEmailService.sendEmail(verification, applicationUser);
     }
 }

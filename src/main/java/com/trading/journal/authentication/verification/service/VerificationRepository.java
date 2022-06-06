@@ -2,12 +2,16 @@ package com.trading.journal.authentication.verification.service;
 
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import reactor.core.publisher.Mono;
+import org.springframework.data.repository.CrudRepository;
 
-public interface VerificationRepository extends ReactiveCrudRepository<Verification, Long> {
+import java.util.List;
 
-    Mono<Verification> getByHashAndEmail(String hash, String email);
+public interface VerificationRepository extends CrudRepository<Verification, Long> {
 
-    Mono<Verification> getByTypeAndEmail(VerificationType type, String email);
+    @Override
+    List<Verification> findAll();
+
+    Verification getByHashAndEmail(String hash, String email);
+
+    Verification getByTypeAndEmail(VerificationType type, String email);
 }

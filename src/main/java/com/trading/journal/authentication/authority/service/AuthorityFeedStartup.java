@@ -8,8 +8,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Component
@@ -21,10 +19,15 @@ public class AuthorityFeedStartup implements ApplicationListener<ApplicationRead
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        Flux.fromArray(AuthoritiesHelper.values())
-                .map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()))
-                .map(authority -> authorityRepository.getByName(authority.getName())
-                        .switchIfEmpty(Mono.defer(() -> authorityRepository.save(authority)))
-                        ).subscribe(authorityMono -> authorityMono.subscribe(authority -> log.info("Authority available {}", authority.getName())));
+        for (AuthoritiesHelper authoritiesHelper : AuthoritiesHelper.values()) {
+            Authority authority = new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel());
+            Authority byName = authorityRepository.getByName(authority.getName());
+            if (byName == null) {
+                authorityRepository.save(authority);
+                log.info("New authority available {}", authority.getName());
+            } else {
+                log.info("Authority already available {}", authority.getName());
+            }
+        }
     }
 }

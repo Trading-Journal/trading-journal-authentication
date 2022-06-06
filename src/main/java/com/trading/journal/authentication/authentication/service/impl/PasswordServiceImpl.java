@@ -13,9 +13,7 @@ import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import static java.util.Collections.singletonList;
 
@@ -32,28 +30,25 @@ public class PasswordServiceImpl implements PasswordService {
     private final EmailSender emailSender;
 
     @Override
-    public Mono<Void> requestPasswordChange(String email) {
-        return applicationUserService.getUserByEmail(email)
-                .switchIfEmpty(Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
-                .flatMap(applicationUser -> verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser))
-                .name("password_change_request")
-                .metrics();
+    public void requestPasswordChange(String email) {
+        ApplicationUser applicationUser = applicationUserService.getUserByEmail(email);
+        verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
     }
 
     @Override
-    public Mono<Void> changePassword(ChangePassword changePassword) {
-        return verificationService.retrieve(changePassword.hash())
-                .filter(verification -> validateVerification(changePassword, verification))
-                .switchIfEmpty(Mono.error(new ApplicationException(HttpStatus.BAD_REQUEST, "Change password request is invalid")))
-                .flatMap(verification -> applicationUserService.changePassword(changePassword.email(), changePassword.getPassword())
-                        .flatMap(applicationUser -> emailSender.send(emailRequest(applicationUser)))
-                        .then(verificationService.verify(verification))
-                )
-                .name("password_change")
-                .metrics();
+    public void changePassword(ChangePassword changePassword) {
+        Verification verification = verificationService.retrieve(changePassword.hash());
+        if (validateVerification(changePassword, verification)) {
+            ApplicationUser applicationUser = applicationUserService.changePassword(changePassword.email(), changePassword.getPassword());
+            EmailRequest emailRequest = passwordChangeConfirmation(applicationUser);
+            emailSender.send(emailRequest);
+            verificationService.verify(verification);
+        } else {
+            throw new ApplicationException(HttpStatus.BAD_REQUEST, "Change password request is invalid");
+        }
     }
 
-    private EmailRequest emailRequest(ApplicationUser applicationUser) {
+    private EmailRequest passwordChangeConfirmation(ApplicationUser applicationUser) {
         return new EmailRequest(
                 "Confirmação de alteração senha",
                 CONFIRMATION_PASSWORD_EMAIL_TEMPLATE,

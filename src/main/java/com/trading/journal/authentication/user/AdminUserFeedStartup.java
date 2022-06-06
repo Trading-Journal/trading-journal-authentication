@@ -20,15 +20,12 @@ public class AdminUserFeedStartup implements ApplicationListener<ApplicationRead
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        applicationAdminUserService.thereIsAdmin()
-                .subscribe(thereIdAdmin -> {
-                    if (thereIdAdmin) {
-                        log.info("Admin has been already create previously");
-                    } else {
-                        UserRegistration userRegistration = new UserRegistration("Admin", "Administrator", "admin", adminUserProperties.email(), null, null);
-                        applicationAdminUserService.createAdmin(userRegistration)
-                                .subscribe(unused -> log.info("Admin user created during startup"));
-                    }
-                });
+        if (applicationAdminUserService.thereIsAdmin()) {
+            log.info("Admin has been already create previously");
+        } else {
+            UserRegistration userRegistration = new UserRegistration("Admin", "Administrator", "admin", adminUserProperties.email(), null, null);
+            applicationAdminUserService.createAdmin(userRegistration);
+            log.info("Admin user created during startup");
+        }
     }
 }

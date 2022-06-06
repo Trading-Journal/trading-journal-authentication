@@ -5,13 +5,12 @@ import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.registration.service.RegistrationService;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import com.trading.journal.authentication.verification.service.VerificationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 
@@ -26,51 +25,27 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final VerificationProperties verificationProperties;
 
     @Override
-    public Mono<SignUpResponse> signUp(@Valid UserRegistration userRegistration) {
-        return applicationUserService.createNewUser(userRegistration)
-                .flatMap(this::sendVerification)
-                .name("signup_user")
-                .metrics();
+    public SignUpResponse signUp(@Valid UserRegistration userRegistration) {
+        ApplicationUser applicationUser = applicationUserService.createNewUser(userRegistration);
+        return sendVerification(applicationUser.getEmail());
     }
 
     @Override
-    public Mono<Void> verify(String hash) {
-        return verificationService.retrieve(hash)
-                .flatMap(verification -> applicationUserService.verifyNewUser(verification.getEmail())
-                        .then(verificationService.verify(verification))
-                )
-                .name("verify_new_user")
-                .metrics();
+    public void verify(String hash) {
+        Verification verification = verificationService.retrieve(hash);
+        applicationUserService.verifyNewUser(verification.getEmail());
+        verificationService.verify(verification);
     }
 
     @Override
-    public Mono<SignUpResponse> sendVerification(String email) {
+    public SignUpResponse sendVerification(String email) {
         SignUpResponse signUpResponse = new SignUpResponse(email, true);
-        Mono<SignUpResponse> methodReturn = Mono.just(signUpResponse);
         if (verificationProperties.isEnabled()) {
-            methodReturn = applicationUserService.getUserByEmail(email)
-                    .switchIfEmpty(Mono.error(new UsernameNotFoundException(String.format("User %s does not exist", email))))
-                    .flatMap(applicationUser -> {
-                        if (applicationUser.getEnabled()) {
-                            return Mono.just(signUpResponse);
-                        } else {
-                            return this.sendVerification(applicationUser);
-                        }
-                    });
+            ApplicationUser applicationUser = applicationUserService.getUserByEmail(email);
+            if (!applicationUser.getEnabled()) {
+                verificationService.send(VerificationType.REGISTRATION, applicationUser);
+            }
         }
-        return methodReturn;
+        return signUpResponse;
     }
-
-    private Mono<SignUpResponse> sendVerification(ApplicationUser applicationUser) {
-        SignUpResponse signUpResponse = new SignUpResponse(applicationUser.getEmail(), applicationUser.getEnabled());
-        Mono<SignUpResponse> signUpResponseMono;
-        if (verificationProperties.isDisabled() || applicationUser.getEnabled().equals(true)) {
-            signUpResponseMono = Mono.just(signUpResponse);
-        } else {
-            signUpResponseMono = verificationService.send(VerificationType.REGISTRATION, applicationUser)
-                    .thenReturn(signUpResponse);
-        }
-        return signUpResponseMono;
-    }
-
 }

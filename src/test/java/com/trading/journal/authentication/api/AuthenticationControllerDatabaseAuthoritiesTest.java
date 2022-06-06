@@ -41,7 +41,7 @@ public class AuthenticationControllerDatabaseAuthoritiesTest {
     @BeforeEach
     public void setUp() {
         webTestClient = WebTestClient.bindToApplicationContext(context).build();
-        applicationUserRepository.deleteAll().block();
+        applicationUserRepository.deleteAll();
     }
 
     @Test
@@ -64,7 +64,7 @@ public class AuthenticationControllerDatabaseAuthoritiesTest {
                 .expectStatus()
                 .isOk();
 
-        List<UserAuthority> userAuthorities = userAuthorityRepository.findAll().collectList().block();
+        List<UserAuthority> userAuthorities = userAuthorityRepository.findAll();
         assert userAuthorities != null;
         userAuthorities.forEach(userAuthority -> assertThat(userAuthority.getAuthorityId()).isNotNull());
     }

@@ -6,12 +6,11 @@ import com.trading.journal.authentication.email.EmailRequest;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.verification.Verification;
-import com.trading.journal.authentication.verification.service.VerificationEmailService;
 import com.trading.journal.authentication.verification.VerificationFields;
+import com.trading.journal.authentication.verification.service.VerificationEmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -28,9 +27,9 @@ public class VerificationEmailServiceImpl implements VerificationEmailService {
     private final HostProperties hostProperties;
 
     @Override
-    public Mono<Void> sendEmail(Verification verification, ApplicationUser applicationUser) {
+    public void sendEmail(Verification verification, ApplicationUser applicationUser) {
         EmailRequest emailRequest = buildEmailRequest(verification, applicationUser);
-        return emailSender.send(emailRequest);
+        emailSender.send(emailRequest);
     }
 
     private EmailRequest buildEmailRequest(Verification verification, ApplicationUser applicationUser) {

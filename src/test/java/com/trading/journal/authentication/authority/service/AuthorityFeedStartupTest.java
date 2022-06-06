@@ -8,7 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import reactor.core.publisher.Mono;
 
 import static org.mockito.Mockito.*;
 
@@ -27,11 +26,11 @@ class AuthorityFeedStartupTest {
         Authority user = new Authority(AuthorityCategory.COMMON_USER, "ROLE_USER");
         Authority admin = new Authority(AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN");
 
-        when(authorityRepository.getByName("ROLE_USER")).thenReturn(Mono.empty());
-        when(authorityRepository.getByName("ROLE_ADMIN")).thenReturn(Mono.empty());
+        when(authorityRepository.getByName("ROLE_USER")).thenReturn(null);
+        when(authorityRepository.getByName("ROLE_ADMIN")).thenReturn(null);
 
-        when(authorityRepository.save(user)).thenReturn(Mono.just(user));
-        when(authorityRepository.save(admin)).thenReturn(Mono.just(admin));
+        when(authorityRepository.save(user)).thenReturn(user);
+        when(authorityRepository.save(admin)).thenReturn(admin);
 
         authorityFeedStartup.onApplicationEvent(null);
 
@@ -45,8 +44,8 @@ class AuthorityFeedStartupTest {
         Authority user = new Authority(AuthorityCategory.COMMON_USER, "ROLE_USER");
         Authority admin = new Authority(AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN");
 
-        when(authorityRepository.getByName("ROLE_USER")).thenReturn(Mono.just(user));
-        when(authorityRepository.getByName("ROLE_ADMIN")).thenReturn(Mono.just(admin));
+        when(authorityRepository.getByName("ROLE_USER")).thenReturn(user);
+        when(authorityRepository.getByName("ROLE_ADMIN")).thenReturn(admin);
 
         authorityFeedStartup.onApplicationEvent(null);
 
@@ -60,10 +59,10 @@ class AuthorityFeedStartupTest {
         Authority user = new Authority(AuthorityCategory.COMMON_USER, "ROLE_USER");
         Authority admin = new Authority(AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN");
 
-        when(authorityRepository.getByName("ROLE_USER")).thenReturn(Mono.just(user));
-        when(authorityRepository.getByName("ROLE_ADMIN")).thenReturn(Mono.empty());
+        when(authorityRepository.getByName("ROLE_USER")).thenReturn(user);
+        when(authorityRepository.getByName("ROLE_ADMIN")).thenReturn(null);
 
-        when(authorityRepository.save(admin)).thenReturn(Mono.just(admin));
+        when(authorityRepository.save(admin)).thenReturn(admin);
 
         authorityFeedStartup.onApplicationEvent(null);
 
@@ -78,10 +77,10 @@ class AuthorityFeedStartupTest {
         Authority user = new Authority(AuthorityCategory.COMMON_USER, "ROLE_USER");
         Authority admin = new Authority(AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN");
 
-        when(authorityRepository.getByName("ROLE_USER")).thenReturn(Mono.empty());
-        when(authorityRepository.getByName("ROLE_ADMIN")).thenReturn(Mono.just(admin));
+        when(authorityRepository.getByName("ROLE_USER")).thenReturn(null);
+        when(authorityRepository.getByName("ROLE_ADMIN")).thenReturn(admin);
 
-        when(authorityRepository.save(user)).thenReturn(Mono.just(user));
+        when(authorityRepository.save(user)).thenReturn(user);
 
         authorityFeedStartup.onApplicationEvent(null);
 

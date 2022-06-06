@@ -12,7 +12,6 @@ import com.trading.journal.authentication.verification.service.VerificationServi
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -26,36 +25,33 @@ public class VerificationServiceImpl implements VerificationService {
     private final HashProvider hashProvider;
 
     @Override
-    public Mono<Void> send(VerificationType verificationType, ApplicationUser applicationUser) {
-        return verificationRepository.getByTypeAndEmail(verificationType, applicationUser.getEmail())
-                .switchIfEmpty(create(verificationType, applicationUser))
-                .map(verification -> verification.renew(hashProvider.generateHash(verification.getEmail())))
-                .flatMap(verificationRepository::save)
-                .flatMap(verification -> verificationEmailService.sendEmail(verification, applicationUser));
-    }
-
-    @Override
-    public Mono<Verification> retrieve(String hash) {
-        String email = hashProvider.readHashValue(hash);
-        return verificationRepository.getByHashAndEmail(hash, email)
-                .switchIfEmpty(Mono.error(new ApplicationException(HttpStatus.BAD_REQUEST, "Request is invalid")));
-    }
-
-    @Override
-    public Mono<Void> verify(Verification verification) {
-        Mono<Void> delete = verificationRepository.delete(verification);
-        if(VerificationType.ADMIN_REGISTRATION.equals(verification.getType())){
-            delete = applicationUserService.getUserByEmail(verification.getEmail())
-                    .map(applicationUser -> this.send(VerificationType.CHANGE_PASSWORD, applicationUser))
-                    .then(delete);
+    public void send(VerificationType verificationType, ApplicationUser applicationUser) {
+        Verification verification = verificationRepository.getByTypeAndEmail(verificationType, applicationUser.getEmail());
+        if (verification == null) {
+            verification = Verification.builder().email(applicationUser.getEmail()).type(verificationType).build();
+        } else {
+            verification = verification.renew(hashProvider.generateHash(verification.getEmail()));
         }
-        return delete;
+        verification = verificationRepository.save(verification);
+        verificationEmailService.sendEmail(verification, applicationUser);
     }
 
-    private Mono<Verification> create(VerificationType verificationType, ApplicationUser applicationUser) {
-        return Mono.just(Verification.builder()
-                .email(applicationUser.getEmail())
-                .type(verificationType)
-                .build());
+    @Override
+    public Verification retrieve(String hash) {
+        String email = hashProvider.readHashValue(hash);
+        Verification verification = verificationRepository.getByHashAndEmail(hash, email);
+        if(verification == null) {
+            throw new ApplicationException(HttpStatus.BAD_REQUEST, "Request is invalid");
+        }
+        return verification;
+    }
+
+    @Override
+    public void verify(Verification verification) {
+        if (VerificationType.ADMIN_REGISTRATION.equals(verification.getType())) {
+            ApplicationUser applicationUser = applicationUserService.getUserByEmail(verification.getEmail());
+            this.send(VerificationType.CHANGE_PASSWORD, applicationUser);
+        }
+        verificationRepository.delete(verification);
     }
 }

@@ -1,46 +1,40 @@
 package com.trading.journal.authentication.authentication.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.impl.AuthenticationServiceImpl;
-import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
-import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.jwt.data.TokenData;
+import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
+import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.user.UserInfo;
-
+import com.trading.journal.authentication.user.service.ApplicationUserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 public class AuthenticationServiceImplTest {
@@ -49,7 +43,7 @@ public class AuthenticationServiceImplTest {
     ApplicationUserService applicationUserService;
 
     @Mock
-    ReactiveAuthenticationManager authenticationManager;
+    AuthenticationManager authenticationManager;
 
     @Mock
     JwtTokenProvider jwtTokenProvider;
@@ -68,9 +62,8 @@ public class AuthenticationServiceImplTest {
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
         ContextUser principal = new ContextUser("mail@mail.com", authorities, "username");
         Authentication authentication = new UsernamePasswordAuthenticationToken(principal, authorities);
-        when(authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password())))
-                .thenReturn(Mono.just(authentication));
+        when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password())))
+                .thenReturn(authentication);
 
         ApplicationUser applicationUser = new ApplicationUser(
                 1L,
@@ -83,7 +76,7 @@ public class AuthenticationServiceImplTest {
                 true,
                 Collections.emptyList(),
                 LocalDateTime.now());
-        when(applicationUserService.getUserByEmail(login.email())).thenReturn(Mono.just(applicationUser));
+        when(applicationUserService.getUserByEmail(login.email())).thenReturn(applicationUser);
 
         TokenData accessToken = new TokenData("token", LocalDateTime.now());
         when(jwtTokenProvider.generateAccessToken(applicationUser)).thenReturn(accessToken);
@@ -91,13 +84,9 @@ public class AuthenticationServiceImplTest {
         TokenData refreshToken = new TokenData("refreshToken", LocalDateTime.now());
         when(jwtTokenProvider.generateRefreshToken(applicationUser)).thenReturn(refreshToken);
 
-        Mono<LoginResponse> signIn = authenticationService.signIn(login);
-        StepVerifier.create(signIn)
-                .assertNext(response -> {
-                    assertThat(response.accessToken()).isEqualTo("token");
-                    assertThat(response.refreshToken()).isEqualTo("refreshToken");
-                }).verifyComplete();
-
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse.accessToken()).isEqualTo("token");
+        assertThat(loginResponse.refreshToken()).isEqualTo("refreshToken");
     }
 
     @Test
@@ -126,9 +115,9 @@ public class AuthenticationServiceImplTest {
                 Collections.singletonList("REFRESH_TOKEN"));
         when(jwtTokenReader.getTokenInfo(refreshToken)).thenReturn(tokenInfo);
 
-        UserInfo userInfo = new UserInfo(1L,"subject", "firstName", "lastName", "email@mail.com", true, true,
+        UserInfo userInfo = new UserInfo(1L, "subject", "firstName", "lastName", "email@mail.com", true, true,
                 Collections.singletonList("ROLE_USER"), LocalDateTime.now());
-        when(applicationUserService.getUserInfo("subject")).thenReturn(Mono.just(userInfo));
+        when(applicationUserService.getUserInfo("subject")).thenReturn(userInfo);
 
         ApplicationUser applicationUser = new ApplicationUser(
                 1L,
@@ -141,17 +130,14 @@ public class AuthenticationServiceImplTest {
                 true,
                 Collections.emptyList(),
                 LocalDateTime.now());
-        when(applicationUserService.getUserByEmail("email@mail.com")).thenReturn(Mono.just(applicationUser));
+        when(applicationUserService.getUserByEmail("email@mail.com")).thenReturn(applicationUser);
 
         TokenData tokenData = new TokenData("new_token", LocalDateTime.now());
         when(jwtTokenProvider.generateAccessToken(applicationUser)).thenReturn(tokenData);
 
-        Mono<LoginResponse> response = authenticationService.refreshToken(refreshToken);
-        StepVerifier.create(response)
-                .assertNext(data -> {
-                    assertThat(data.accessToken()).isEqualTo("new_token");
-                    assertThat(data.refreshToken()).isEqualTo(refreshToken);
-                }).verifyComplete();
+        LoginResponse loginResponse = authenticationService.refreshToken(refreshToken);
+        assertThat(loginResponse.accessToken()).isEqualTo("new_token");
+        assertThat(loginResponse.refreshToken()).isEqualTo(refreshToken);
     }
 
     @Test
@@ -161,14 +147,9 @@ public class AuthenticationServiceImplTest {
 
         when(jwtTokenReader.isTokenValid(refreshToken)).thenReturn(false);
 
-        Mono<LoginResponse> response = authenticationService.refreshToken(refreshToken);
-        StepVerifier.create(response)
-                .expectErrorMatches(throwable -> throwable instanceof ApplicationException
-                        && ((ApplicationException) throwable).getStatusCode().equals(HttpStatus.UNAUTHORIZED)
-                        && ((ApplicationException) throwable)
-                                .getStatusText()
-                                .equals("Refresh token is expired"))
-                .verify();
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationService.refreshToken(refreshToken));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(exception.getStatusText()).isEqualTo("Refresh token is expired");
 
         verify(jwtTokenReader, never()).getTokenInfo(anyString());
         verify(applicationUserService, never()).getUserInfo(anyString());
@@ -187,14 +168,9 @@ public class AuthenticationServiceImplTest {
                 Collections.singletonList("USER_ROLE"));
         when(jwtTokenReader.getTokenInfo(refreshToken)).thenReturn(tokenInfo);
 
-        Mono<LoginResponse> response = authenticationService.refreshToken(refreshToken);
-        StepVerifier.create(response)
-                .expectErrorMatches(throwable -> throwable instanceof ApplicationException
-                        && ((ApplicationException) throwable).getStatusCode().equals(HttpStatus.UNAUTHORIZED)
-                        && ((ApplicationException) throwable)
-                                .getStatusText()
-                                .equals("Refresh token is invalid or is not a refresh token"))
-                .verify();
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationService.refreshToken(refreshToken));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(exception.getStatusText()).isEqualTo("Refresh token is invalid or is not a refresh token");
 
         verify(applicationUserService, never()).getUserInfo(anyString());
         verify(applicationUserService, never()).getUserByEmail(anyString());

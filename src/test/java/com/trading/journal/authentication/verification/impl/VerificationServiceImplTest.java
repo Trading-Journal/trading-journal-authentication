@@ -17,14 +17,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -69,15 +69,12 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Mono.empty());
+        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(null);
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
-        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
-        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+        when(verificationRepository.save(any())).thenReturn(verificationSaved);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        Mono<Void> voidMono = verificationService.send(VerificationType.REGISTRATION, applicationUser);
-        StepVerifier.create(voidMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        verificationService.send(VerificationType.REGISTRATION, applicationUser);
     }
 
     @DisplayName("Given verification type CHANGE_PASSWORD and application user send the verification to user email and never execute delete because previous verification did not exist")
@@ -103,15 +100,12 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Mono.empty());
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(null);
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
-        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
-        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+        when(verificationRepository.save(any())).thenReturn(verificationSaved);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        Mono<Void> voidMono = verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
-        StepVerifier.create(voidMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
     }
 
     @DisplayName("Given verification type ADMIN_REGISTRATION and application user send the verification to user email and never execute delete because previous verification did not exist")
@@ -137,15 +131,12 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Mono.empty());
+        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(null);
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
-        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
-        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+        when(verificationRepository.save(any())).thenReturn(verificationSaved);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        Mono<Void> voidMono = verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
-        StepVerifier.create(voidMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
     }
 
     @DisplayName("Given verification type REGISTRATION and application user send the verification to user email and execute delete because previous verification did exist")
@@ -171,15 +162,12 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Mono.just(verificationSaved));
+        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(verificationSaved);
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
-        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
-        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+        when(verificationRepository.save(any())).thenReturn(verificationSaved);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        Mono<Void> voidMono = verificationService.send(VerificationType.REGISTRATION, applicationUser);
-        StepVerifier.create(voidMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        verificationService.send(VerificationType.REGISTRATION, applicationUser);
     }
 
     @DisplayName("Given verification type CHANGE_PASSWORD and application user send the verification to user email and execute delete because previous verification did exist")
@@ -205,15 +193,12 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Mono.just(verificationSaved));
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(verificationSaved);
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
-        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
-        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+        when(verificationRepository.save(any())).thenReturn(verificationSaved);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        Mono<Void> voidMono = verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
-        StepVerifier.create(voidMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
     }
 
     @DisplayName("Given verification type ADMIN_REGISTRATION and application user send the verification to user email and execute delete because previous verification did exist")
@@ -239,15 +224,12 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Mono.just(verificationSaved));
+        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(verificationSaved);
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
-        when(verificationRepository.save(any())).thenReturn(Mono.just(verificationSaved));
-        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+        when(verificationRepository.save(any())).thenReturn(verificationSaved);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        Mono<Void> voidMono = verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
-        StepVerifier.create(voidMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
     }
 
     @DisplayName("Given hash and email find current Verification REGISTRATION")
@@ -263,13 +245,10 @@ class VerificationServiceImplTest {
                 LocalDateTime.now());
 
         when(hashProvider.readHashValue(hash)).thenReturn(email);
-        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Mono.just(verificationSaved));
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(verificationSaved);
 
-        Mono<Verification> verificationMono = verificationService.retrieve(hash);
-
-        StepVerifier.create(verificationMono)
-                .expectNext(verificationSaved)
-                .verifyComplete();
+        Verification verification = verificationService.retrieve(hash);
+        assertThat(verificationSaved).isEqualTo(verification);
     }
 
     @DisplayName("Given hash and email find current Verification CHANGE_PASSWORD")
@@ -285,13 +264,11 @@ class VerificationServiceImplTest {
                 LocalDateTime.now());
 
         when(hashProvider.readHashValue(hash)).thenReturn(email);
-        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Mono.just(verificationSaved));
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(verificationSaved);
 
-        Mono<Verification> verificationMono = verificationService.retrieve(hash);
+        Verification verification = verificationService.retrieve(hash);
 
-        StepVerifier.create(verificationMono)
-                .expectNext(verificationSaved)
-                .verifyComplete();
+        assertThat(verificationSaved).isEqualTo(verification);
     }
 
     @DisplayName("Given hash and email find current Verification ADMIN_REGISTRATION")
@@ -307,13 +284,11 @@ class VerificationServiceImplTest {
                 LocalDateTime.now());
 
         when(hashProvider.readHashValue(hash)).thenReturn(email);
-        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Mono.just(verificationSaved));
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(verificationSaved);
 
-        Mono<Verification> verificationMono = verificationService.retrieve(hash);
+        Verification verification = verificationService.retrieve(hash);
 
-        StepVerifier.create(verificationMono)
-                .expectNext(verificationSaved)
-                .verifyComplete();
+        assertThat(verificationSaved).isEqualTo(verification);
     }
 
     @DisplayName("Given hash and email find current Verification not found return exception")
@@ -322,17 +297,11 @@ class VerificationServiceImplTest {
         String hash = "12456";
         String email = "mail@mail.com";
         when(hashProvider.readHashValue(hash)).thenReturn(email);
-        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Mono.empty());
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(null);
 
-        Mono<Verification> verificationMono = verificationService.retrieve(hash);
-
-        StepVerifier.create(verificationMono)
-                .expectErrorMatches(throwable -> throwable instanceof ApplicationException
-                        && ((ApplicationException) throwable).getStatusCode().equals(BAD_REQUEST)
-                        && ((ApplicationException) throwable)
-                        .getStatusText()
-                        .equals("Request is invalid"))
-                .verify();
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> verificationService.retrieve(hash));
+        assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("Request is invalid");
     }
 
     @DisplayName("Given Verification REGISTRATION delete it when Verify")
@@ -345,13 +314,9 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        when(verificationRepository.delete(verificationSaved)).thenReturn(Mono.empty());
+        doNothing().when(verificationRepository).delete(verificationSaved);
 
-        Mono<Void> voidMono = verificationService.verify(verificationSaved);
-
-        StepVerifier.create(voidMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        verificationService.verify(verificationSaved);
 
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(hashProvider, never()).generateHash(anyString());
@@ -369,13 +334,9 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        when(verificationRepository.delete(verificationSaved)).thenReturn(Mono.empty());
+        doNothing().when(verificationRepository).delete(verificationSaved);
 
-        Mono<Void> voidMono = verificationService.verify(verificationSaved);
-
-        StepVerifier.create(voidMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        verificationService.verify(verificationSaved);
 
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(hashProvider, never()).generateHash(anyString());
@@ -415,17 +376,13 @@ class VerificationServiceImplTest {
                 emptyList(),
                 LocalDateTime.now());
 
-        when(applicationUserService.getUserByEmail(email)).thenReturn(Mono.just(applicationUser));
-        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(Mono.empty());
+        when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(null);
         when(hashProvider.generateHash(email)).thenReturn(hash);
-        when(verificationRepository.save(any())).thenReturn(Mono.just(changerPassword));
-        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
-        when(verificationRepository.delete(adminRegistration)).thenReturn(Mono.empty());
+        when(verificationRepository.save(any())).thenReturn(changerPassword);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
+        doNothing().when(verificationRepository).delete(adminRegistration);
 
-        Mono<Void> voidMono = verificationService.verify(adminRegistration);
-
-        StepVerifier.create(voidMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        verificationService.verify(adminRegistration);
     }
 }

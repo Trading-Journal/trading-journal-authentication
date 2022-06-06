@@ -12,14 +12,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class EmailSenderImplTest {
@@ -45,8 +43,6 @@ class EmailSenderImplTest {
         when(templateFormat.format(emailRequest.template(), emailRequest.fields())).thenReturn("Any email text");
         when(templateFormat.addBodyToEmail("Any email text")).thenReturn("Complete message");
 
-        Mono<Void> voidMono = emailSender.send(emailRequest);
-        StepVerifier.create(voidMono)
-                .verifyComplete();
+        emailSender.send(emailRequest);
     }
 }

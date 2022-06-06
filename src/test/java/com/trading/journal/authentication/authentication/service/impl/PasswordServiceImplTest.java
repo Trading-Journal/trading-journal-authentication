@@ -9,7 +9,6 @@ import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.verification.Verification;
-import com.trading.journal.authentication.verification.VerificationFields;
 import com.trading.journal.authentication.verification.VerificationStatus;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationService;
@@ -21,14 +20,14 @@ import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.UUID;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -52,21 +51,20 @@ class PasswordServiceImplTest {
         String email = "mail@mail.com";
         ApplicationUser applicationUser = new ApplicationUser(1L, "UserAdm", "123456", "User", "Admin", email, true, true, Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")), LocalDateTime.now());
 
-        when(applicationUserService.getUserByEmail(email)).thenReturn(Mono.just(applicationUser));
-        when(verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser)).thenReturn(Mono.empty());
+        when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
+        doNothing().when(verificationService).send(VerificationType.CHANGE_PASSWORD, applicationUser);
 
-        Mono<Void> voidMono = passwordService.requestPasswordChange(email);
-        StepVerifier.create(voidMono).expectNextCount(0).verifyComplete();
+        passwordService.requestPasswordChange(email);
     }
 
     @DisplayName("Request for a password change when user does not exist return exception")
     @Test
     void passwordChangeRequestException() {
         String email = "mail@mail.com";
-        when(applicationUserService.getUserByEmail(email)).thenReturn(Mono.empty());
+        when(applicationUserService.getUserByEmail(email)).thenReturn(null);
 
-        Mono<Void> voidMono = passwordService.requestPasswordChange(email);
-        StepVerifier.create(voidMono).expectErrorMatches(throwable -> throwable instanceof UsernameNotFoundException && throwable.getMessage().equals(String.format("User %s does not exist", email))).verify();
+        UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> passwordService.requestPasswordChange(email));
+        assertThat(exception.getMessage()).isEqualTo(String.format("User %s does not exist", email));
 
         verify(verificationService, never()).send(any(), any());
     }
@@ -76,10 +74,11 @@ class PasswordServiceImplTest {
     void passwordChangeHashNotFound() {
         ChangePassword changePassword = new ChangePassword("mail@email.com", "null", "dad231#$#4", "dad231#$#4123");
 
-        when(verificationService.retrieve(changePassword.hash())).thenReturn(Mono.empty());
+        when(verificationService.retrieve(changePassword.hash())).thenReturn(null);
 
-        Mono<Void> voidMono = passwordService.changePassword(changePassword);
-        StepVerifier.create(voidMono).expectErrorMatches(throwable -> throwable instanceof ApplicationException && ((ApplicationException) throwable).getStatusCode().equals(HttpStatus.BAD_REQUEST) && ((ApplicationException) throwable).getStatusText().equals("Change password request is invalid")).verify();
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> passwordService.changePassword(changePassword));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatusText()).isNotEqualTo("Change password request is invalid");
 
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
@@ -95,10 +94,11 @@ class PasswordServiceImplTest {
         ChangePassword changePassword = new ChangePassword(email, hash, "dad231#$#4", "dad231#$#4123");
         Verification verification = new Verification(1L, "anotheremail@mail.com", VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
-        when(verificationService.retrieve(changePassword.hash())).thenReturn(Mono.just(verification));
+        when(verificationService.retrieve(changePassword.hash())).thenReturn(verification);
 
-        Mono<Void> voidMono = passwordService.changePassword(changePassword);
-        StepVerifier.create(voidMono).expectErrorMatches(throwable -> throwable instanceof ApplicationException && ((ApplicationException) throwable).getStatusCode().equals(HttpStatus.BAD_REQUEST) && ((ApplicationException) throwable).getStatusText().equals("Change password request is invalid")).verify();
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> passwordService.changePassword(changePassword));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatusText()).isNotEqualTo("Change password request is invalid");
 
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
@@ -114,10 +114,11 @@ class PasswordServiceImplTest {
         ChangePassword changePassword = new ChangePassword(email, hash, "dad231#$#4", "dad231#$#4123");
         Verification verification = new Verification(1L, email, VerificationType.REGISTRATION, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
-        when(verificationService.retrieve(changePassword.hash())).thenReturn(Mono.just(verification));
+        when(verificationService.retrieve(changePassword.hash())).thenReturn(verification);
 
-        Mono<Void> voidMono = passwordService.changePassword(changePassword);
-        StepVerifier.create(voidMono).expectErrorMatches(throwable -> throwable instanceof ApplicationException && ((ApplicationException) throwable).getStatusCode().equals(HttpStatus.BAD_REQUEST) && ((ApplicationException) throwable).getStatusText().equals("Change password request is invalid")).verify();
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> passwordService.changePassword(changePassword));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatusText()).isNotEqualTo("Change password request is invalid");
 
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
@@ -150,13 +151,12 @@ class PasswordServiceImplTest {
         ChangePassword changePassword = new ChangePassword(email, hash, "dad231#$#4", "dad231#$#4123");
         Verification verification = new Verification(1L, email, VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
-        when(verificationService.retrieve(changePassword.hash())).thenReturn(Mono.just(verification));
-        when(applicationUserService.changePassword(email, "dad231#$#4")).thenReturn(Mono.empty());
-        when(applicationUserService.getUserByEmail(changePassword.email())).thenReturn(Mono.just(applicationUser));
-        when(emailSender.send(emailRequest)).thenReturn(Mono.empty());
-        when(verificationService.verify(verification)).thenReturn(Mono.empty());
+        when(verificationService.retrieve(changePassword.hash())).thenReturn(verification);
+        doNothing().when(applicationUserService).changePassword(email, "dad231#$#4");
+        when(applicationUserService.getUserByEmail(changePassword.email())).thenReturn(applicationUser);
+        doNothing().when(emailSender).send(emailRequest);
+        doNothing().when(verificationService).verify(verification);
 
-        Mono<Void> voidMono = passwordService.changePassword(changePassword);
-        StepVerifier.create(voidMono).expectNextCount(0).verifyComplete();
+        passwordService.changePassword(changePassword);
     }
 }

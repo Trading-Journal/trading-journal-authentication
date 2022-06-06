@@ -1,12 +1,12 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
+import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.user.UserInfo;
+import com.trading.journal.authentication.user.service.ApplicationUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,11 +48,11 @@ public class MeControllerTest {
     @ParameterizedTest
     @MethodSource("feedUsers")
     void meEndpoint(UserRegistration user) {
-        applicationUserService.createNewUser(user).block();
+        applicationUserService.createNewUser(user);
 
         Login login = new Login(user.email(), user.password());
 
-        LoginResponse loginResponse = authenticationService.signIn(login).block();
+        LoginResponse loginResponse = authenticationService.signIn(login);
 
         assert loginResponse != null;
         webTestClient

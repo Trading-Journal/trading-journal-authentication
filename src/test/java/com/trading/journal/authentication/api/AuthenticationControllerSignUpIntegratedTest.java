@@ -38,7 +38,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
     @BeforeEach
     public void setUp() {
         webTestClient = WebTestClient.bindToApplicationContext(context).build();
-        applicationUserRepository.deleteAll().block();
+        applicationUserRepository.deleteAll();
     }
 
     @Test
@@ -91,7 +91,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 .value(response -> {
                     assertThat(response.get("firstName")).isEqualTo("First name is required");
                     assertThat(response.get("lastName")).isEqualTo("Last name is required");
-                    assertThat(response.get("password")).matches(message -> message.equals("Password is required") ||  message.equals("Password is not valid"));
+                    assertThat(response.get("password")).matches(message -> message.equals("Password is required") || message.equals("Password is not valid"));
                     assertThat(response.get("confirmPassword")).isEqualTo("Password confirmation is required");
                     assertThat(response.get("userName")).isEqualTo("User name is required");
                     assertThat(response.get("email")).isEqualTo("Email is required");

@@ -1,10 +1,14 @@
 package com.trading.journal.authentication.authority.service;
 
 import com.trading.journal.authentication.authority.UserAuthority;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import reactor.core.publisher.Flux;
+import org.springframework.data.repository.CrudRepository;
 
-public interface UserAuthorityRepository extends ReactiveCrudRepository<UserAuthority, Long> {
+import java.util.List;
 
-    Flux<UserAuthority> findByUserId(Long userId);
+public interface UserAuthorityRepository extends CrudRepository<UserAuthority, Long> {
+
+    @Override
+    List<UserAuthority> findAll();
+
+    List<UserAuthority> findByUserId(Long userId);
 }

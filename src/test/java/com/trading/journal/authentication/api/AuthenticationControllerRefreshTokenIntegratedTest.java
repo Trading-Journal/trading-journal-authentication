@@ -65,7 +65,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
     @BeforeEach
     public void setUp() {
         webTestClient = WebTestClient.bindToApplicationContext(context).build();
-        applicationUserRepository.deleteAll().block();
+        applicationUserRepository.deleteAll();
     }
 
     @Test
@@ -79,11 +79,11 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(user).block();
+        applicationUserService.createNewUser(user);
 
         Login login = new Login(user.email(), user.password());
 
-        LoginResponse loginResponse = authenticationService.signIn(login).block();
+        LoginResponse loginResponse = authenticationService.signIn(login);
 
         assert loginResponse != null;
         webTestClient
@@ -112,11 +112,11 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(user).block();
+        applicationUserService.createNewUser(user);
 
         Login login = new Login(user.email(), user.password());
 
-        LoginResponse loginResponse = authenticationService.signIn(login).block();
+        LoginResponse loginResponse = authenticationService.signIn(login);
 
         assert loginResponse != null;
         webTestClient

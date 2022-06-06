@@ -4,14 +4,18 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.service.impl.AuthorityServiceDatabaseImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import org.springframework.data.repository.CrudRepository;
+
+import java.util.List;
 
 @ConditionalOnBean(AuthorityServiceDatabaseImpl.class)
-public interface AuthorityRepository extends ReactiveCrudRepository<Authority, Long> {
+public interface AuthorityRepository extends CrudRepository<Authority, Long> {
 
-    Flux<Authority> getByCategory(AuthorityCategory category);
+    @Override
+    List<Authority> findAll();
 
-    Mono<Authority> getByName(String name);
+    List<Authority> getByCategory(AuthorityCategory category);
+
+    Authority getByName(String name);
+
 }

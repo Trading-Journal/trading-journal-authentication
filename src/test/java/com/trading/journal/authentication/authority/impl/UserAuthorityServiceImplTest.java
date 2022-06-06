@@ -1,6 +1,8 @@
 package com.trading.journal.authentication.authority.impl;
 
-import com.trading.journal.authentication.authority.*;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
+import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.authority.service.UserAuthorityRepository;
 import com.trading.journal.authentication.authority.service.impl.UserAuthorityServiceImpl;
@@ -12,14 +14,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -52,17 +53,13 @@ class UserAuthorityServiceImplTest {
                 LocalDateTime.now());
 
         Authority authority = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
-        when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(Flux.just(authority));
+        when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(singletonList(authority));
 
         UserAuthority userAuthority = new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId());
-        when(userAuthorityRepository.save(userAuthority)).thenReturn(Mono.just(userAuthority));
+        when(userAuthorityRepository.save(userAuthority)).thenReturn(userAuthority);
 
-        Mono<UserAuthority> mono = userAuthorityService.saveCommonUserAuthorities(applicationUser);
-        StepVerifier.create(mono)
-                .expectNextCount(1L)
-                .verifyComplete();
-
-        verify(userAuthorityRepository).save(any());
+        UserAuthority userAuthoritySaved = userAuthorityService.saveCommonUserAuthorities(applicationUser);
+        assertThat(userAuthoritySaved).isEqualTo(userAuthority);
     }
 
     @DisplayName("Given application user for TWO authority when saving common authorities, save user authorities")
@@ -82,17 +79,14 @@ class UserAuthorityServiceImplTest {
 
         Authority authority1 = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
         Authority authority2 = Authority.builder().id(2L).category(AuthorityCategory.ADMINISTRATOR).name("ADMIN").build();
-        when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(Flux.just(authority1, authority2));
+        when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(Arrays.asList(authority1, authority2));
 
         UserAuthority userAuthority1 = new UserAuthority(applicationUser.getId(), authority1.getName(), authority1.getId());
         UserAuthority userAuthority2 = new UserAuthority(applicationUser.getId(), authority2.getName(), authority2.getId());
-        when(userAuthorityRepository.save(userAuthority1)).thenReturn(Mono.just(userAuthority1));
-        when(userAuthorityRepository.save(userAuthority2)).thenReturn(Mono.just(userAuthority2));
+        when(userAuthorityRepository.save(userAuthority1)).thenReturn(userAuthority1);
+        when(userAuthorityRepository.save(userAuthority2)).thenReturn(userAuthority2);
 
-        Mono<UserAuthority> mono = userAuthorityService.saveCommonUserAuthorities(applicationUser);
-        StepVerifier.create(mono)
-                .expectNextCount(1L)
-                .verifyComplete();
+        userAuthorityService.saveCommonUserAuthorities(applicationUser);
 
         verify(userAuthorityRepository, times(2)).save(any());
     }
@@ -114,81 +108,26 @@ class UserAuthorityServiceImplTest {
 
         Authority authorityAdmin = Authority.builder().id(1L).category(AuthorityCategory.ADMINISTRATOR).name("ADMIN").build();
         Authority authorityUser = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
-        when(authorityService.getAll()).thenReturn(Flux.just(authorityAdmin, authorityUser));
+        when(authorityService.getAll()).thenReturn(Arrays.asList(authorityAdmin, authorityUser));
 
         UserAuthority userAuthorityUser = new UserAuthority(applicationUser.getId(), authorityAdmin.getName(), authorityAdmin.getId());
         UserAuthority userAuthorityAdmin = new UserAuthority(applicationUser.getId(), authorityUser.getName(), authorityUser.getId());
-        when(userAuthorityRepository.save(userAuthorityUser)).thenReturn(Mono.just(userAuthorityUser));
-        when(userAuthorityRepository.save(userAuthorityAdmin)).thenReturn(Mono.just(userAuthorityAdmin));
+        when(userAuthorityRepository.save(userAuthorityUser)).thenReturn(userAuthorityUser);
+        when(userAuthorityRepository.save(userAuthorityAdmin)).thenReturn(userAuthorityAdmin);
 
-        Mono<UserAuthority> mono = userAuthorityService.saveAdminUserAuthorities(applicationUser);
-        StepVerifier.create(mono)
-                .expectNextCount(1L)
-                .verifyComplete();
+        userAuthorityService.saveAdminUserAuthorities(applicationUser);
 
         verify(userAuthorityRepository, times(2)).save(any());
-    }
-
-    @DisplayName("Given application user to load one authority, return a list of authorities with one item")
-    @Test
-    void loadOneAuthorityFromApplicationUser() {
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.emptyList(),
-                LocalDateTime.now());
-
-        UserAuthority userAuthority = new UserAuthority(1L, "User", applicationUser.getId());
-        when(userAuthorityRepository.findByUserId(applicationUser.getId())).thenReturn(Flux.just(userAuthority));
-
-        Mono<List<UserAuthority>> mono = userAuthorityService.loadList(applicationUser);
-        StepVerifier.create(mono)
-                .assertNext(list -> assertThat(list).hasSize(1))
-                .verifyComplete();
-    }
-
-    @DisplayName("Given application user to load three authority, return a list of authorities with one item")
-    @Test
-    void loadThreeAuthorityFromApplicationUser() {
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.emptyList(),
-                LocalDateTime.now());
-
-        UserAuthority userAuthority1 = new UserAuthority(1L, "User", applicationUser.getId());
-        UserAuthority userAuthority2 = new UserAuthority(2L, "Admin", applicationUser.getId());
-        UserAuthority userAuthority3 = new UserAuthority(3L, "Other", applicationUser.getId());
-        when(userAuthorityRepository.findByUserId(applicationUser.getId())).thenReturn(Flux.just(userAuthority1, userAuthority2, userAuthority3));
-
-        Mono<List<UserAuthority>> mono = userAuthorityService.loadList(applicationUser);
-        StepVerifier.create(mono)
-                .assertNext(list -> assertThat(list).hasSize(3))
-                .verifyComplete();
     }
 
     @DisplayName("Given user id to load one authority, return a list of authorities with one item")
     @Test
     void loadOneAuthorityFromUserId() {
         UserAuthority userAuthority = new UserAuthority(1L, "User", 1L);
-        when(userAuthorityRepository.findByUserId(1L)).thenReturn(Flux.just(userAuthority));
+        when(userAuthorityRepository.findByUserId(1L)).thenReturn(singletonList(userAuthority));
 
-        Mono<List<UserAuthority>> mono = userAuthorityService.loadList(1L);
-        StepVerifier.create(mono)
-                .assertNext(list -> assertThat(list).hasSize(1))
-                .verifyComplete();
+        List<UserAuthority> userAuthorities = userAuthorityService.loadList(1L);
+        assertThat(userAuthorities).hasSize(1);
     }
 
     @DisplayName("Given user id to load three authority, return a list of authorities with one item")
@@ -197,12 +136,10 @@ class UserAuthorityServiceImplTest {
         UserAuthority userAuthority1 = new UserAuthority(1L, "User", 1L);
         UserAuthority userAuthority2 = new UserAuthority(2L, "Admin", 1L);
         UserAuthority userAuthority3 = new UserAuthority(3L, "Other", 1L);
-        when(userAuthorityRepository.findByUserId(1L)).thenReturn(Flux.just(userAuthority1, userAuthority2, userAuthority3));
+        when(userAuthorityRepository.findByUserId(1L)).thenReturn(Arrays.asList(userAuthority1, userAuthority2, userAuthority3));
 
-        Mono<List<UserAuthority>> mono = userAuthorityService.loadList(1L);
-        StepVerifier.create(mono)
-                .assertNext(list -> assertThat(list).hasSize(3))
-                .verifyComplete();
+        List<UserAuthority> userAuthorities = userAuthorityService.loadList(1L);
+        assertThat(userAuthorities).hasSize(3);
     }
 
     @DisplayName("Given application user to load one SimpleGrantedAuthority, return a list of SimpleGrantedAuthority with one item")
@@ -221,12 +158,10 @@ class UserAuthorityServiceImplTest {
                 LocalDateTime.now());
 
         UserAuthority userAuthority = new UserAuthority(1L, "User", applicationUser.getId());
-        when(userAuthorityRepository.findByUserId(applicationUser.getId())).thenReturn(Flux.just(userAuthority));
+        when(userAuthorityRepository.findByUserId(applicationUser.getId())).thenReturn(singletonList(userAuthority));
 
-        Mono<List<SimpleGrantedAuthority>> mono = userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser);
-        StepVerifier.create(mono)
-                .assertNext(list -> assertThat(list).hasSize(1))
-                .verifyComplete();
+        List<SimpleGrantedAuthority> simpleGrantedAuthorities = userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser);
+        assertThat(simpleGrantedAuthorities).hasSize(1);
     }
 
     @DisplayName("Given application user to load three SimpleGrantedAuthority, return a list of SimpleGrantedAuthority with one item")
@@ -247,11 +182,9 @@ class UserAuthorityServiceImplTest {
         UserAuthority userAuthority1 = new UserAuthority(1L, "User", applicationUser.getId());
         UserAuthority userAuthority2 = new UserAuthority(2L, "Admin", applicationUser.getId());
         UserAuthority userAuthority3 = new UserAuthority(3L, "Other", applicationUser.getId());
-        when(userAuthorityRepository.findByUserId(applicationUser.getId())).thenReturn(Flux.just(userAuthority1, userAuthority2, userAuthority3));
+        when(userAuthorityRepository.findByUserId(applicationUser.getId())).thenReturn(Arrays.asList(userAuthority1, userAuthority2, userAuthority3));
 
-        Mono<List<SimpleGrantedAuthority>> mono = userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser);
-        StepVerifier.create(mono)
-                .assertNext(list -> assertThat(list).hasSize(3))
-                .verifyComplete();
+        List<SimpleGrantedAuthority> simpleGrantedAuthorities = userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser);
+        assertThat(simpleGrantedAuthorities).hasSize(3);
     }
 }

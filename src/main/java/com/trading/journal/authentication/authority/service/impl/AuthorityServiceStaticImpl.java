@@ -7,10 +7,10 @@ import com.trading.journal.authentication.authority.service.AuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,14 +18,17 @@ import java.util.stream.Stream;
 public class AuthorityServiceStaticImpl implements AuthorityService {
 
     @Override
-    public Flux<Authority> getAuthoritiesByCategory(AuthorityCategory category) {
-        Stream<Authority> authorities = AuthoritiesHelper.getByCategory(category).stream().map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()));
-        return Flux.fromStream(authorities);
+    public List<Authority> getAuthoritiesByCategory(AuthorityCategory category) {
+        return AuthoritiesHelper.getByCategory(category)
+                .stream()
+                .map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Flux<Authority> getAll() {
-        Stream<Authority> authorities = Arrays.stream(AuthoritiesHelper.values()).map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()));
-        return Flux.fromStream(authorities);
+    public List<Authority> getAll() {
+        return Arrays.stream(AuthoritiesHelper.values())
+                .map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()))
+                .collect(Collectors.toList());
     }
 }

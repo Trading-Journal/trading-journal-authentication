@@ -43,7 +43,7 @@ public class AuthenticationControllerSignInIntegratedTest {
     @BeforeEach
     public void setUp() {
         webTestClient = WebTestClient.bindToApplicationContext(context).build();
-        applicationUserRepository.deleteAll().block();
+        applicationUserRepository.deleteAll();
     }
 
     @Test
@@ -57,7 +57,7 @@ public class AuthenticationControllerSignInIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(userRegistration).block();
+        applicationUserService.createNewUser(userRegistration);
 
         Login login = new Login("mail@mail.com", "dad231#$#4");
 
@@ -105,7 +105,7 @@ public class AuthenticationControllerSignInIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(userRegistration).block();
+        applicationUserService.createNewUser(userRegistration);
 
         Login login = new Login("mail4@mail.com", "wrong_password");
 

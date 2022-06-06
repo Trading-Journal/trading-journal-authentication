@@ -1,6 +1,7 @@
 package com.trading.journal.authentication.authority.service.impl;
 
-import com.trading.journal.authentication.authority.*;
+import com.trading.journal.authentication.authority.AuthorityCategory;
+import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.authority.service.UserAuthorityRepository;
 import com.trading.journal.authentication.authority.service.UserAuthorityService;
@@ -8,9 +9,9 @@ import com.trading.journal.authentication.user.ApplicationUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,35 +22,35 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     private final AuthorityService authorityService;
 
     @Override
-    public Mono<UserAuthority> saveCommonUserAuthorities(ApplicationUser applicationUser) {
+    public UserAuthority saveCommonUserAuthorities(ApplicationUser applicationUser) {
         return authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)
+                .stream()
                 .map(authority -> new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId()))
-                .flatMap(userAuthorityRepository::save)
-                .last();
+                .map(userAuthorityRepository::save)
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
-    public Mono<UserAuthority> saveAdminUserAuthorities(ApplicationUser applicationUser) {
+    public UserAuthority saveAdminUserAuthorities(ApplicationUser applicationUser) {
         return authorityService.getAll()
+                .stream()
                 .map(authority -> new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId()))
-                .flatMap(userAuthorityRepository::save)
-                .last();
+                .map(userAuthorityRepository::save)
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
-    public Mono<List<UserAuthority>> loadList(ApplicationUser applicationUser) {
-        return userAuthorityRepository.findByUserId(applicationUser.getId()).collectList();
+    public List<UserAuthority> loadList(Long userId) {
+        return userAuthorityRepository.findByUserId(userId);
     }
 
     @Override
-    public Mono<List<UserAuthority>> loadList(Long userId) {
-        return userAuthorityRepository.findByUserId(userId).collectList();
-    }
-
-    @Override
-    public Mono<List<SimpleGrantedAuthority>> loadListAsSimpleGrantedAuthority(ApplicationUser applicationUser) {
+    public List<SimpleGrantedAuthority> loadListAsSimpleGrantedAuthority(ApplicationUser applicationUser) {
         return userAuthorityRepository.findByUserId(applicationUser.getId())
+                .stream()
                 .map(userAuthorities -> new SimpleGrantedAuthority(userAuthorities.getName()))
-                .collectList();
+                .collect(Collectors.toList());
     }
 }
