@@ -1,6 +1,7 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.service.ApplicationUserRepository;
@@ -9,7 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -20,25 +21,28 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 @TestPropertySource(properties = {"journal.authentication.authority.type=STATIC"})
 public class AuthenticationControllerSignUpIntegratedTest {
 
     @Autowired
-    private ApplicationContext context;
-
-    @Autowired
     ApplicationUserRepository applicationUserRepository;
 
+    @Autowired
     private WebTestClient webTestClient;
+
+    @MockBean
+    EmailSender emailSender;
 
     @BeforeEach
     public void setUp() {
-        webTestClient = WebTestClient.bindToApplicationContext(context).build();
         applicationUserRepository.deleteAll();
+        doNothing().when(emailSender).send(any());
     }
 
     @Test

@@ -58,6 +58,6 @@ public class PasswordServiceImpl implements PasswordService {
     }
 
     private boolean validateVerification(ChangePassword changePassword, Verification verification) {
-        return verification.getEmail().equals(changePassword.email()) && VerificationType.CHANGE_PASSWORD.equals(verification.getType());
+        return verification != null && verification.getEmail().equals(changePassword.email()) && VerificationType.CHANGE_PASSWORD.equals(verification.getType());
     }
 }

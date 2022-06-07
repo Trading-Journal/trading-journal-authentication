@@ -22,27 +22,25 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     private final AuthorityService authorityService;
 
     @Override
-    public UserAuthority saveCommonUserAuthorities(ApplicationUser applicationUser) {
+    public List<UserAuthority> saveCommonUserAuthorities(ApplicationUser applicationUser) {
         return authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)
                 .stream()
                 .map(authority -> new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId()))
                 .map(userAuthorityRepository::save)
-                .findFirst()
-                .orElse(null);
+                .collect(Collectors.toList());
     }
 
     @Override
-    public UserAuthority saveAdminUserAuthorities(ApplicationUser applicationUser) {
+    public List<UserAuthority> saveAdminUserAuthorities(ApplicationUser applicationUser) {
         return authorityService.getAll()
                 .stream()
                 .map(authority -> new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId()))
                 .map(userAuthorityRepository::save)
-                .findFirst()
-                .orElse(null);
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<UserAuthority> loadList(Long userId) {
+    public List<UserAuthority> getByUserId(Long userId) {
         return userAuthorityRepository.findByUserId(userId);
     }
 

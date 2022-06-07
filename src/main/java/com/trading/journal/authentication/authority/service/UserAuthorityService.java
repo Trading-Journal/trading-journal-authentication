@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface UserAuthorityService {
 
-    UserAuthority saveCommonUserAuthorities(ApplicationUser applicationUser);
+    List<UserAuthority> saveCommonUserAuthorities(ApplicationUser applicationUser);
 
-    UserAuthority saveAdminUserAuthorities(ApplicationUser applicationUser);
+    List<UserAuthority> saveAdminUserAuthorities(ApplicationUser applicationUser);
 
-    List<UserAuthority> loadList(Long userId);
+    List<UserAuthority> getByUserId(Long userId);
 
     List<SimpleGrantedAuthority> loadListAsSimpleGrantedAuthority(ApplicationUser applicationUser);
 }

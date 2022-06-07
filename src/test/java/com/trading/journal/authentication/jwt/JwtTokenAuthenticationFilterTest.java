@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.jwt;
 
+import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,8 +13,11 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.context.request.NativeWebRequest;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static java.util.Collections.emptyList;
@@ -35,8 +39,9 @@ public class JwtTokenAuthenticationFilterTest {
     @Test
     @DisplayName("Given server request with token process request successfully")
     void serverRequestSuccess() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(JwtConstants.TOKEN_PREFIX.concat("123456789"));
         MockFilterChain chain = new MockFilterChain();
 
         when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer 123456789");
@@ -49,8 +54,8 @@ public class JwtTokenAuthenticationFilterTest {
     @Test
     @DisplayName("Given server request without token process request successfully")
     void serverRequestSuccessWithoutToken() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
         MockFilterChain chain = new MockFilterChain();
 
         when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(null);

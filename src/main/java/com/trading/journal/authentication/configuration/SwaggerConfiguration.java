@@ -1,10 +1,11 @@
 package com.trading.journal.authentication.configuration;
 
-import org.springframework.beans.BeansException;
+import com.trading.journal.authentication.ApplicationException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -23,7 +24,6 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 
@@ -68,9 +68,8 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
     @Bean
     public static BeanPostProcessor springfoxHandlerProviderBeanPostProcessor() {
         return new BeanPostProcessor() {
-
             @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+            public Object postProcessAfterInitialization(Object bean, String beanName){
                 if (bean instanceof WebMvcRequestHandlerProvider) {
                     customizeSpringfoxHandlerMappings(getHandlerMappings(bean));
                 }
@@ -78,8 +77,7 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
             }
 
             private <T extends RequestMappingInfoHandlerMapping> void customizeSpringfoxHandlerMappings(List<T> mappings) {
-                List<T> copy = mappings.stream()
-                        .filter(mapping -> mapping.getPatternParser() == null).toList();
+                List<T> copy = mappings.stream().filter(mapping -> mapping.getPatternParser() == null).toList();
                 mappings.clear();
                 mappings.addAll(copy);
             }
@@ -92,7 +90,7 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
                     field.setAccessible(true);
                     return (List<RequestMappingInfoHandlerMapping>) field.get(bean);
                 } catch (IllegalArgumentException | IllegalAccessException e) {
-                    throw new IllegalStateException(e);
+                    throw (ApplicationException) new ApplicationException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).initCause(e);
                 }
             }
         };

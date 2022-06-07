@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,14 +37,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 @TestPropertySource(properties = {"journal.authentication.authority.type=STATIC"})
 public class AuthenticationControllerChangePasswordIntegratedTest {
-
-    @Autowired
-    private ApplicationContext context;
 
     @Autowired
     private ApplicationUserService applicationUserService;
@@ -65,11 +61,11 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
     @MockBean
     EmailSender emailSender;
 
+    @Autowired
     private WebTestClient webTestClient;
 
     @BeforeEach
     public void setUp() {
-        webTestClient = WebTestClient.bindToApplicationContext(context).build();
         applicationUserRepository.deleteAll();
         verificationRepository.deleteAll();
     }

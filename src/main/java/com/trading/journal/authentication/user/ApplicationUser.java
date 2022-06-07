@@ -4,7 +4,6 @@ import com.trading.journal.authentication.authority.UserAuthority;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 
 import javax.validation.constraints.NotBlank;
@@ -36,7 +35,7 @@ public class ApplicationUser {
 
     private Boolean verified;
 
-    @MappedCollection(keyColumn = "userId", idColumn = "id")
+    @Transient
     private List<UserAuthority> authorities;
 
     private LocalDateTime createdAt;

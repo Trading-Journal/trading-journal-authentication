@@ -11,9 +11,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -30,7 +32,7 @@ public class JwtResolveTokenHttpHeaderTest {
     @DisplayName("Given server request with token return token value")
     void requestWithToken() {
         String token = UUID.randomUUID().toString();
-        MockHttpServletRequest request = new MockHttpServletRequest();
+        HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(JwtConstants.TOKEN_PREFIX.concat(token));
         String resolved = jwtResolveToken.resolve(request);
         assertThat(resolved).isEqualTo(token);
@@ -39,7 +41,7 @@ public class JwtResolveTokenHttpHeaderTest {
     @Test
     @DisplayName("Given server request without token return null")
     void requestWithoutToken() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
+        HttpServletRequest request = mock(HttpServletRequest.class);
         String resolved = jwtResolveToken.resolve(request);
         assertThat(resolved).isNull();
     }

@@ -18,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -57,18 +56,6 @@ class PasswordServiceImplTest {
         passwordService.requestPasswordChange(email);
     }
 
-    @DisplayName("Request for a password change when user does not exist return exception")
-    @Test
-    void passwordChangeRequestException() {
-        String email = "mail@mail.com";
-        when(applicationUserService.getUserByEmail(email)).thenReturn(null);
-
-        UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> passwordService.requestPasswordChange(email));
-        assertThat(exception.getMessage()).isEqualTo(String.format("User %s does not exist", email));
-
-        verify(verificationService, never()).send(any(), any());
-    }
-
     @DisplayName("Password change hash not found return exception")
     @Test
     void passwordChangeHashNotFound() {
@@ -78,7 +65,7 @@ class PasswordServiceImplTest {
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> passwordService.changePassword(changePassword));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(exception.getStatusText()).isNotEqualTo("Change password request is invalid");
+        assertThat(exception.getStatusText()).isEqualTo("Change password request is invalid");
 
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
@@ -98,7 +85,7 @@ class PasswordServiceImplTest {
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> passwordService.changePassword(changePassword));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(exception.getStatusText()).isNotEqualTo("Change password request is invalid");
+        assertThat(exception.getStatusText()).isEqualTo("Change password request is invalid");
 
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
@@ -118,7 +105,7 @@ class PasswordServiceImplTest {
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> passwordService.changePassword(changePassword));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(exception.getStatusText()).isNotEqualTo("Change password request is invalid");
+        assertThat(exception.getStatusText()).isEqualTo("Change password request is invalid");
 
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
@@ -152,7 +139,7 @@ class PasswordServiceImplTest {
         Verification verification = new Verification(1L, email, VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
         when(verificationService.retrieve(changePassword.hash())).thenReturn(verification);
-        doNothing().when(applicationUserService).changePassword(email, "dad231#$#4");
+        when(applicationUserService.changePassword(email, "dad231#$#4")).thenReturn(applicationUser);
         when(applicationUserService.getUserByEmail(changePassword.email())).thenReturn(applicationUser);
         doNothing().when(emailSender).send(emailRequest);
         doNothing().when(verificationService).verify(verification);

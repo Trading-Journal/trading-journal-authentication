@@ -2,6 +2,7 @@ package com.trading.journal.authentication.jwt.impl;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authority.UserAuthority;
+import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenParser;
@@ -9,10 +10,12 @@ import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.user.ApplicationUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -25,6 +28,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest
 @Testcontainers
@@ -36,6 +41,14 @@ public class JwtIntegratedTest {
 
     @Autowired
     private JwtTokenParser jwtTokenParser;
+
+    @MockBean
+    EmailSender emailSender;
+
+    @BeforeEach
+    public void setUp() {
+        doNothing().when(emailSender).send(any());
+    }
 
     @DisplayName("Generate and read access token")
     @Test

@@ -58,8 +58,9 @@ class UserAuthorityServiceImplTest {
         UserAuthority userAuthority = new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId());
         when(userAuthorityRepository.save(userAuthority)).thenReturn(userAuthority);
 
-        UserAuthority userAuthoritySaved = userAuthorityService.saveCommonUserAuthorities(applicationUser);
-        assertThat(userAuthoritySaved).isEqualTo(userAuthority);
+        List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(applicationUser);
+        assertThat(userAuthorities).hasSize(1);
+        assertThat(userAuthorities.get(0)).isEqualTo(userAuthority);
     }
 
     @DisplayName("Given application user for TWO authority when saving common authorities, save user authorities")
@@ -78,7 +79,7 @@ class UserAuthorityServiceImplTest {
                 LocalDateTime.now());
 
         Authority authority1 = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
-        Authority authority2 = Authority.builder().id(2L).category(AuthorityCategory.ADMINISTRATOR).name("ADMIN").build();
+        Authority authority2 = Authority.builder().id(2L).category(AuthorityCategory.COMMON_USER).name("ADMIN").build();
         when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(Arrays.asList(authority1, authority2));
 
         UserAuthority userAuthority1 = new UserAuthority(applicationUser.getId(), authority1.getName(), authority1.getId());
@@ -86,7 +87,8 @@ class UserAuthorityServiceImplTest {
         when(userAuthorityRepository.save(userAuthority1)).thenReturn(userAuthority1);
         when(userAuthorityRepository.save(userAuthority2)).thenReturn(userAuthority2);
 
-        userAuthorityService.saveCommonUserAuthorities(applicationUser);
+        List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(applicationUser);
+        assertThat(userAuthorities).hasSize(2);
 
         verify(userAuthorityRepository, times(2)).save(any());
     }
@@ -126,7 +128,7 @@ class UserAuthorityServiceImplTest {
         UserAuthority userAuthority = new UserAuthority(1L, "User", 1L);
         when(userAuthorityRepository.findByUserId(1L)).thenReturn(singletonList(userAuthority));
 
-        List<UserAuthority> userAuthorities = userAuthorityService.loadList(1L);
+        List<UserAuthority> userAuthorities = userAuthorityService.getByUserId(1L);
         assertThat(userAuthorities).hasSize(1);
     }
 
@@ -138,7 +140,7 @@ class UserAuthorityServiceImplTest {
         UserAuthority userAuthority3 = new UserAuthority(3L, "Other", 1L);
         when(userAuthorityRepository.findByUserId(1L)).thenReturn(Arrays.asList(userAuthority1, userAuthority2, userAuthority3));
 
-        List<UserAuthority> userAuthorities = userAuthorityService.loadList(1L);
+        List<UserAuthority> userAuthorities = userAuthorityService.getByUserId(1L);
         assertThat(userAuthorities).hasSize(3);
     }
 

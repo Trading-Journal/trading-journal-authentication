@@ -23,6 +23,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtResolveToken resolveToken;
 
     public JwtTokenAuthenticationFilter(JwtTokenReader tokenReader) {
+        super();
         this.tokenReader = tokenReader;
         this.resolveToken = new JwtResolveTokenHttpHeader();
     }

@@ -1,6 +1,7 @@
 package com.trading.journal.authentication.user.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.authority.UserAuthority;
 import com.trading.journal.authentication.authority.service.UserAuthorityService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
@@ -34,7 +35,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     private final VerificationProperties verificationProperties;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         ApplicationUser applicationUser = this.getUserByEmail(username);
         List<SimpleGrantedAuthority> authorities = userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser);
         if (authorities == null || authorities.isEmpty()) {
@@ -56,6 +57,8 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
         if (applicationUser == null) {
             throw new UsernameNotFoundException(String.format("User %s does not exist", email));
         }
+        List<UserAuthority> authorities = userAuthorityService.getByUserId(applicationUser.getId());
+        applicationUser.loadAuthorities(authorities);
         return applicationUser;
     }
 

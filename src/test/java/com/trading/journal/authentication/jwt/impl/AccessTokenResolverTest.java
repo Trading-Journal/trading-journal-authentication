@@ -1,6 +1,7 @@
 package com.trading.journal.authentication.jwt.impl;
 
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
+import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.jwt.service.impl.AccessTokenResolver;
 import org.junit.jupiter.api.DisplayName;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -43,12 +45,12 @@ public class AccessTokenResolverTest {
     @DisplayName("Given a access token resolve into AccessTokenInfo")
     @Test
     public void retrieveTokenInfo() throws Exception {
-
         String token = UUID.randomUUID().toString();
 
         NativeWebRequest nativeWebRequest = mock(NativeWebRequest.class);
         HttpServletRequest request = mock(HttpServletRequest.class);
-        when(nativeWebRequest.getNativeRequest()).thenReturn(request);
+        when(nativeWebRequest.getNativeRequest(HttpServletRequest.class)).thenReturn(request);
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(JwtConstants.TOKEN_PREFIX.concat(token));
 
         when(tokenReader.getAccessTokenInfo(token)).thenReturn(
                 new AccessTokenInfo(

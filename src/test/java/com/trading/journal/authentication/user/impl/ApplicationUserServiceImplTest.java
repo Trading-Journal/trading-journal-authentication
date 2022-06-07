@@ -74,7 +74,7 @@ public class ApplicationUserServiceImplTest {
 
         when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
         when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(new UserAuthority(1L, 1L, 1L, "USER"));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(1L, 1L, 1L, "USER")));
         when(encoder.encode(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(appUser);
         when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));
@@ -110,7 +110,7 @@ public class ApplicationUserServiceImplTest {
 
         when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
         when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(new UserAuthority(1L, 1L, 1L, "USER"));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(1L, 1L, 1L, "USER")));
         when(encoder.encode(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(appUser);
         when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));

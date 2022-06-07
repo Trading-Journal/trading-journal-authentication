@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -98,6 +97,7 @@ public class RegistrationServiceImplTest {
                 LocalDateTime.now());
 
         when(applicationUserService.createNewUser(userRegistration)).thenReturn(applicationUser);
+        when(applicationUserService.getUserByEmail("mail@mail.com")).thenReturn(applicationUser);
         when(verificationProperties.isEnabled()).thenReturn(true);
         doNothing().when(verificationService).send(VerificationType.REGISTRATION, applicationUser);
 
@@ -200,19 +200,6 @@ public class RegistrationServiceImplTest {
         SignUpResponse signUpResponse = registrationService.sendVerification(email);
         assertThat(signUpResponse.email()).isEqualTo(email);
         assertThat(signUpResponse.enabled()).isTrue();
-
-        verify(verificationService, never()).send(any(), any());
-    }
-
-    @Test
-    @DisplayName("Send new email verification throws exception because user does not exist")
-    void newEmailVerificationException() {
-        String email = "mail@mail.com";
-
-        when(verificationProperties.isEnabled()).thenReturn(true);
-        when(applicationUserService.getUserByEmail(email)).thenReturn(null);
-
-        assertThrows(UsernameNotFoundException.class, () -> registrationService.sendVerification(email), "User mail@mail.com does not exist");
 
         verify(verificationService, never()).send(any(), any());
     }

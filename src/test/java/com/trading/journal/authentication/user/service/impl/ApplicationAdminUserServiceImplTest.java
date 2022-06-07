@@ -87,7 +87,7 @@ class ApplicationAdminUserServiceImplTest {
 
         when(encoder.encode("mail@mail.com")).thenReturn("password_secret");
         when(applicationUserRepository.save(any())).thenReturn(applicationUser);
-        when(userAuthorityService.saveAdminUserAuthorities(applicationUser)).thenReturn(userAuthority);
+        when(userAuthorityService.saveAdminUserAuthorities(applicationUser)).thenReturn(singletonList(userAuthority));
         when(applicationUserRepository.findById(1L)).thenReturn(Optional.of(applicationUser));
         doNothing().when(verificationService).send(VerificationType.ADMIN_REGISTRATION, applicationUser);
 
