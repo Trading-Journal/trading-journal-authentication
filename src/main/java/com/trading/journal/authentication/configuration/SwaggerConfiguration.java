@@ -65,37 +65,6 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
                 .globalResponses(HttpMethod.DELETE, GLOBAL_RESPONSES);
     }
 
-    @Bean
-    public static BeanPostProcessor springfoxHandlerProviderBeanPostProcessor() {
-        return new BeanPostProcessor() {
-            @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName){
-                if (bean instanceof WebMvcRequestHandlerProvider) {
-                    customizeSpringfoxHandlerMappings(getHandlerMappings(bean));
-                }
-                return bean;
-            }
-
-            private <T extends RequestMappingInfoHandlerMapping> void customizeSpringfoxHandlerMappings(List<T> mappings) {
-                List<T> copy = mappings.stream().filter(mapping -> mapping.getPatternParser() == null).toList();
-                mappings.clear();
-                mappings.addAll(copy);
-            }
-
-            @SuppressWarnings("unchecked")
-            private List<RequestMappingInfoHandlerMapping> getHandlerMappings(Object bean) {
-                try {
-                    Field field = ReflectionUtils.findField(bean.getClass(), "handlerMappings");
-                    assert field != null;
-                    field.setAccessible(true);
-                    return (List<RequestMappingInfoHandlerMapping>) field.get(bean);
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                    throw (ApplicationException) new ApplicationException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).initCause(e);
-                }
-            }
-        };
-    }
-
     private ApiInfo apiInfo() {
         Contact contact = new Contact("Allan Weber", "https://allanweber.dev", "a.cassianoweber@gmail.com");
         return new ApiInfo(
@@ -130,5 +99,37 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }
+
+    //This is a hack to fix some current swagger issue for spring 2.6+
+    @Bean
+    public static BeanPostProcessor springfoxHandlerProviderBeanPostProcessor() {
+        return new BeanPostProcessor() {
+            @Override
+            public Object postProcessAfterInitialization(Object bean, String beanName){
+                if (bean instanceof WebMvcRequestHandlerProvider) {
+                    customizeSpringfoxHandlerMappings(getHandlerMappings(bean));
+                }
+                return bean;
+            }
+
+            private <T extends RequestMappingInfoHandlerMapping> void customizeSpringfoxHandlerMappings(List<T> mappings) {
+                List<T> copy = mappings.stream().filter(mapping -> mapping.getPatternParser() == null).toList();
+                mappings.clear();
+                mappings.addAll(copy);
+            }
+
+            @SuppressWarnings("unchecked")
+            private List<RequestMappingInfoHandlerMapping> getHandlerMappings(Object bean) {
+                try {
+                    Field field = ReflectionUtils.findField(bean.getClass(), "handlerMappings");
+                    assert field != null;
+                    field.setAccessible(true);
+                    return (List<RequestMappingInfoHandlerMapping>) field.get(bean);
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                    throw (ApplicationException) new ApplicationException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).initCause(e);
+                }
+            }
+        };
     }
 }
