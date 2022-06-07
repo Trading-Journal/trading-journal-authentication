@@ -9,14 +9,14 @@ import java.util.List;
 
 public interface ApplicationUserRepository extends CrudRepository<ApplicationUser, Long> {
 
-    Integer countByUserName(String userName);
+    Boolean existsByUserName(String userName);
 
-    Integer countByEmail(String email);
+    Boolean existsByEmail(String email);
 
     ApplicationUser findByEmail(String email);
 
     @Query("select id, userName, firstName, lastName, email, enabled, verified, createdAt from Users where userName = :userName")
-    UserInfo findByUserName(String userName);
+    UserInfo getUserInfoByUserName(String userName);
 
     @Query("SELECT COUNT(Users.id) FROM Users inner join UserAuthorities where Users.id = UserAuthorities.userId and UserAuthorities.name in (:roles)")
     Integer countAdmins(List<String> roles);

@@ -3,11 +3,7 @@
 ## Pending
 
 * Remove Reactive and make it normal rest api
-  * Change queries COUNT to Exist
-  * Make Entity relationships works
   * Redo the metrics and document them
-  * Check @Transactional
-  * spring.jpa.hibernate.ddl-auto
 * Admin on start up
   * Must change password - Registration and Change password must be only one email doing both at the same time
 * Admin endpoints

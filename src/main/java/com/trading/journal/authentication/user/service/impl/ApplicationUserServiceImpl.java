@@ -83,17 +83,17 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
     @Override
     public Boolean userNameExists(@NotBlank String userName) {
-        return applicationUserRepository.countByUserName(userName) > 0;
+        return applicationUserRepository.existsByUserName(userName);
     }
 
     @Override
     public Boolean emailExists(@NotBlank String email) {
-        return applicationUserRepository.countByEmail(email) > 0;
+        return applicationUserRepository.existsByEmail(email);
     }
 
     @Override
     public UserInfo getUserInfo(@NotBlank String userName) {
-        return applicationUserRepository.findByUserName(userName);
+        return applicationUserRepository.getUserInfoByUserName(userName);
     }
 
     @Override

@@ -72,8 +72,8 @@ public class ApplicationUserServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
+        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
+        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
         when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(1L, 1L, 1L, "USER")));
         when(encoder.encode(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(appUser);
@@ -108,8 +108,8 @@ public class ApplicationUserServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
+        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
+        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
         when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(1L, 1L, 1L, "USER")));
         when(encoder.encode(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(appUser);
@@ -172,8 +172,8 @@ public class ApplicationUserServiceImplTest {
                 "123456",
                 "123456");
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(1);
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
+        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(true);
+        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
         assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
@@ -193,8 +193,8 @@ public class ApplicationUserServiceImplTest {
                 "123456",
                 "123456");
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(1);
+        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
+        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(true);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
         assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
@@ -214,8 +214,8 @@ public class ApplicationUserServiceImplTest {
                 "123456",
                 "123456");
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(1);
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(1);
+        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(true);
+        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(true);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
         assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
@@ -230,8 +230,8 @@ public class ApplicationUserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
+        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
+        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
 
         Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
         assertThat(userValid).isTrue();
@@ -243,8 +243,8 @@ public class ApplicationUserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(1);
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(0);
+        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(true);
+        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
 
         Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
         assertThat(userValid).isFalse();
@@ -256,8 +256,8 @@ public class ApplicationUserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(0);
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(1);
+        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
+        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(true);
 
         Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
         assertThat(userValid).isFalse();
@@ -269,8 +269,8 @@ public class ApplicationUserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.countByUserName(anyString())).thenReturn(1);
-        when(applicationUserRepository.countByEmail(anyString())).thenReturn(1);
+        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(true);
+        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(true);
 
         Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
         assertThat(userValid).isFalse();

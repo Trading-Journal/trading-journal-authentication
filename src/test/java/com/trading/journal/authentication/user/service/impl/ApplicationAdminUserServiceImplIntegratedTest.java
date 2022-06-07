@@ -70,7 +70,7 @@ class ApplicationAdminUserServiceImplIntegratedTest {
         applicationAdminUserService.createAdmin(adminRegistration);
 
         Long userId;
-        UserInfo userInfo = applicationUserRepository.findByUserName("admin");
+        UserInfo userInfo = applicationUserRepository.getUserInfoByUserName("admin");
         assertThat(userInfo.getEnabled()).isFalse();
         assertThat(userInfo.getVerified()).isFalse();
         userId = userInfo.getId();
