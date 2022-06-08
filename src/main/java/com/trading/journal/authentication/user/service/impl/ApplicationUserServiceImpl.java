@@ -1,20 +1,20 @@
 package com.trading.journal.authentication.user.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.authority.UserAuthority;
-import com.trading.journal.authentication.authority.service.UserAuthorityService;
+import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.service.ApplicationUserRepository;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotBlank;
@@ -30,9 +30,9 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
     private final UserAuthorityService userAuthorityService;
 
-    private final PasswordEncoder encoder;
-
     private final VerificationProperties verificationProperties;
+
+    private final PasswordService passwordService;
 
     @Override
     public UserDetails loadUserByUsername(String username) {
@@ -107,7 +107,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     @Override
     public ApplicationUser changePassword(@NotBlank String email, @NotBlank String password) {
         ApplicationUser applicationUser = this.getUserByEmail(email);
-        applicationUser.changePassword(encoder.encode(password));
+        applicationUser.changePassword(passwordService.encodePassword(password));
         return applicationUserRepository.save(applicationUser);
     }
 
@@ -115,7 +115,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
         boolean enabledAndVerified = !verificationProperties.isEnabled();
         return ApplicationUser.builder()
                 .userName(userRegistration.userName())
-                .password(encoder.encode(userRegistration.password()))
+                .password(passwordService.encodePassword(userRegistration.password()))
                 .firstName(userRegistration.firstName())
                 .lastName(userRegistration.lastName())
                 .email(userRegistration.email())

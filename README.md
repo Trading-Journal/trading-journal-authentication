@@ -3,6 +3,7 @@
 ## Pending
 
 * Remove Reactive and make it normal rest api
+  * WebSecurityConfigurerAdapter deprected
   * Redo the metrics and document them
 * Admin on start up
   * Must change password - Registration and Change password must be only one email doing both at the same time
@@ -16,6 +17,7 @@
   * Admin access only
   * Validate if entity authorities is enabled before manage
   * Manage user authorities
+* Enable/Disable Multitenancy
 * Postman Test run
 * Test Coverage with fail under X percent
 * Delete account

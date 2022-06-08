@@ -1,10 +1,10 @@
 package com.trading.journal.authentication.api;
 
-import com.trading.journal.authentication.authentication.ChangePassword;
+import com.trading.journal.authentication.password.ChangePassword;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
-import com.trading.journal.authentication.authentication.service.PasswordService;
+import com.trading.journal.authentication.password.service.PasswordManagementService;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.registration.service.RegistrationService;
@@ -23,7 +23,7 @@ public class AuthenticationController implements AuthenticationApi {
     private final RegistrationService registrationService;
     private final AuthenticationService authenticationService;
 
-    private final PasswordService passwordService;
+    private final PasswordManagementService passwordManagementService;
 
     @Override
     public ResponseEntity<SignUpResponse> signUp(@Valid UserRegistration registration) {
@@ -57,13 +57,13 @@ public class AuthenticationController implements AuthenticationApi {
 
     @Override
     public ResponseEntity<Void> requestPasswordChange(String email) {
-        passwordService.requestPasswordChange(email);
+        passwordManagementService.requestPasswordChange(email);
         return ok().build();
     }
 
     @Override
     public ResponseEntity<Void> changePassword(@Valid ChangePassword changePassword) {
-        passwordService.changePassword(changePassword);
+        passwordManagementService.changePassword(changePassword);
         return ok().build();
     }
 }

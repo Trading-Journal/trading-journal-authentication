@@ -1,7 +1,7 @@
 package com.trading.journal.authentication.registration.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.authority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;

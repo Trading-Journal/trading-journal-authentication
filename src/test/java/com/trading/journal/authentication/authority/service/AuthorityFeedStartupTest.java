@@ -2,6 +2,8 @@ package com.trading.journal.authentication.authority.service;
 
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
+import com.trading.journal.authentication.authority.AuthorityRepository;
+import com.trading.journal.authentication.verification.service.impl.service.AuthorityFeedStartup;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -3,7 +3,7 @@ package com.trading.journal.authentication.configuration;
 import com.trading.journal.authentication.authority.AuthoritiesHelper;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
-import com.trading.journal.authentication.authority.service.AuthorityService;
+import com.trading.journal.authentication.verification.service.impl.service.AuthorityService;
 import com.trading.journal.authentication.jwt.JwtTokenAuthenticationFilter;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.user.service.ApplicationUserService;

@@ -2,15 +2,15 @@ package com.trading.journal.authentication.user.service.impl;
 
 import com.trading.journal.authentication.authority.AuthoritiesHelper;
 import com.trading.journal.authentication.authority.AuthorityCategory;
-import com.trading.journal.authentication.authority.service.UserAuthorityService;
+import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.service.ApplicationAdminUserService;
-import com.trading.journal.authentication.user.service.ApplicationUserRepository;
+import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
@@ -27,7 +27,7 @@ public class ApplicationAdminUserServiceImpl implements ApplicationAdminUserServ
 
     private final VerificationService verificationService;
 
-    private final PasswordEncoder encoder;
+    private final PasswordService passwordService;
 
     @Override
     public Boolean thereIsAdmin() {
@@ -46,7 +46,7 @@ public class ApplicationAdminUserServiceImpl implements ApplicationAdminUserServ
     private ApplicationUser adminUser(UserRegistration userRegistration) {
         return ApplicationUser.builder()
                 .userName(userRegistration.userName())
-                .password(encoder.encode(userRegistration.email()))
+                .password(passwordService.randomPassword())
                 .firstName(userRegistration.firstName())
                 .lastName(userRegistration.lastName())
                 .email(userRegistration.email())

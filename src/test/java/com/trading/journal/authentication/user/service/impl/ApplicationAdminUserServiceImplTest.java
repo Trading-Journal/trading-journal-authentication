@@ -1,10 +1,11 @@
 package com.trading.journal.authentication.user.service.impl;
 
-import com.trading.journal.authentication.authority.UserAuthority;
-import com.trading.journal.authentication.authority.service.UserAuthorityService;
+import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.service.ApplicationUserRepository;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationService;
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -39,7 +39,7 @@ class ApplicationAdminUserServiceImplTest {
     VerificationService verificationService;
 
     @Mock
-    PasswordEncoder encoder;
+    PasswordService passwordService;
 
     @InjectMocks
     ApplicationAdminUserServiceImpl applicationAdminUserService;
@@ -85,7 +85,7 @@ class ApplicationAdminUserServiceImplTest {
 
         UserAuthority userAuthority = new UserAuthority(1L, "ADMIN", 1L);
 
-        when(encoder.encode("mail@mail.com")).thenReturn("password_secret");
+        when(passwordService.randomPassword()).thenReturn("password_secret");
         when(applicationUserRepository.save(any())).thenReturn(applicationUser);
         when(userAuthorityService.saveAdminUserAuthorities(applicationUser)).thenReturn(singletonList(userAuthority));
         when(applicationUserRepository.findById(1L)).thenReturn(Optional.of(applicationUser));

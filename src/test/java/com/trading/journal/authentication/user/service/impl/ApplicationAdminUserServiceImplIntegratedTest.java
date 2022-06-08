@@ -1,17 +1,17 @@
 package com.trading.journal.authentication.user.service.impl;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.authority.UserAuthority;
-import com.trading.journal.authentication.authority.service.UserAuthorityRepository;
+import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.properties.AdminUserProperties;
 import com.trading.journal.authentication.user.service.ApplicationAdminUserService;
-import com.trading.journal.authentication.user.service.ApplicationUserRepository;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
-import com.trading.journal.authentication.verification.service.VerificationRepository;
+import com.trading.journal.authentication.verification.VerificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.doNothing;
 @SpringBootTest
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
-@TestPropertySource(properties = {"journal.authentication.authority.type=DATABASE"})
+@TestPropertySource(properties = {"journal.authentication.authority.type=DATABASE", "journal.authentication.admin-user.email=admin@email.com"})
 class ApplicationAdminUserServiceImplIntegratedTest {
 
     @Autowired
@@ -56,12 +56,11 @@ class ApplicationAdminUserServiceImplIntegratedTest {
         applicationUserRepository.deleteAll();
         verificationRepository.deleteAll();
         userAuthorityRepository.deleteAll();
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
     }
 
     @Test
     void addAdmin() {
-        doNothing().when(verificationEmailService).sendEmail(any(), any());
-
         UserRegistration adminRegistration = new UserRegistration("Admin", "Administrator", "admin", adminUserProperties.email(), null, null);
 
         Boolean thereIsAdmin = applicationAdminUserService.thereIsAdmin();

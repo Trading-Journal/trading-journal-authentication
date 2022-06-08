@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 
 public class ApiExceptionHandlerTest {
-    ApiExceptionHandler apiExceptionHandler = new ApiExceptionHandler();
+    final ApiExceptionHandler apiExceptionHandler = new ApiExceptionHandler();
 
     @Test
     @DisplayName("When handle HttpClientErrorException with no message, return status as message")
