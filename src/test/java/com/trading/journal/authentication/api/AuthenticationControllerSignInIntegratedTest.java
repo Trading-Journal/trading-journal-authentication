@@ -95,7 +95,7 @@ public class AuthenticationControllerSignInIntegratedTest {
                 .isUnauthorized()
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
-                .value(response -> assertThat(response.get("error")).isEqualTo("Bad credentials"));
+                .value(response -> assertThat(response.get("error")).isEqualTo("Bad Credentials"));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class AuthenticationControllerSignInIntegratedTest {
                 .isUnauthorized()
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
-                .value(response -> assertThat(response.get("error")).isEqualTo("Bad credentials"));
+                .value(response -> assertThat(response.get("error")).isEqualTo("Bad Credentials"));
     }
 
     @Test

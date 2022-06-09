@@ -69,7 +69,7 @@ public class JwtIntegratedTest {
 
         assertThat(accessToken.token()).isNotBlank();
         Jws<Claims> accessTokenClaims = jwtTokenParser.parseToken(accessToken.token());
-        assertThat(accessTokenClaims.getBody().getSubject()).isEqualTo(appUser.getUserName());
+        assertThat(accessTokenClaims.getBody().getSubject()).isEqualTo(appUser.getEmail());
         assertThat(accessTokenClaims.getBody().get(JwtConstants.TENANCY)).isEqualTo(appUser.getUserName());
         assertThat(accessTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
         assertThat(accessTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
@@ -102,7 +102,7 @@ public class JwtIntegratedTest {
         TokenData refreshToken = jwtTokenProvider.generateRefreshToken(appUser);
         assertThat(refreshToken.token()).isNotBlank();
         Jws<Claims> refreshTokenClaims = jwtTokenParser.parseToken(refreshToken.token());
-        assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo(appUser.getUserName());
+        assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo(appUser.getEmail());
         assertThat(refreshTokenClaims.getBody().get(JwtConstants.TENANCY)).isNull();
         assertThat(refreshTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
         assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");

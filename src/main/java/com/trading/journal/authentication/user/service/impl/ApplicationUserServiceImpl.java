@@ -11,9 +11,6 @@ import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +18,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,23 +31,6 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     private final VerificationProperties verificationProperties;
 
     private final PasswordService passwordService;
-
-    @Override
-    public UserDetails loadUserByUsername(String username) {
-        ApplicationUser applicationUser = this.getUserByEmail(username);
-        List<SimpleGrantedAuthority> authorities = userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser);
-        if (authorities == null || authorities.isEmpty()) {
-            throw new ApplicationException("There is no authorities for this user");
-        }
-        return User.withUsername(applicationUser.getEmail())
-                .password(applicationUser.getPassword())
-                .authorities(authorities)
-                .accountExpired(!applicationUser.getEnabled())
-                .credentialsExpired(!applicationUser.getVerified())
-                .disabled(!applicationUser.getEnabled())
-                .accountLocked(!applicationUser.getVerified())
-                .build();
-    }
 
     @Override
     public ApplicationUser getUserByEmail(@NotBlank String email) {
@@ -92,8 +73,11 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     }
 
     @Override
-    public UserInfo getUserInfo(@NotBlank String userName) {
-        return applicationUserRepository.getUserInfoByUserName(userName);
+    public UserInfo getUserInfo(@NotBlank String email) {
+        UserInfo userInfo = applicationUserRepository.getUserInfoByEmail(email);
+        List<String> authorities = userAuthorityService.getByUserId(userInfo.getId()).stream().map(UserAuthority::getName).collect(Collectors.toList());
+        userInfo.loadAuthorities(authorities);
+        return userInfo;
     }
 
     @Override

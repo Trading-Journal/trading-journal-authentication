@@ -2,6 +2,7 @@ package com.trading.journal.authentication.user.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.password.service.PasswordService;
+import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.registration.UserRegistration;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -277,82 +279,6 @@ public class ApplicationUserServiceImplTest {
     }
 
     @Test
-    @DisplayName("When find user by email that exist return user details")
-    void userDetails() {
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
-                LocalDateTime.now());
-
-        when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(applicationUser);
-        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(singletonList(new SimpleGrantedAuthority("ROLE_USER")));
-
-        UserDetails details = applicationUserServiceImpl.loadUserByUsername(applicationUser.getEmail());
-        assertThat(details.isAccountNonExpired()).isTrue();
-        assertThat(details.isCredentialsNonExpired()).isTrue();
-        assertThat(details.isEnabled()).isTrue();
-        assertThat(details.isAccountNonLocked()).isTrue();
-        assertThat(details.getAuthorities().toArray()).hasSize(1);
-        assertThat(details.getAuthorities().toArray()).contains(new SimpleGrantedAuthority("ROLE_USER"));
-    }
-
-    @Test
-    @DisplayName("When find user by email that does not exist return exception")
-    void findUserException() {
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(null);
-        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.loadUserByUsername("email@mail.com"), "User email@mail.com does not exist");
-    }
-
-    @Test
-    @DisplayName("When find user by email and the authorities are null return exception")
-    void authoritiesNullReturnException() {
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                null,
-                LocalDateTime.now());
-
-        when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(applicationUser);
-        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(emptyList());
-
-        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.loadUserByUsername("email@mail.com"), "User email@mail.com does not exist");
-    }
-
-    @Test
-    @DisplayName("When find user by email and the authorities are null return exception")
-    void authoritiesEmptyReturnException() {
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now());
-
-        when(applicationUserRepository.findByEmail(applicationUser.getEmail())).thenReturn(applicationUser);
-        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(null);
-
-        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.loadUserByUsername("email@mail.com"), "User email@mail.com does not exist");
-    }
-
-    @Test
     @DisplayName("Change password")
     void changePassword() {
         ApplicationUser applicationUser = new ApplicationUser(
@@ -391,5 +317,35 @@ public class ApplicationUserServiceImplTest {
     void changePasswordException() {
         when(applicationUserRepository.findByEmail(anyString())).thenReturn(null);
         assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.changePassword("mail@mail.com", "password"), "User email@mail.com does not exist");
+    }
+
+    @Test
+    @DisplayName("Given an email load user info")
+    void userInfo() {
+        UserInfo userInfo = new UserInfo(1L,
+                "subject",
+                "firstName",
+                "lastName",
+                "email@mail.com",
+                true,
+                true,
+                emptyList(),
+                LocalDateTime.now());
+
+        when(applicationUserRepository.getUserInfoByEmail("email@mail.com")).thenReturn(userInfo);
+
+        UserAuthority userAuthority1 = new UserAuthority(1L, "User", 1L);
+        UserAuthority userAuthority2 = new UserAuthority(2L, "Admin", 1L);
+        when(userAuthorityService.getByUserId(userInfo.getId())).thenReturn(Arrays.asList(userAuthority1, userAuthority2));
+
+        UserInfo info = applicationUserServiceImpl.getUserInfo("email@mail.com");
+        assertThat(info.getId()).isEqualTo(1L);
+        assertThat(info.getUserName()).isEqualTo("subject");
+        assertThat(info.getFirstName()).isEqualTo("firstName");
+        assertThat(info.getLastName()).isEqualTo("lastName");
+        assertThat(info.getEmail()).isEqualTo("email@mail.com");
+        assertThat(info.getEnabled()).isEqualTo(true);
+        assertThat(info.getVerified()).isEqualTo(true);
+        assertThat(info.getAuthorities()).containsExactly("User", "Admin");
     }
 }

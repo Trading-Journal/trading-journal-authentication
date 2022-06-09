@@ -3,13 +3,12 @@ package com.trading.journal.authentication.user.service;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.UserInfo;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 
 @Service
-public interface ApplicationUserService extends UserDetailsService {
+public interface ApplicationUserService {
 
     ApplicationUser getUserByEmail(String email);
 
@@ -21,7 +20,7 @@ public interface ApplicationUserService extends UserDetailsService {
 
     Boolean emailExists(String email);
 
-    UserInfo getUserInfo(String userName);
+    UserInfo getUserInfo(String email);
 
     void verifyNewUser(String email);
 

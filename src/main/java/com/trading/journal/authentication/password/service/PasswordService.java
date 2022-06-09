@@ -4,4 +4,6 @@ public interface PasswordService {
     String encodePassword(String rawPassword);
 
     String randomPassword();
+
+    Boolean matches(String rawPassword, String encodedPassword);
 }

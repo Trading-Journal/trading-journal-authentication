@@ -72,6 +72,7 @@ public class MeControllerTest {
                     assertThat(response.getFirstName()).isEqualTo(user.firstName());
                     assertThat(response.getLastName()).isEqualTo(user.lastName());
                     assertThat(response.getEmail()).isEqualTo(user.email());
+                    assertThat(response.getAuthorities()).containsExactly("ROLE_USER");
                 });
     }
 

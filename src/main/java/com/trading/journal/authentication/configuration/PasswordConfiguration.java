@@ -1,19 +1,13 @@
 package com.trading.journal.authentication.configuration;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.passay.CharacterCharacteristicsRule;
-import org.passay.CharacterRule;
-import org.passay.EnglishCharacterData;
-import org.passay.LengthRule;
-import org.passay.PasswordValidator;
-import org.passay.RepeatCharacterRegexRule;
-import org.passay.Rule;
+import org.passay.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 public class PasswordConfiguration {

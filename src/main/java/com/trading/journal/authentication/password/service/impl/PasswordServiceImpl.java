@@ -21,4 +21,9 @@ public class PasswordServiceImpl implements PasswordService {
     public String randomPassword() {
         return encoder.encode(UUID.randomUUID().toString()) ;
     }
+
+    @Override
+    public Boolean matches(String rawPassword, String encodedPassword) {
+        return encoder.matches(rawPassword, encodedPassword);
+    }
 }

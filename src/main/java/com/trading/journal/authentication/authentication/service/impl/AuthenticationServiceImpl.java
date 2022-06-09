@@ -5,6 +5,7 @@ import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
+import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
@@ -17,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
@@ -34,8 +34,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public LoginResponse signIn(@Valid Login login) {
         Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password()));
-        UserDetails userDetails = (UserDetails) authenticate.getPrincipal();
-        ApplicationUser applicationUser = applicationUserService.getUserByEmail(userDetails.getUsername());
+        ContextUser principal = (ContextUser) authenticate.getPrincipal();
+        ApplicationUser applicationUser = applicationUserService.getUserByEmail(principal.email());
 
         TokenData accessToken = jwtTokenProvider.generateAccessToken(applicationUser);
         TokenData refreshToken = jwtTokenProvider.generateRefreshToken(applicationUser);

@@ -13,8 +13,8 @@ public interface ApplicationUserRepository extends CrudRepository<ApplicationUse
 
     ApplicationUser findByEmail(String email);
 
-    @Query("select id, userName, firstName, lastName, email, enabled, verified, createdAt from Users where userName = :userName")
-    UserInfo getUserInfoByUserName(String userName);
+    @Query("select id, userName, firstName, lastName, email, enabled, verified, createdAt from Users where email = :email")
+    UserInfo getUserInfoByEmail(String email);
 
     @Query("SELECT COUNT(Users.id) FROM Users inner join UserAuthorities where Users.id = UserAuthorities.userId and UserAuthorities.name in (:roles)")
     Integer countAdmins(List<String> roles);
