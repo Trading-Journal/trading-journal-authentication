@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.user;
 
-import com.trading.journal.authentication.authority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;

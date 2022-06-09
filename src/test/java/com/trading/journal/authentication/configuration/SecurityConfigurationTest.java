@@ -16,19 +16,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.stream.Stream;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 public class SecurityConfigurationTest {
     @Autowired
     private ApplicationContext context;
 
+    @Autowired
     private WebTestClient webTestClient;
-
-    @BeforeEach
-    public void setUp() {
-        webTestClient = WebTestClient.bindToApplicationContext(context).build();
-    }
 
     @Test
     @DisplayName("Access public paths anonymously")

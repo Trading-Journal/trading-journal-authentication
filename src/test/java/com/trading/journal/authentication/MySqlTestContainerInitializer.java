@@ -30,14 +30,14 @@ public class MySqlTestContainerInitializer implements ApplicationContextInitiali
     @Override
     public void initialize(@NotNull ConfigurableApplicationContext configurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
-                format("journal.authentication.datasource.host=%s", container.getHost()));
+                format("spring.datasource.url=jdbc:mysql://%s:%s/trade-journal", container.getHost(), container.getMappedPort(3306)));
+
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
-                format("journal.authentication.datasource.port=%s", container.getMappedPort(3306)));
+                "spring.datasource.username=trade-journal");
+
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
-                "journal.authentication.datasource.database=trade-journal");
-        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
-                "journal.authentication.datasource.username=trade-journal");
-        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
-                "journal.authentication.datasource.password=trade-journal");
+                "spring.datasource.password=trade-journal");
+
+        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, "spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver");
     }
 }

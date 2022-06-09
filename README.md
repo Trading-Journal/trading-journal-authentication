@@ -2,18 +2,18 @@
 
 ## Pending
 
-* Admin on start up
-  * Must change password
 * Admin endpoints
   * Improve SecurityConfigurationTest with admin access
   * Manage User
     * Disable
     * Delete
     * Change authorities
-  * Manage Authorities via API
-    * Admin access only
-    * Validate if entity authorities is enabled before manage
+* Manage Authorities via API when Database authorities (ConditionalOnProperty???)
+  * Admin access only
+  * Validate if entity authorities is enabled before manage
   * Manage user authorities
+* Enable/Disable Multitenancy
+* When user request password change, disable it, it cannot perform login until change password
 * Postman Test run
 * Test Coverage with fail under X percent
 * Delete account
@@ -33,7 +33,8 @@
 
 ## Swagger
 
-[Localhost swagger URL](http://localhost:8080/swagger-ui/index.html)
+[http://localhost:8080/swagger-ui/index.htm](http://localhost:8080/swagger-ui/index.html)
+Or just [http://localhost:8080](http://localhost:8080)
 
 ## Running
 
@@ -77,8 +78,8 @@ CREATE TABLE `Users` (
   `firstName` varchar(45) NOT NULL,
   `lastName` varchar(45) NOT NULL,
   `email` varchar(150) NOT NULL,
-  `enabled` tinyint NOT NULL,
-  `verified` tinyint NOT NULL,
+  `enabled` tinyint(1) NOT NULL,
+  `verified` tinyint(1) NOT NULL,
   `createdAt` datetime NOT NULL,
   `authorities` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -119,9 +120,9 @@ CREATE TABLE `Verifications` (
 
 ### Database connection
 
-* **journal.authentication.datasource.host** *e.g. localhost* 
+* **journal.authentication.datasource.host** *e.g. localhost*
 * **journal.authentication.datasource.port** *e.g. 3306*
-* **journal.authentication.datasource.database** *e.g. dbname* 
+* **journal.authentication.datasource.database** *e.g. dbname*
 * **journal.authentication.datasource.username** *e.g. user*
 * **journal.authentication.datasource.password** *e.g. root*
 
@@ -129,10 +130,10 @@ CREATE TABLE `Verifications` (
 
 There are two ways to handle Authority/Roles:
 * STATIC: No authorities are persisted in the database, there are initially two possible roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
- * DATABASE: Authorities will be persisted and retrieved from database, a initial load is made in the table  **Authorities** with roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
-This configuration can be changed using the property **journal.authentication.authority.type** with none is defined, the default behavior is **STATIC**
- * **journal.authentication.authority.type** *e.g. STATIC*
- * **journal.authentication.authority.type** *e.g. DATABASE*
+* DATABASE: Authorities will be persisted and retrieved from database, a initial load is made in the table  **Authorities** with roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
+  This configuration can be changed using the property **journal.authentication.authority.type** with none is defined, the default behavior is **STATIC**
+* **journal.authentication.authority.type** *e.g. STATIC*
+* **journal.authentication.authority.type** *e.g. DATABASE*
 
 ### Email Verification
 In case there is need for new users confirm their emails, then enable the configuration property:
@@ -146,11 +147,11 @@ In case there is need for new users confirm their emails, then enable the config
 
 ### Retrieve reactive metrics
 
-* http://localhost:8080/metrics/signup_user.flow.duration - Data about Signing Up process
-* http://localhost:8080/metrics/create_new_user.flow.duration - Data about Creating a new User process
-* http://localhost:8080/metrics/signing_user.flow.duration - Data about Signing In process
-* http://localhost:8080/metrics/refresh_token.flow.duration - Data about Refreshing Token process
-* http://localhost:8080/metrics/get_me_info.flow.duration - Data about Getting Current User Information process
-* http://localhost:8080/metrics/verify_new_user.flow.duration - Data about Email Verification for new users
-* http://localhost:8080/metrics/password_change_request.flow.duration - Data about requester for a password change
-* http://localhost:8080/metrics/password_change.flow.duration - Data about effectively change the user password
+* http://localhost:8080/metrics/signup_user - Amount of time create a new user via signup
+* http://localhost:8080/metrics/signin_use - Amount of time to authenticate a user
+* http://localhost:8080/metrics/refresh_token - Amount of time to refresh the user token
+* http://localhost:8080/metrics/verify_new_user - Amount of time to verify a new user emails
+* http://localhost:8080/metrics/send_new_verification - Amount of time to send a new email verification to the user email
+* http://localhost:8080/metrics/request_password_change - Amount of time to request a password change
+* http://localhost:8080/metrics/password_change - Amount of time to apply a password change
+* http://localhost:8080/metrics/get_me_info - Amount of time to retrieve user information

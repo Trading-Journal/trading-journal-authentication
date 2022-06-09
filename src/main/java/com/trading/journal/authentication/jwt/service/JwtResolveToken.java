@@ -1,9 +1,9 @@
 package com.trading.journal.authentication.jwt.service;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import javax.servlet.http.HttpServletRequest;
 
 public interface JwtResolveToken {
 
-    String resolve(ServerHttpRequest request);
+    String resolve(HttpServletRequest request);
 
 }

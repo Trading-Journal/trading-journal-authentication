@@ -1,16 +1,17 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.authority.UserAuthority;
-import com.trading.journal.authentication.authority.service.UserAuthorityRepository;
+import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
+import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.service.ApplicationUserRepository;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -20,28 +21,31 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 @TestPropertySource(properties = {"journal.authentication.authority.type=DATABASE"})
 public class AuthenticationControllerDatabaseAuthoritiesTest {
 
     @Autowired
-    private ApplicationContext context;
-
-    @Autowired
     UserAuthorityRepository userAuthorityRepository;
 
+    @Autowired
     private WebTestClient webTestClient;
 
     @Autowired
     ApplicationUserRepository applicationUserRepository;
 
+    @MockBean
+    EmailSender emailSender;
+
     @BeforeEach
     public void setUp() {
-        webTestClient = WebTestClient.bindToApplicationContext(context).build();
-        applicationUserRepository.deleteAll().block();
+        applicationUserRepository.deleteAll();
+        doNothing().when(emailSender).send(any());
     }
 
     @Test
@@ -64,7 +68,7 @@ public class AuthenticationControllerDatabaseAuthoritiesTest {
                 .expectStatus()
                 .isOk();
 
-        List<UserAuthority> userAuthorities = userAuthorityRepository.findAll().collectList().block();
+        List<UserAuthority> userAuthorities = userAuthorityRepository.findAll();
         assert userAuthorities != null;
         userAuthorities.forEach(userAuthority -> assertThat(userAuthority.getAuthorityId()).isNotNull());
     }

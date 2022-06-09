@@ -45,6 +45,7 @@
         <exclude name="DataflowAnomalyAnalysis" />
         <exclude name="BeanMembersShouldSerialize" />
         <exclude name="InvalidLogMessageFormat" />
+        <exclude name="AvoidAccessibilityAlteration"/>
     </rule>
     <rule ref="category/java/multithreading.xml" />
     <rule ref="category/java/performance.xml">

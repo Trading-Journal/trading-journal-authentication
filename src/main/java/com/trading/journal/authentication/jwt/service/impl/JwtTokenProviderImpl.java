@@ -18,7 +18,7 @@ import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.authority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -60,7 +60,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
                 .setIssuer(properties.getIssuer())
                 .setAudience(properties.getAudience())
-                .setSubject(applicationUser.getUserName())
+                .setSubject(applicationUser.getEmail())
                 .setIssuedAt(issuedAt)
                 .setExpiration(getExpirationDate(properties.getAccessTokenExpiration()))
                 .claim(JwtConstants.SCOPES, authorities)
@@ -79,7 +79,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
                 .setIssuer(properties.getIssuer())
                 .setAudience(properties.getAudience())
-                .setSubject(applicationUser.getUserName())
+                .setSubject(applicationUser.getEmail())
                 .setIssuedAt(issuedAt)
                 .setExpiration(getExpirationDate(properties.getRefreshTokenExpiration()))
                 .claim(JwtConstants.SCOPES, Collections.singletonList(JwtConstants.REFRESH_TOKEN))

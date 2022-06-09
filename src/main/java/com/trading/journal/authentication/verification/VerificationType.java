@@ -2,5 +2,6 @@ package com.trading.journal.authentication.verification;
 
 public enum VerificationType {
     REGISTRATION,
-    CHANGE_PASSWORD;
+    CHANGE_PASSWORD,
+    ADMIN_REGISTRATION
 }

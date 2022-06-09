@@ -1,15 +1,15 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
+import com.trading.journal.authentication.jwt.data.AccessToken;
 import com.trading.journal.authentication.jwt.service.JwtResolveToken;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
-import com.trading.journal.authentication.jwt.data.AccessToken;
-
 import org.springframework.core.MethodParameter;
-import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
-import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
-import reactor.core.publisher.Mono;
+import javax.servlet.http.HttpServletRequest;
 
 public class AccessTokenResolver implements HandlerMethodArgumentResolver {
 
@@ -27,9 +27,9 @@ public class AccessTokenResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
-            ServerWebExchange exchange) {
-        String token = resolveToken.resolve(exchange.getRequest());
-        return Mono.just(tokenReader.getAccessTokenInfo(token));
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+        HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+        String token = resolveToken.resolve(request);
+        return tokenReader.getAccessTokenInfo(token);
     }
 }

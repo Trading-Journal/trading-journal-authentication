@@ -1,57 +1,47 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.authentication.ChangePassword;
+import com.trading.journal.authentication.password.ChangePassword;
 import com.trading.journal.authentication.email.EmailField;
 import com.trading.journal.authentication.email.EmailRequest;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
-import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.service.ApplicationUserRepository;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.verification.Verification;
-import com.trading.journal.authentication.verification.VerificationFields;
 import com.trading.journal.authentication.verification.VerificationStatus;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
-import com.trading.journal.authentication.verification.service.VerificationRepository;
+import com.trading.journal.authentication.verification.VerificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 @TestPropertySource(properties = {"journal.authentication.authority.type=STATIC"})
 public class AuthenticationControllerChangePasswordIntegratedTest {
-
-    @Autowired
-    private ApplicationContext context;
 
     @Autowired
     private ApplicationUserService applicationUserService;
@@ -71,13 +61,13 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
     @MockBean
     EmailSender emailSender;
 
+    @Autowired
     private WebTestClient webTestClient;
 
     @BeforeEach
     public void setUp() {
-        webTestClient = WebTestClient.bindToApplicationContext(context).build();
-        applicationUserRepository.deleteAll().block();
-        verificationRepository.deleteAll().block();
+        applicationUserRepository.deleteAll();
+        verificationRepository.deleteAll();
     }
 
     @Test
@@ -93,9 +83,9 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(user).block();
+        applicationUserService.createNewUser(user);
 
-        when(verificationEmailService.sendEmail(any(), any())).thenReturn(Mono.empty());
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
 
         webTestClient
                 .post()
@@ -108,13 +98,9 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 .expectStatus()
                 .isOk();
 
-        Mono<Verification> verificationByEmail = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email);
-        StepVerifier.create(verificationByEmail)
-                .assertNext(verification -> {
-                    assertThat(verification.getStatus()).isEqualTo(VerificationStatus.PENDING);
-                    assertThat(verification.getHash()).isNotBlank();
-                })
-                .verifyComplete();
+        Verification verification = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email);
+        assertThat(verification.getStatus()).isEqualTo(VerificationStatus.PENDING);
+        assertThat(verification.getHash()).isNotBlank();
     }
 
     @Test
@@ -138,10 +124,8 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                         assertThat(response.get("error")).isEqualTo("User mail@mail.com does not exist")
                 );
 
-        Mono<Verification> verificationByEmail = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email);
-        StepVerifier.create(verificationByEmail)
-                .expectNextCount(0)
-                .verifyComplete();
+        Verification verification = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email);
+        assertThat(verification).isNull();
 
         verify(verificationEmailService, never()).sendEmail(any(), any());
     }
@@ -242,7 +226,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 .status(VerificationStatus.PENDING)
                 .lastChange(LocalDateTime.now())
                 .build()
-        ).block();
+        );
 
         ChangePassword changePassword = new ChangePassword("mail@email.com", tokenData.token(), "dad231#$#4", "dad231#$#4");
 
@@ -273,7 +257,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(user).block();
+        applicationUserService.createNewUser(user);
 
         TokenData tokenData = jwtTokenProvider.generateTemporaryToken(email);
         verificationRepository.save(Verification.builder()
@@ -283,11 +267,11 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 .status(VerificationStatus.PENDING)
                 .lastChange(LocalDateTime.now())
                 .build()
-        ).block();
+        );
 
         ChangePassword changePassword = new ChangePassword(email, tokenData.token(), "&UeK0j@tYRnhVGS&S64d", "&UeK0j@tYRnhVGS&S64d");
 
-        String oldPasswordEncoded = Objects.requireNonNull(applicationUserRepository.findByEmail(email).block()).getPassword();
+        String oldPasswordEncoded = applicationUserRepository.findByEmail(email).getPassword();
         assertThat(oldPasswordEncoded).isNotBlank();
 
 
@@ -297,7 +281,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 singletonList(new EmailField("$NAME", "allan weber")),
                 singletonList(email)
         );
-        when(emailSender.send(emailRequest)).thenReturn(Mono.empty());
+        doNothing().when(emailSender).send(emailRequest);
 
         webTestClient
                 .post()
@@ -308,10 +292,10 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 .expectStatus()
                 .isOk();
 
-        List<Verification> verifications = Objects.requireNonNull(verificationRepository.findAll().collectList().block());
+        List<Verification> verifications = verificationRepository.findAll();
         assertThat(verifications).isEmpty();
 
-        String newPasswordEncoded = Objects.requireNonNull(applicationUserRepository.findByEmail(email).block()).getPassword();
+        String newPasswordEncoded = applicationUserRepository.findByEmail(email).getPassword();
         assertThat(newPasswordEncoded).isNotBlank();
 
         assertThat(oldPasswordEncoded).isNotEqualTo(newPasswordEncoded);

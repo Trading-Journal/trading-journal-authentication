@@ -4,9 +4,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-import com.trading.journal.authentication.registration.validation.PasswordAndConfirmation;
-import com.trading.journal.authentication.registration.validation.PasswordConfirmed;
-import com.trading.journal.authentication.registration.validation.PasswordPolicy;
+import com.trading.journal.authentication.password.validation.PasswordAndConfirmation;
+import com.trading.journal.authentication.password.validation.PasswordConfirmed;
+import com.trading.journal.authentication.password.validation.PasswordPolicy;
 
 @PasswordConfirmed
 public record UserRegistration(

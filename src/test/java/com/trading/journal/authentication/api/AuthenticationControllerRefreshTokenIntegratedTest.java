@@ -4,12 +4,13 @@ import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
+import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.service.ApplicationUserRepository;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -18,7 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,15 +36,14 @@ import java.util.Date;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 @TestPropertySource(properties = {"journal.authentication.authority.type=STATIC"})
 public class AuthenticationControllerRefreshTokenIntegratedTest {
-
-    @Autowired
-    private ApplicationContext context;
 
     @Autowired
     private ApplicationUserService applicationUserService;
@@ -60,12 +60,16 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
     @Autowired
     ApplicationUserRepository applicationUserRepository;
 
+    @Autowired
     private WebTestClient webTestClient;
+
+    @MockBean
+    EmailSender emailSender;
 
     @BeforeEach
     public void setUp() {
-        webTestClient = WebTestClient.bindToApplicationContext(context).build();
-        applicationUserRepository.deleteAll().block();
+        applicationUserRepository.deleteAll();
+        doNothing().when(emailSender).send(any());
     }
 
     @Test
@@ -79,11 +83,11 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(user).block();
+        applicationUserService.createNewUser(user);
 
         Login login = new Login(user.email(), user.password());
 
-        LoginResponse loginResponse = authenticationService.signIn(login).block();
+        LoginResponse loginResponse = authenticationService.signIn(login);
 
         assert loginResponse != null;
         webTestClient
@@ -112,11 +116,11 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(user).block();
+        applicationUserService.createNewUser(user);
 
         Login login = new Login(user.email(), user.password());
 
-        LoginResponse loginResponse = authenticationService.signIn(login).block();
+        LoginResponse loginResponse = authenticationService.signIn(login);
 
         assert loginResponse != null;
         webTestClient

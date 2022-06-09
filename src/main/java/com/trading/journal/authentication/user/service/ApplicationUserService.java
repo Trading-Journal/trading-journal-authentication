@@ -1,32 +1,28 @@
 package com.trading.journal.authentication.user.service;
 
-import javax.validation.constraints.NotNull;
-
 import com.trading.journal.authentication.registration.UserRegistration;
-
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.UserInfo;
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.stereotype.Service;
 
-import reactor.core.publisher.Mono;
+import javax.validation.constraints.NotNull;
 
 @Service
-public interface ApplicationUserService extends ReactiveUserDetailsService {
+public interface ApplicationUserService {
 
-    Mono<ApplicationUser> getUserByEmail(String email);
+    ApplicationUser getUserByEmail(String email);
 
-    Mono<ApplicationUser> createNewUser(@NotNull UserRegistration userRegistration);
+    ApplicationUser createNewUser(@NotNull UserRegistration userRegistration);
 
-    Mono<Boolean> validateNewUser(@NotNull String userName, String email);
+    Boolean validateNewUser(@NotNull String userName, String email);
 
-    Mono<Boolean> userNameExists(String userName);
+    Boolean userNameExists(String userName);
 
-    Mono<Boolean> emailExists(String email);
+    Boolean emailExists(String email);
 
-    Mono<UserInfo> getUserInfo(String userName);
+    UserInfo getUserInfo(String email);
 
-    Mono<Void> verifyNewUser(String email);
+    void verifyNewUser(String email);
 
-    Mono<ApplicationUser> changePassword(String email, String password);
+    ApplicationUser changePassword(String email, String password);
 }

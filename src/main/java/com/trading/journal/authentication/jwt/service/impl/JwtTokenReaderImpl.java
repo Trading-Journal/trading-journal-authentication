@@ -38,7 +38,7 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
         Jws<Claims> jwsClaims = tokenParser.parseToken(token);
         Collection<? extends GrantedAuthority> authorities = getAuthorities(jwsClaims);
         String tenancy = getTenancy(jwsClaims);
-        ContextUser principal = new ContextUser(jwsClaims.getBody().getSubject(), authorities, tenancy);
+        ContextUser principal = new ContextUser(jwsClaims.getBody().getSubject(), tenancy);
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
