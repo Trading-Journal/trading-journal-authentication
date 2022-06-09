@@ -1,4 +1,4 @@
-package com.trading.journal.authentication.configuration;
+package com.trading.journal.authentication.configuration.swagger;
 
 import com.trading.journal.authentication.ApplicationException;
 import org.springframework.beans.factory.config.BeanPostProcessor;

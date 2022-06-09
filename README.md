@@ -2,10 +2,6 @@
 
 ## Pending
 
-* Remove Reactive and make it normal rest api
-  * Redo the metrics and document them
-* Admin on start up
-  * Must change password - Registration and Change password must be only one email doing both at the same time
 * Admin endpoints
   * Improve SecurityConfigurationTest with admin access
   * Manage User
@@ -17,6 +13,7 @@
   * Validate if entity authorities is enabled before manage
   * Manage user authorities
 * Enable/Disable Multitenancy
+* When user request password change, disable it, it cannot perform login until change password
 * Postman Test run
 * Test Coverage with fail under X percent
 * Delete account
@@ -36,7 +33,8 @@
 
 ## Swagger
 
-[Localhost swagger URL](http://localhost:8080/swagger-ui/index.html)
+[http://localhost:8080/swagger-ui/index.htm](http://localhost:8080/swagger-ui/index.html)
+Or just [http://localhost:8080](http://localhost:8080)
 
 ## Running
 
@@ -149,11 +147,11 @@ In case there is need for new users confirm their emails, then enable the config
 
 ### Retrieve reactive metrics
 
-* http://localhost:8080/metrics/signup_user.flow.duration - Data about Signing Up process
-* http://localhost:8080/metrics/create_new_user.flow.duration - Data about Creating a new User process
-* http://localhost:8080/metrics/signing_user.flow.duration - Data about Signing In process
-* http://localhost:8080/metrics/refresh_token.flow.duration - Data about Refreshing Token process
-* http://localhost:8080/metrics/get_me_info.flow.duration - Data about Getting Current User Information process
-* http://localhost:8080/metrics/verify_new_user.flow.duration - Data about Email Verification for new users
-* http://localhost:8080/metrics/password_change_request.flow.duration - Data about requester for a password change
-* http://localhost:8080/metrics/password_change.flow.duration - Data about effectively change the user password
+* http://localhost:8080/metrics/signup_user - Amount of time create a new user via signup
+* http://localhost:8080/metrics/signin_use - Amount of time to authenticate a user
+* http://localhost:8080/metrics/refresh_token - Amount of time to refresh the user token
+* http://localhost:8080/metrics/verify_new_user - Amount of time to verify a new user emails
+* http://localhost:8080/metrics/send_new_verification - Amount of time to send a new email verification to the user email
+* http://localhost:8080/metrics/request_password_change - Amount of time to request a password change
+* http://localhost:8080/metrics/password_change - Amount of time to apply a password change
+* http://localhost:8080/metrics/get_me_info - Amount of time to retrieve user information
