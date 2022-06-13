@@ -1,9 +1,11 @@
 package com.trading.journal.authentication.authority;
 
-import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -11,13 +13,14 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Getter
 @Builder
-@EqualsAndHashCode
-@Table("Authorities")
+@Entity(name = "Authorities")
 public class Authority {
 
     @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @NotNull
     private AuthorityCategory category;
 

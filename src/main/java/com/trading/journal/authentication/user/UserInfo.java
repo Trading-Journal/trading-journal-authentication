@@ -3,6 +3,7 @@ package com.trading.journal.authentication.user;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,7 +39,15 @@ public class UserInfo {
     @JsonFormat(pattern = DateHelper.DATE_TIME_FORMAT)
     private LocalDateTime createdAt;
 
-    public void loadAuthorities(List<String> authorities) {
-        this.authorities = authorities;
+    public UserInfo(ApplicationUser applicationUser) {
+        this.id = applicationUser.getId();
+        this.userName = applicationUser.getUserName();
+        this.firstName = applicationUser.getFirstName();
+        this.lastName = applicationUser.getLastName();
+        this.email = applicationUser.getEmail();
+        this.enabled = applicationUser.getEnabled();
+        this.verified = applicationUser.getVerified();
+        this.authorities = applicationUser.getAuthorities().stream().map(UserAuthority::getName).collect(Collectors.toList());
+        this.createdAt = applicationUser.getCreatedAt();
     }
 }

@@ -42,3 +42,5 @@ CREATE TABLE `Verifications` (
   PRIMARY KEY (`id`)
 );
 
+INSERT INTO Authorities (category, name) VALUES ('COMMON_USER','ROLE_USER');
+INSERT INTO Authorities (category, name) VALUES ('ADMINISTRATOR','ROLE_ADMIN');

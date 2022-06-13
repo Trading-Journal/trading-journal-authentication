@@ -18,7 +18,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -74,10 +73,10 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
     @Override
     public UserInfo getUserInfo(@NotBlank String email) {
-        UserInfo userInfo = applicationUserRepository.getUserInfoByEmail(email);
-        List<String> authorities = userAuthorityService.getByUserId(userInfo.getId()).stream().map(UserAuthority::getName).collect(Collectors.toList());
-        userInfo.loadAuthorities(authorities);
-        return userInfo;
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail(email);
+        List<UserAuthority> authorities = userAuthorityService.getByUserId(applicationUser.getId());
+        applicationUser.loadAuthorities(authorities);
+        return new UserInfo(applicationUser);
     }
 
     @Override

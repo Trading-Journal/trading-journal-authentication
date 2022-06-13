@@ -2,10 +2,10 @@ package com.trading.journal.authentication.userauthority.service.impl;
 
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
-import com.trading.journal.authentication.userauthority.UserAuthority;
-import com.trading.journal.authentication.verification.service.impl.service.AuthorityService;
-import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
+import com.trading.journal.authentication.verification.service.impl.service.AuthorityService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +55,7 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(singletonList(authority));
 
         UserAuthority userAuthority = new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId());
-        when(userAuthorityRepository.save(userAuthority)).thenReturn(userAuthority);
+        when(userAuthorityRepository.save(any())).thenReturn(userAuthority);
 
         List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(applicationUser);
         assertThat(userAuthorities).hasSize(1);

@@ -5,11 +5,11 @@ import com.trading.journal.authentication.user.properties.AdminUserProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableConfigurationProperties({AuthorityProperties.class, AdminUserProperties.class})
-@EnableJdbcRepositories
+@EnableJpaRepositories
 public class AuthenticationApplication {
 
     public static void main(String[] args) {

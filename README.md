@@ -7,7 +7,9 @@
   * Manage User
     * Disable
     * Delete
-    * Change authorities
+    * Change User authorities
+  * List authorities API
+* Test change to Functional with Consumers, functions and atc
 * Manage Authorities via API when Database authorities (ConditionalOnProperty???)
   * Admin access only
   * Validate if entity authorities is enabled before manage
@@ -114,6 +116,13 @@ CREATE TABLE `Verifications` (
   `lastChange` datetime NOT NULL,
   PRIMARY KEY (`id`)
 );
+```
+
+### Database initial data
+
+```
+INSERT INTO Authorities (category, name) VALUES ('COMMON_USER','ROLE_USER');
+INSERT INTO Authorities (category, name) VALUES ('ADMINISTRATOR','ROLE_ADMIN');
 ```
 
 ## Configurations

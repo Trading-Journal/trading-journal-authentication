@@ -1,29 +1,32 @@
 package com.trading.journal.authentication.userauthority;
 
-import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Builder
-@EqualsAndHashCode
-@Table("UserAuthorities")
+@Entity(name = "UserAuthorities")
 public class UserAuthority {
 
     @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
     private Long userId;
 
-    @NotNull
     private Long authorityId;
 
-    @NotBlank
+    @NotBlank(message = "Name is required")
     private String name;
 
     public UserAuthority(Long userId, String name, Long authorityId) {
