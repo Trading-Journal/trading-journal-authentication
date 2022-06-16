@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,5 +31,11 @@ public class AuthorityServiceStaticImpl implements AuthorityService {
         return Arrays.stream(AuthoritiesHelper.values())
                 .map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Authority> getByName(String name) {
+        return Optional.ofNullable(AuthoritiesHelper.getByName(name))
+                .map(authoritiesHelper -> new Authority(authoritiesHelper.getCategory(), authoritiesHelper.getLabel()));
     }
 }

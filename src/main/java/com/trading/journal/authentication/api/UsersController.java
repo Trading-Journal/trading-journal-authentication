@@ -5,9 +5,12 @@ import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.ApplicationUserManagementService;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -50,7 +53,12 @@ public class UsersController implements UsersApi {
     }
 
     @Override
-    public ResponseEntity<UserInfo> changeAuthorities(Long id, AuthoritiesChange authorities) {
+    public ResponseEntity<List<UserAuthority>> addAuthorities(Long id, AuthoritiesChange authorities) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<List<UserAuthority>> deleteAuthorities(Long id, AuthoritiesChange authorities) {
         return null;
     }
 }

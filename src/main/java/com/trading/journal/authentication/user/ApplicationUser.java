@@ -49,6 +49,10 @@ public class ApplicationUser {
         this.enabled = true;
     }
 
+    public void disable() {
+        this.enabled = false;
+    }
+
     public void verify() {
         this.verified = true;
     }

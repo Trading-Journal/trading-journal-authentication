@@ -3,10 +3,13 @@ package com.trading.journal.authentication.api;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import io.swagger.annotations.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Api(tags = "Users Api")
 @RequestMapping("/users")
@@ -48,7 +51,13 @@ public interface UsersApi {
 
     @ApiOperation(notes = "Add user authorities", value = "Add user authorities by user id")
     @ApiResponses(@ApiResponse(code = 200, message = "User authorities changed"))
-    @PostMapping("/{id}/authorities")
+    @PutMapping("/{id}/authorities")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<UserInfo> changeAuthorities(@PathVariable Long id, @RequestBody AuthoritiesChange authorities);
+    ResponseEntity<List<UserAuthority>> addAuthorities(@PathVariable Long id, @RequestBody AuthoritiesChange authorities);
+
+    @ApiOperation(notes = "Add user authorities", value = "Add user authorities by user id")
+    @ApiResponses(@ApiResponse(code = 200, message = "User authorities changed"))
+    @DeleteMapping("/{id}/authorities")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<List<UserAuthority>> deleteAuthorities(@PathVariable Long id, @RequestBody AuthoritiesChange authorities);
 }

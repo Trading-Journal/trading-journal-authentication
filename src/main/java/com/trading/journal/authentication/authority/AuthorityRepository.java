@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @ConditionalOnBean(AuthorityServiceDatabaseImpl.class)
 public interface AuthorityRepository extends CrudRepository<Authority, Long> {
@@ -14,6 +15,6 @@ public interface AuthorityRepository extends CrudRepository<Authority, Long> {
 
     List<Authority> getByCategory(AuthorityCategory category);
 
-    Authority getByName(String name);
+    Optional<Authority> getByName(String name);
 
 }

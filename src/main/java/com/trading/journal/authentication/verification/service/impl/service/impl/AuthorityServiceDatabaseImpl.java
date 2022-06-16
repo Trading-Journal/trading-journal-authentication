@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,5 +26,10 @@ public class AuthorityServiceDatabaseImpl implements AuthorityService {
     @Override
     public List<Authority> getAll() {
         return authorityRepository.findAll();
+    }
+
+    @Override
+    public Optional<Authority> getByName(String name) {
+        return authorityRepository.getByName(name);
     }
 }

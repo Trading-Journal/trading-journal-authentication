@@ -1,11 +1,12 @@
 package com.trading.journal.authentication.user;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.List;
 
-public interface ApplicationUserRepository extends PagingAndSortingRepository<ApplicationUser, Long> {
+public interface ApplicationUserRepository extends PagingAndSortingRepository<ApplicationUser, Long>, JpaSpecificationExecutor<ApplicationUser> {
 
     Boolean existsByUserName(String userName);
 
