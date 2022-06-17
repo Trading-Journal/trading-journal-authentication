@@ -34,31 +34,34 @@ public class UsersController implements UsersApi {
 
     @Override
     public ResponseEntity<UserInfo> getById(Long id) {
-        return null;
+        return ok(applicationUserManagementService.getUserById(id));
     }
 
     @Override
     public ResponseEntity<Void> disable(Long id) {
-        return null;
+        applicationUserManagementService.disableUserById(id);
+        return ok().build();
     }
 
     @Override
     public ResponseEntity<Void> enable(Long id) {
-        return null;
+        applicationUserManagementService.enableUserById(id);
+        return ok().build();
     }
 
     @Override
     public ResponseEntity<Void> delete(Long id) {
-        return null;
+        applicationUserManagementService.deleteUserById(id);
+        return ok().build();
     }
 
     @Override
     public ResponseEntity<List<UserAuthority>> addAuthorities(Long id, AuthoritiesChange authorities) {
-        return null;
+        return ok(applicationUserManagementService.addAuthorities(id, authorities));
     }
 
     @Override
     public ResponseEntity<List<UserAuthority>> deleteAuthorities(Long id, AuthoritiesChange authorities) {
-        return null;
+        return ok(applicationUserManagementService.deleteAuthorities(id, authorities));
     }
 }

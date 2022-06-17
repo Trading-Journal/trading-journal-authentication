@@ -3,7 +3,6 @@
 ## Pending
 
 * Admin endpoints
-  * Improve SecurityConfigurationTest with admin access
   * Manage User
     * Disable
     * Delete

@@ -1,6 +1,16 @@
 package com.trading.journal.authentication.configuration;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.authentication.Login;
+import com.trading.journal.authentication.authentication.LoginResponse;
+import com.trading.journal.authentication.authentication.service.AuthenticationService;
+import com.trading.journal.authentication.email.service.EmailSender;
+import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.UserInfo;
+import com.trading.journal.authentication.user.service.ApplicationAdminUserService;
+import com.trading.journal.authentication.user.service.ApplicationUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,23 +18,50 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 public class SecurityConfigurationTest {
+
     @Autowired
-    private ApplicationContext context;
+    ApplicationUserService applicationUserService;
+
+    @Autowired
+    ApplicationAdminUserService applicationAdminUserService;
+
+    @Autowired
+    AuthenticationService authenticationService;
+
+    @Autowired
+    ApplicationUserRepository applicationUserRepository;
+
+    @Autowired
+    PasswordEncoder encoder;
 
     @Autowired
     private WebTestClient webTestClient;
+
+    @MockBean
+    EmailSender emailSender;
+
+    @BeforeEach
+    public void setUp() {
+        doNothing().when(emailSender).send(any());
+        applicationUserRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("Access public paths anonymously")
@@ -62,6 +99,63 @@ public class SecurityConfigurationTest {
                 .exchange()
                 .expectStatus()
                 .isUnauthorized();
+    }
+
+    @DisplayName("Access admin path with common user token fails")
+    @Test
+    void invalidAdminAccess() {
+        UserRegistration userRegistration = new UserRegistration(
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        applicationUserService.createNewUser(userRegistration);
+        Login login = new Login(userRegistration.email(), userRegistration.password());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        webTestClient
+                .get()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+
+    @DisplayName("Access admin path with Admin user is granted")
+    @Test
+    void adminAccess() {
+        UserRegistration userRegistration = new UserRegistration(
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        applicationAdminUserService.createAdmin(userRegistration);
+
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com");
+        applicationUser.enable();
+        applicationUser.verify();
+        applicationUser.changePassword(encoder.encode("dad231#$#4"));
+        applicationUserRepository.save(applicationUser);
+
+        Login login = new Login(userRegistration.email(), userRegistration.password());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        webTestClient
+                .get()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 
     private static Stream<String> invalidTokens() {
