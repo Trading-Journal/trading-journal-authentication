@@ -8,12 +8,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -40,22 +38,22 @@ public class PageableRequest {
     }
 
     private Sort loadSort() {
-        Sort sortable = Sort.unsorted();
+        Sort sortable = Sort.by("id").ascending();
         if (sort != null && sort.length > 0) {
-            List<Sort.Order> orders = Arrays.stream(sort).map(
-                    sortString -> {
-                        String[] split = sortString.split(COMMA);
-                        if (split.length % 2 != 0) {
-                            throw new ApplicationException(HttpStatus.BAD_REQUEST, "Sort is invalid");
-                        }
-                        Sort.Direction direction = Sort.Direction.fromString(split[1].trim());
-                        if (Sort.Direction.ASC.equals(direction)) {
-                            return Sort.Order.asc(split[0].trim());
-                        } else {
-                            return Sort.Order.desc(split[0].trim());
-                        }
-                    }
-            ).collect(Collectors.toList());
+            if (sort.length % 2 != 0) {
+                throw new ApplicationException("Sort is invalid. It must be a pair of column and direction");
+            }
+            List<Sort.Order> orders = new ArrayList<>();
+            String column = null;
+            for (int index = 0; index < sort.length; index++) {
+                if (index % 2 == 0) {
+                    column = sort[index].trim();
+                } else {
+                    Sort.Direction direction = Sort.Direction.fromString(sort[index].trim());
+                    orders.add(new Sort.Order(direction, column));
+
+                }
+            }
             sortable = Sort.by(orders);
         }
         return sortable;

@@ -17,7 +17,7 @@ class PageableRequestTest {
     @DisplayName("Load pageable request")
     @Test
     void pageable() {
-        String[] sort = new String[]{"name,asc", "id,desc", "age,asc"};
+        String[] sort = new String[]{"name", "asc", "id", "desc", "age", "asc"};
         PageableRequest pageableRequest = new PageableRequest(1, 20, sort, "something");
 
         Pageable pageable = pageableRequest.pageable();
@@ -34,7 +34,7 @@ class PageableRequestTest {
     @DisplayName("Load pageable request even with extra spaces in sort")
     @Test
     void pageableSort() {
-        String[] sort = new String[]{" name,  asc", "id  ,desc  ", "age , asc"};
+        String[] sort = new String[]{" name", "  asc", "id  ", "desc  ", "age ", " asc"};
         PageableRequest pageableRequest = new PageableRequest(1, 20, sort, "something");
 
         Pageable pageable = pageableRequest.pageable();
@@ -48,21 +48,21 @@ class PageableRequestTest {
         assertThat(pageableRequest.getFilter()).isEqualTo("something");
     }
 
-    @DisplayName("Load pageable throws exception when sort array item has more than 2 expressions")
+    @DisplayName("Load pageable throws exception when sort array is not odd")
     @Test
     void pageableSortException() {
-        String[] sort = new String[]{"name,asc,abc", "id,desc", "age,asc"};
+        String[] sort = new String[]{"name", "desc", "age"};
         PageableRequest pageableRequest = new PageableRequest(1, 20, sort, "something");
 
         ApplicationException exception = assertThrows(ApplicationException.class, pageableRequest::pageable);
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(exception.getStatusText()).isEqualTo("Sort is invalid");
+        assertThat(exception.getStatusText()).isEqualTo("Sort is invalid. It must be a pair of column and direction");
     }
 
     @DisplayName("Load pageable throws exception when direction is not valid (asc or desc)")
     @Test
     void pageableDirectionException() {
-        String[] sort = new String[]{"name,asc", "id,abc", "age,asc"};
+        String[] sort = new String[]{"name", "asc", "id", "abc", "age", "asc"};
         PageableRequest pageableRequest = new PageableRequest(1, 20, sort, "something");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, pageableRequest::pageable);
