@@ -3,11 +3,6 @@
 ## Pending
 
 * Admin endpoints
-  * Manage User
-    * Disable
-    * Delete
-    * Change User authorities
-  * List authorities API
   * Enable OneToMany to User->UserAuths
 * Test change to Functional with Consumers, functions and atc
 * Manage Authorities via API when Database authorities (ConditionalOnProperty???)

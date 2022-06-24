@@ -9,7 +9,6 @@ import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,6 +37,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 class UsersControllerTest {
 
+    public static final String USER_PATH = "/admin/users/{userId}";
+    public static final String USERS_AUTHORITIES_PATH = "/admin/users/{userId}/authorities";
+    public static final String USERS_ENABLE_PATH = "/admin/users/{userId}/enable";
+    public static final String USERS_DISABLE_PATH = "/admin/users/{userId}/disable";
     private static String token;
 
     @Autowired
@@ -85,7 +88,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -110,7 +113,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -134,7 +137,7 @@ class UsersControllerTest {
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/disable")
+                        .path(USERS_DISABLE_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -145,7 +148,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -170,7 +173,7 @@ class UsersControllerTest {
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/disable")
+                        .path(USERS_DISABLE_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -198,7 +201,7 @@ class UsersControllerTest {
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/enable")
+                        .path(USERS_ENABLE_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -209,7 +212,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -234,7 +237,7 @@ class UsersControllerTest {
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/enable")
+                        .path(USERS_ENABLE_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -258,7 +261,7 @@ class UsersControllerTest {
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -277,7 +280,7 @@ class UsersControllerTest {
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -301,7 +304,7 @@ class UsersControllerTest {
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -315,7 +318,7 @@ class UsersControllerTest {
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -339,7 +342,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -356,7 +359,7 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/authorities")
+                        .path(USERS_AUTHORITIES_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
@@ -368,7 +371,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -392,7 +395,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -409,7 +412,7 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/authorities")
+                        .path(USERS_AUTHORITIES_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
@@ -421,7 +424,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -446,7 +449,7 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/authorities")
+                        .path(USERS_AUTHORITIES_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
@@ -458,7 +461,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -480,7 +483,7 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/authorities")
+                        .path(USERS_AUTHORITIES_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
@@ -506,7 +509,7 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/authorities")
+                        .path(USERS_AUTHORITIES_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
@@ -518,7 +521,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -535,7 +538,7 @@ class UsersControllerTest {
         webTestClient
                 .method(HttpMethod.DELETE)
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/authorities")
+                        .path(USERS_AUTHORITIES_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
@@ -547,7 +550,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -571,7 +574,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -588,7 +591,7 @@ class UsersControllerTest {
         webTestClient
                 .method(HttpMethod.DELETE)
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/authorities")
+                        .path(USERS_AUTHORITIES_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
@@ -600,7 +603,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -624,7 +627,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -641,7 +644,7 @@ class UsersControllerTest {
         webTestClient
                 .method(HttpMethod.DELETE)
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/authorities")
+                        .path(USERS_AUTHORITIES_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
@@ -653,7 +656,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -678,7 +681,7 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/authorities")
+                        .path(USERS_AUTHORITIES_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
@@ -690,7 +693,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -707,7 +710,7 @@ class UsersControllerTest {
         webTestClient
                 .method(HttpMethod.DELETE)
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/authorities")
+                        .path(USERS_AUTHORITIES_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
@@ -719,7 +722,7 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}")
+                        .path(USER_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -740,7 +743,7 @@ class UsersControllerTest {
         webTestClient
                 .method(HttpMethod.DELETE)
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/{userId}/authorities")
+                        .path(USERS_AUTHORITIES_PATH)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)

@@ -101,7 +101,7 @@ public class SecurityConfigurationTest {
                 .isUnauthorized();
     }
 
-    @DisplayName("Access admin path with common user token fails")
+    @DisplayName("Access users admin path with common user token fails")
     @Test
     void invalidAdminAccess() {
         UserRegistration userRegistration = new UserRegistration(
@@ -118,7 +118,7 @@ public class SecurityConfigurationTest {
 
         webTestClient
                 .get()
-                .uri("/users")
+                .uri("/admin/users")
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()
@@ -126,7 +126,7 @@ public class SecurityConfigurationTest {
                 .isForbidden();
     }
 
-    @DisplayName("Access admin path with Admin user is granted")
+    @DisplayName("Access users admin path with Admin user is granted")
     @Test
     void adminAccess() {
         UserRegistration userRegistration = new UserRegistration(
@@ -150,7 +150,64 @@ public class SecurityConfigurationTest {
 
         webTestClient
                 .get()
-                .uri("/users")
+                .uri("/admin/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    @DisplayName("Access authorities admin path with common user token fails")
+    @Test
+    void invalidAdminAccessAuthorities() {
+        UserRegistration userRegistration = new UserRegistration(
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        applicationUserService.createNewUser(userRegistration);
+        Login login = new Login(userRegistration.email(), userRegistration.password());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        webTestClient
+                .get()
+                .uri("/admin/authorities")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+
+    @DisplayName("Access authorities admin path with Admin user is granted")
+    @Test
+    void adminAccessauthorities() {
+        UserRegistration userRegistration = new UserRegistration(
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        applicationAdminUserService.createAdmin(userRegistration);
+
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com");
+        applicationUser.enable();
+        applicationUser.verify();
+        applicationUser.changePassword(encoder.encode("dad231#$#4"));
+        applicationUserRepository.save(applicationUser);
+
+        Login login = new Login(userRegistration.email(), userRegistration.password());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        webTestClient
+                .get()
+                .uri("/admin/authorities")
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()

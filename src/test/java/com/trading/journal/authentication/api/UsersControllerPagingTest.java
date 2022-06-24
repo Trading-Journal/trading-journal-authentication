@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 class UsersControllerPagingTest {
 
+    public static final String PATH = "/admin/users";
     private static String token;
 
     @Autowired
@@ -73,7 +74,7 @@ class UsersControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
+                        .path(PATH)
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -98,7 +99,7 @@ class UsersControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
+                        .path(PATH)
                         .queryParam("page", "3")
                         .queryParam("size", "10")
                         .build())
@@ -125,7 +126,7 @@ class UsersControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
+                        .path(PATH)
                         .queryParam("page", "6")
                         .queryParam("size", "10")
                         .build())
@@ -150,7 +151,7 @@ class UsersControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
+                        .path(PATH)
                         .queryParam("sort", "firstName", "desc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
@@ -176,7 +177,7 @@ class UsersControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
+                        .path(PATH)
                         .queryParam("sort", "firstName", "desc", "lastName", "asc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
@@ -202,7 +203,7 @@ class UsersControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
+                        .path(PATH)
                         .queryParam("filter", "son")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
@@ -228,7 +229,7 @@ class UsersControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
+                        .path(PATH)
                         .queryParam("page", "0")
                         .queryParam("size", "4")
                         .queryParam("filter", "la")
@@ -252,7 +253,7 @@ class UsersControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
+                        .path(PATH)
                         .queryParam("page", "1")
                         .queryParam("size", "4")
                         .queryParam("filter", "la")
@@ -280,7 +281,7 @@ class UsersControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
+                        .path(PATH)
                         .queryParam("filter", "www")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
@@ -304,7 +305,7 @@ class UsersControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
+                        .path(PATH)
                         .queryParam("page", "0")
                         .queryParam("size", "4")
                         .queryParam("filter", "la")
@@ -329,7 +330,7 @@ class UsersControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
+                        .path(PATH)
                         .queryParam("page", "1")
                         .queryParam("size", "4")
                         .queryParam("filter", "la")

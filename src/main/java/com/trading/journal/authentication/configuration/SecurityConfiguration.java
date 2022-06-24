@@ -64,7 +64,7 @@ public class SecurityConfiguration {
     }
 
     private String[] getAdminPath() {
-        return new String[]{"/users/**"};
+        return new String[]{"/admin/**"};
     }
 
     private Map<AuthorityCategory, String[]> getAuthorityCategoryMap() {

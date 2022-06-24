@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Api(tags = "Users Api")
-@RequestMapping("/users")
+@RequestMapping("/admin/users")
 public interface UsersApi {
 
     @ApiOperation(notes = "Get all users", value = "Get all users")
