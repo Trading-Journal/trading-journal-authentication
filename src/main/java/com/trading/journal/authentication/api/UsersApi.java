@@ -33,13 +33,13 @@ public interface UsersApi {
 
     @ApiOperation(notes = "Disable user", value = "Disable user by id")
     @ApiResponses(@ApiResponse(code = 200, message = "User disabled"))
-    @PostMapping("/{id}/disable")
+    @PatchMapping("/{id}/disable")
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Void> disable(@PathVariable Long id);
 
     @ApiOperation(notes = "Enable user", value = "Enable user by id")
     @ApiResponses(@ApiResponse(code = 200, message = "User enabled"))
-    @PostMapping("/{id}/enable")
+    @PatchMapping("/{id}/enable")
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Void> enable(@PathVariable Long id);
 

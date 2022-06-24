@@ -51,7 +51,8 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
                 .filter(Optional::isPresent)
                 .map(Optional::get).toList();
 
-        List<UserAuthority> userAuthoritiesToAdd = authorities.stream().filter(filterOutEqualAuthorities(applicationUser))
+        List<UserAuthority> userAuthoritiesToAdd = authorities.stream()
+                .filter(filterOutEqualAuthorities(applicationUser))
                 .map(authority -> new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId()))
                 .toList();
 
@@ -67,9 +68,9 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
                 .filter(Optional::isPresent)
                 .map(Optional::get).toList();
 
-        List<UserAuthority> userAuthoritiesToRemove = authorities.stream().filter(filterOutEqualAuthorities(applicationUser))
-                .map(authority -> new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId()))
-                .toList();
+        List<UserAuthority> userAuthoritiesToRemove = applicationUser.getAuthorities()
+                .stream()
+                .filter(filterUserRolesToRemove(authorities)).toList();
 
         userAuthoritiesToRemove.forEach(userAuthorityRepository::delete);
         return userAuthoritiesToRemove;
@@ -94,5 +95,12 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
                 .stream()
                 .noneMatch(userAuthority -> userAuthority.getName().equals(authority.getName())
                         && Objects.equals(userAuthority.getAuthorityId(), authority.getId()));
+    }
+
+    private Predicate<UserAuthority> filterUserRolesToRemove(List<Authority> authorities) {
+        return userAuthority -> authorities.stream()
+                .anyMatch(authority -> userAuthority.getName().equals(authority.getName())
+                        && Objects.equals(userAuthority.getAuthorityId(), authority.getId())
+                );
     }
 }

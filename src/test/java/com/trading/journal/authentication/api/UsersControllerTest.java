@@ -5,10 +5,11 @@ import com.trading.journal.authentication.TestLoader;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
-import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
@@ -24,8 +26,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -34,6 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UsersControllerTest {
 
     private static String token;
+
+    @Autowired
+    ApplicationUserRepository applicationUserRepository;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -67,326 +75,683 @@ class UsersControllerTest {
         token = loginResponse.accessToken();
     }
 
-    @DisplayName("Get first page of all users without any arguments")
+    @DisplayName("Get user by id")
     @Test
-    void plainPageable() {
+    void getUserById() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("ermablack@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
+
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .build())
+                        .path("/users/{userId}")
+                        .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
+                .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.items()).hasSize(10);
-                    assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Andy Johnson", "Angel Duncan", "Angelo Wells", "Arthur Lawrence", "Bernard Myers", "Beth Guzman", "Blake Coleman", "Brian Mann", "Cameron Fleming", "Carlton Santos");
+                    assertThat(response.getFirstName()).isEqualTo("Erma");
+                    assertThat(response.getLastName()).isEqualTo("Black");
+                    assertThat(response.getEmail()).isEqualTo("ermablack@email.com");
+                    assertThat(response.getUserName()).isEqualTo("ermablack");
+                    assertThat(response.getVerified()).isEqualTo(true);
+                    assertThat(response.getEnabled()).isEqualTo(true);
                 });
     }
 
-    @DisplayName("Get items in the middle pages")
+    @DisplayName("Get user by id not found")
     @Test
-    void middlePage() {
+    void getUserByIdNotFound() {
+        long userId = 1000L;
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .queryParam("page", "3")
-                        .queryParam("size", "10")
-                        .build())
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
+    }
+
+    @DisplayName("Disable user by id")
+    @Test
+    void disableUserById() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("ernestokim@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
+
+        webTestClient
+                .patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/disable")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
+                .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.items()).hasSize(10);
-                    assertThat(response.currentPage()).isEqualTo(3);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Jerome Pratt", "Joel Dunn", "Julie Carson", "Kathy Oliver", "Katrina Hawkins", "Larry Robbins", "Laurie Adams", "Loretta Stanley", "Luke Tyler", "Melinda Fields");
+                    assertThat(response.getFirstName()).isEqualTo("Ernesto");
+                    assertThat(response.getLastName()).isEqualTo("Kim");
+                    assertThat(response.getEmail()).isEqualTo("ernestokim@email.com");
+                    assertThat(response.getUserName()).isEqualTo("ernestokim");
+                    assertThat(response.getVerified()).isEqualTo(true);
+                    assertThat(response.getEnabled()).isEqualTo(false);
                 });
     }
 
-    @DisplayName("Page out of range return empty results\"")
+    @DisplayName("Disable user by id not found")
     @Test
-    void outOfRange() {
+    void disableUserByIdNotFound() {
+        long userId = 1000L;
+        webTestClient
+                .patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/disable")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
+    }
+
+    @DisplayName("Enable user by id")
+    @Test
+    void enableUserById() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("fanniehines@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
+
+        applicationUser.disable();
+        applicationUser = applicationUserRepository.save(applicationUser);
+        assertThat(applicationUser.getEnabled()).isFalse();
+
+        webTestClient
+                .patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/enable")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .queryParam("page", "6")
-                        .queryParam("size", "10")
-                        .build())
+                        .path("/users/{userId}")
+                        .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
+                .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.items()).hasSize(0);
-                    assertThat(response.currentPage()).isEqualTo(6);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.getFirstName()).isEqualTo("Fannie");
+                    assertThat(response.getLastName()).isEqualTo("Hines");
+                    assertThat(response.getEmail()).isEqualTo("fanniehines@email.com");
+                    assertThat(response.getUserName()).isEqualTo("fanniehines");
+                    assertThat(response.getVerified()).isEqualTo(true);
+                    assertThat(response.getEnabled()).isEqualTo(true);
                 });
     }
 
-    @DisplayName("Page out of range return empty results")
+    @DisplayName("Enable user by id not found")
     @Test
-    void plainSort() {
+    void enableUserByIdNotFound() {
+        long userId = 1000L;
+        webTestClient
+                .patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/enable")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
+    }
+
+    @DisplayName("Delete user by id")
+    @Test
+    void deleteUserById() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("garylogan@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        ApplicationUser byEmail = applicationUserRepository.findByEmail("garylogan@email.com");
+        assertThat(byEmail).isNull();
+    }
+
+    @DisplayName("Delete user by id not found")
+    @Test
+    void DeleteUserByIdNotFound() {
+        long userId = 1000L;
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
+    }
+
+    @DisplayName("Delete user by id user recently deleted return not found")
+    @Test
+    void deleteUserByIdRecentlyDeleted() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("laurieadams@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        ApplicationUser byEmail = applicationUserRepository.findByEmail("laurieadams@email.com");
+        assertThat(byEmail).isNull();
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
+    }
+
+    @DisplayName("Add authorities to user")
+    @Test
+    void addAuthorities() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("lorettastanley@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
+
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .queryParam("sort", "firstName", "desc")
-                        .build())
+                        .path("/users/{userId}")
+                        .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
+                .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.items()).hasSize(10);
-                    assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Victoria Luna", "Verna Wilkins", "Vera Lamb", "Sadie Davis", "Sabrina Garcia", "Rochelle Graves", "Phyllis Terry", "Pedro Sullivan", "Nora Waters", "Natasha Rivera");
+                    assertThat(response.getAuthorities()).hasSize(1);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_USER");
+                });
+
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
+        webTestClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/authorities")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserInfo.class)
+                .value(response -> {
+                    assertThat(response.getAuthorities()).hasSize(2);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
                 });
     }
 
-    @DisplayName("Sort for two columns")
+    @DisplayName("Add same authorities that is already for the user do not add it again")
     @Test
-    void sortTwoColumns() {
+    void addSameAuthorities() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("natasharivera@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
+
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .queryParam("sort", "firstName", "desc", "lastName", "asc")
-                        .build())
+                        .path("/users/{userId}")
+                        .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
+                .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.items()).hasSize(10);
-                    assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Victoria Luna", "Verna Wilkins", "Vera Lamb", "Sadie Davis", "Sabrina Garcia", "Rochelle Graves", "Phyllis Terry", "Pedro Sullivan", "Nora Waters", "Natasha Rivera");
+                    assertThat(response.getAuthorities()).hasSize(1);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_USER");
+                });
+
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_USER"));
+        webTestClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/authorities")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserInfo.class)
+                .value(response -> {
+                    assertThat(response.getAuthorities()).hasSize(1);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_USER");
                 });
     }
 
-    @DisplayName("Filter users returning only one page")
+    @DisplayName("Add authorities with invalid name do not add it")
     @Test
-    void filterFirstPage() {
+    void addAuthoritiesInvalidName() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("natasharivera@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
+
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ANOTHER"));
+        webTestClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/authorities")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .queryParam("filter", "son")
-                        .build())
+                        .path("/users/{userId}")
+                        .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
+                .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.items()).hasSize(3);
-                    assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(1);
-                    assertThat(response.totalItems()).isEqualTo(3L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Andy Johnson", "Dolores Williamson", "Julie Carson");
+                    assertThat(response.getAuthorities()).hasSize(1);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_USER");
                 });
     }
 
-    @DisplayName("Filter users returning two pages page")
+    @DisplayName("Add authorities user by id not found")
     @Test
-    void filterTwoPages() {
+    void addAuthoritiesUserNotFound() {
+        long userId = 1000L;
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ANOTHER"));
         webTestClient
-                .get()
+                .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .queryParam("page", "0")
-                        .queryParam("size", "4")
-                        .queryParam("filter", "la")
-                        .build())
+                        .path("/users/{userId}/authorities")
+                        .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
-                .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
-                .value(response -> {
-                    assertThat(response.items()).hasSize(4);
-                    assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(2);
-                    assertThat(response.totalItems()).isEqualTo(6L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Arthur Lawrence", "Blake Coleman", "Erma Black", "Larry Robbins");
-                });
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
+    }
+
+    @DisplayName("Delete authority from user")
+    @Test
+    void deleteAuthority() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("norawaters@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
+
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
+        webTestClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/authorities")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
 
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .queryParam("page", "1")
-                        .queryParam("size", "4")
-                        .queryParam("filter", "la")
-                        .build())
+                        .path("/users/{userId}")
+                        .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
+                .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.items()).hasSize(2);
-                    assertThat(response.currentPage()).isEqualTo(1);
-                    assertThat(response.totalPages()).isEqualTo(2);
-                    assertThat(response.totalItems()).isEqualTo(6L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Laurie Adams", "Vera Lamb");
+                    assertThat(response.getAuthorities()).hasSize(2);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
+                });
+
+        authoritiesChange = new AuthoritiesChange(singletonList("ROLE_USER"));
+        webTestClient
+                .method(HttpMethod.DELETE)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/authorities")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserInfo.class)
+                .value(response -> {
+                    assertThat(response.getAuthorities()).hasSize(1);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_ADMIN");
                 });
     }
 
-    @DisplayName("Filter users returning no results")
+    @DisplayName("Delete authority that does not exist for the user")
     @Test
-    void filterEmpty() {
+    void deleteAuthorityNotThere() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("pedrosullivan@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
+
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .queryParam("filter", "www")
-                        .build())
+                        .path("/users/{userId}")
+                        .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
+                .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.items()).hasSize(0);
-                    assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(0);
-                    assertThat(response.totalItems()).isEqualTo(0L);
+                    assertThat(response.getAuthorities()).hasSize(1);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_USER");
+                });
+
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
+        webTestClient
+                .method(HttpMethod.DELETE)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/authorities")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserInfo.class)
+                .value(response -> {
+                    assertThat(response.getAuthorities()).hasSize(1);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_USER");
                 });
     }
 
-    @DisplayName("Filter users returning two pages page but sorting by last name")
+    @DisplayName("Delete authority that is invalid for the user")
     @Test
-    void filterAndSort() {
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .queryParam("page", "0")
-                        .queryParam("size", "4")
-                        .queryParam("filter", "la")
-                        .queryParam("sort", "lastName", "desc")
-                        .build())
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
-                .value(response -> {
-                    assertThat(response.items()).hasSize(4);
-                    assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(2);
-                    assertThat(response.totalItems()).isEqualTo(6L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Larry Robbins", "Arthur Lawrence", "Vera Lamb", "Blake Coleman");
-                });
+    void deleteAuthorityInvalid() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("phyllisterry@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
 
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .queryParam("page", "1")
-                        .queryParam("size", "4")
-                        .queryParam("filter", "la")
-                        .queryParam("sort", "lastName", "desc")
-                        .build())
+                        .path("/users/{userId}")
+                        .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
+                .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.items()).hasSize(2);
-                    assertThat(response.currentPage()).isEqualTo(1);
-                    assertThat(response.totalPages()).isEqualTo(2);
-                    assertThat(response.totalItems()).isEqualTo(6L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Erma Black", "Laurie Adams");
+                    assertThat(response.getAuthorities()).hasSize(1);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_USER");
+                });
+
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ANOTHER"));
+        webTestClient
+                .method(HttpMethod.DELETE)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/authorities")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserInfo.class)
+                .value(response -> {
+                    assertThat(response.getAuthorities()).hasSize(1);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_USER");
                 });
     }
 
-    //Get by ID
+    @DisplayName("Delete all authorities from user")
+    @Test
+    void deleteAllAuthorities() {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("sabrinagarcia@email.com");
+        assertThat(applicationUser).isNotNull();
+        long userId = applicationUser.getId();
 
-    //Get by ID NOT FOUND
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
+        webTestClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/authorities")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
 
-    //Disable by Id
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserInfo.class)
+                .value(response -> {
+                    assertThat(response.getAuthorities()).hasSize(2);
+                    assertThat(response.getAuthorities()).containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
+                });
 
-    //Disable by Id already disabled
+        authoritiesChange = new AuthoritiesChange(asList("ROLE_USER", "ROLE_ADMIN"));
+        webTestClient
+                .method(HttpMethod.DELETE)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/authorities")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
 
-    //Disable by Id not found
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserInfo.class)
+                .value(response -> {
+                    assertThat(response.getAuthorities()).hasSize(0);
+                });
+    }
 
-    //Enable by Id
-
-    //Enable by Id already enabled
-
-    //Enable by Id not found
-
-    //Delete by id
-
-    //Delete by id not found
-
-    //Delete by id already deleted
-
-    //Add authorities
-
-    //Add authorities same authorities
-
-    //Add authorities invalid authorities
-
-    //Add authorities not found
-
-    //Delete authorities
-
-    //Delete authorities with authorities that are not there
-
-    //Delete authorities invalid authorities
-
-    //Delete authorities not found
+    @DisplayName("Delete authorities user by id not found")
+    @Test
+    void deleteAuthoritiesUserNotFound() {
+        long userId = 1000L;
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
+        webTestClient
+                .method(HttpMethod.DELETE)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{userId}/authorities")
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
+    }
 }

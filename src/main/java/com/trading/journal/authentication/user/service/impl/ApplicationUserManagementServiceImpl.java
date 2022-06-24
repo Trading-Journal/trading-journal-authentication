@@ -48,6 +48,10 @@ public class ApplicationUserManagementServiceImpl implements ApplicationUserMana
     @Override
     public UserInfo getUserById(Long id) {
         return applicationUserRepository.findById(id)
+                .map(applicationUser -> {
+                    applicationUser.loadAuthorities(userAuthorityService.getByUserId(applicationUser.getId()));
+                    return applicationUser;
+                })
                 .map(UserInfo::new)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
     }

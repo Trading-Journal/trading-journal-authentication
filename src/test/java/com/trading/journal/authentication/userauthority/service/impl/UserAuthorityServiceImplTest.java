@@ -295,10 +295,9 @@ class UserAuthorityServiceImplTest {
     @DisplayName("Delete two new authorities from the user")
     @Test
     void deleteTwoAuthorities() {
-        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ROLE_USER", "ROLE_ADMIN", "ANOTHER_ROLE"));
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ROLE_USER", "ANOTHER_ROLE"));
 
         when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
-        when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
         when(authorityService.getByName("ANOTHER_ROLE")).thenReturn(Optional.of(new Authority(3L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE")));
 
         ApplicationUser applicationUser = new ApplicationUser(
@@ -310,7 +309,9 @@ class UserAuthorityServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                List.of(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                List.of(new UserAuthority(1L, 1L, 1L, "ROLE_USER")
+                        , new UserAuthority(2L, 1L, 2L, "ROLE_ADMIN")
+                        , new UserAuthority(2L, 1L, 3L, "ANOTHER_ROLE")),
                 LocalDateTime.now());
 
         userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
@@ -321,10 +322,10 @@ class UserAuthorityServiceImplTest {
     @DisplayName("No deleted authorities from the user")
     @Test
     void doNotDeleteAuthorities() {
-        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ANOTHER_ROLE_USER", "ANOTHER_ROLE_ADMIN"));
 
-        when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
-        when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
+        when(authorityService.getByName("ANOTHER_ROLE_USER")).thenReturn(Optional.empty());
+        when(authorityService.getByName("ANOTHER_ROLE_ADMIN")).thenReturn(Optional.empty());
 
         ApplicationUser applicationUser = new ApplicationUser(
                 1L,
