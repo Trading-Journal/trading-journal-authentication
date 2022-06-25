@@ -2,10 +2,11 @@ package com.trading.journal.authentication.userauthority.service.impl;
 
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
-import com.trading.journal.authentication.userauthority.UserAuthority;
-import com.trading.journal.authentication.verification.service.impl.service.AuthorityService;
-import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.AuthoritiesChange;
+import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
+import com.trading.journal.authentication.verification.service.impl.service.AuthorityService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,7 +57,7 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(singletonList(authority));
 
         UserAuthority userAuthority = new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId());
-        when(userAuthorityRepository.save(userAuthority)).thenReturn(userAuthority);
+        when(userAuthorityRepository.save(any())).thenReturn(userAuthority);
 
         List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(applicationUser);
         assertThat(userAuthorities).hasSize(1);
@@ -187,5 +189,158 @@ class UserAuthorityServiceImplTest {
 
         List<SimpleGrantedAuthority> simpleGrantedAuthorities = userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser);
         assertThat(simpleGrantedAuthorities).hasSize(3);
+    }
+
+    @DisplayName("Add new authority to the user")
+    @Test
+    void addAuthorities() {
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+
+        when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
+        when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "12345679",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                List.of(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
+
+        verify(userAuthorityRepository).save(any());
+    }
+
+    @DisplayName("Add two new authorities to the user")
+    @Test
+    void addTwoAuthorities() {
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ROLE_USER", "ROLE_ADMIN", "ANOTHER_ROLE"));
+
+        when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
+        when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
+        when(authorityService.getByName("ANOTHER_ROLE")).thenReturn(Optional.of(new Authority(3L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE")));
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "12345679",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                List.of(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
+
+        verify(userAuthorityRepository, times(2)).save(any());
+    }
+
+    @DisplayName("No new authority to the user")
+    @Test
+    void doNotAddAuthorities() {
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+
+        when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
+        when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "12345679",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                List.of(new UserAuthority(1L, 1L, 1L, "ROLE_USER"), new UserAuthority(2L, 1L, 2L, "ROLE_ADMIN")),
+                LocalDateTime.now());
+
+        userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
+
+        verify(userAuthorityRepository, never()).save(any());
+    }
+
+    @DisplayName("Delete authority from the user")
+    @Test
+    void deleteAuthorities() {
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+
+        when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
+        when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "12345679",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                List.of(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                LocalDateTime.now());
+
+        userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
+
+        verify(userAuthorityRepository).delete(any());
+    }
+
+    @DisplayName("Delete two new authorities from the user")
+    @Test
+    void deleteTwoAuthorities() {
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ROLE_USER", "ANOTHER_ROLE"));
+
+        when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
+        when(authorityService.getByName("ANOTHER_ROLE")).thenReturn(Optional.of(new Authority(3L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE")));
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "12345679",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                List.of(new UserAuthority(1L, 1L, 1L, "ROLE_USER")
+                        , new UserAuthority(2L, 1L, 2L, "ROLE_ADMIN")
+                        , new UserAuthority(2L, 1L, 3L, "ANOTHER_ROLE")),
+                LocalDateTime.now());
+
+        userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
+
+        verify(userAuthorityRepository, times(2)).delete(any());
+    }
+
+    @DisplayName("No deleted authorities from the user")
+    @Test
+    void doNotDeleteAuthorities() {
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ANOTHER_ROLE_USER", "ANOTHER_ROLE_ADMIN"));
+
+        when(authorityService.getByName("ANOTHER_ROLE_USER")).thenReturn(Optional.empty());
+        when(authorityService.getByName("ANOTHER_ROLE_ADMIN")).thenReturn(Optional.empty());
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "12345679",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                List.of(new UserAuthority(1L, 1L, 1L, "ROLE_USER"), new UserAuthority(2L, 1L, 2L, "ROLE_ADMIN")),
+                LocalDateTime.now());
+
+        userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
+
+        verify(userAuthorityRepository, never()).delete(any());
     }
 }

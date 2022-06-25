@@ -1,11 +1,12 @@
 package com.trading.journal.authentication.user;
 
 import com.trading.journal.authentication.userauthority.UserAuthority;
-import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.relational.core.mapping.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,11 +15,11 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Builder
-@Table("Users")
-@EqualsAndHashCode
+@Entity(name = "Users")
 public class ApplicationUser {
 
     @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
     private String userName;
@@ -46,6 +47,10 @@ public class ApplicationUser {
 
     public void enable() {
         this.enabled = true;
+    }
+
+    public void disable() {
+        this.enabled = false;
     }
 
     public void verify() {

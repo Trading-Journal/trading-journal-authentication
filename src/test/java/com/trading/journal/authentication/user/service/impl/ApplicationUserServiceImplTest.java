@@ -2,22 +2,19 @@ package com.trading.journal.authentication.user.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.password.service.PasswordService;
-import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.userauthority.UserAuthority;
-import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.UserInfo;
+import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -322,30 +319,33 @@ public class ApplicationUserServiceImplTest {
     @Test
     @DisplayName("Given an email load user info")
     void userInfo() {
-        UserInfo userInfo = new UserInfo(1L,
-                "subject",
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "new_password_encoded",
                 "firstName",
                 "lastName",
-                "email@mail.com",
+                "mail@mail.com",
                 true,
                 true,
                 emptyList(),
-                LocalDateTime.now());
+                LocalDateTime.of(2022, 12, 12, 12, 12, 12));
 
-        when(applicationUserRepository.getUserInfoByEmail("email@mail.com")).thenReturn(userInfo);
+        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(applicationUser);
 
-        UserAuthority userAuthority1 = new UserAuthority(1L, "User", 1L);
-        UserAuthority userAuthority2 = new UserAuthority(2L, "Admin", 1L);
-        when(userAuthorityService.getByUserId(userInfo.getId())).thenReturn(Arrays.asList(userAuthority1, userAuthority2));
+        when(userAuthorityService.getByUserId(1L)).thenReturn(Arrays.asList(
+                new UserAuthority(1L, 1L, 1L, "ROLE_USER"),
+                new UserAuthority(2L, 1L, 1L, "ROLE_ADMIN")
+        ));
 
-        UserInfo info = applicationUserServiceImpl.getUserInfo("email@mail.com");
+        UserInfo info = applicationUserServiceImpl.getUserInfo("mail@mail.com");
         assertThat(info.getId()).isEqualTo(1L);
-        assertThat(info.getUserName()).isEqualTo("subject");
+        assertThat(info.getUserName()).isEqualTo("UserName");
         assertThat(info.getFirstName()).isEqualTo("firstName");
         assertThat(info.getLastName()).isEqualTo("lastName");
-        assertThat(info.getEmail()).isEqualTo("email@mail.com");
+        assertThat(info.getEmail()).isEqualTo("mail@mail.com");
         assertThat(info.getEnabled()).isEqualTo(true);
         assertThat(info.getVerified()).isEqualTo(true);
-        assertThat(info.getAuthorities()).containsExactly("User", "Admin");
+        assertThat(info.getAuthorities()).containsExactly("ROLE_USER", "ROLE_ADMIN");
     }
 }

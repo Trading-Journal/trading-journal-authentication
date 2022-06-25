@@ -1,7 +1,7 @@
 package com.trading.journal.authentication.configuration;
 
+import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authentication.service.UserPasswordAuthenticationManager;
-import com.trading.journal.authentication.authority.AuthoritiesHelper;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.jwt.JwtTokenAuthenticationFilter;
@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -74,10 +75,7 @@ public class SecurityConfiguration {
                     String[] authorities;
                     List<Authority> authoritiesByCategory = authorityService.getAuthoritiesByCategory(category);
                     if (authoritiesByCategory.isEmpty()) {
-                        authorities = AuthoritiesHelper.getByCategory(category)
-                                .stream()
-                                .map(AuthoritiesHelper::getLabel)
-                                .toArray(String[]::new);
+                        throw new ApplicationException(HttpStatus.INTERNAL_SERVER_ERROR, "No authorities found in the database, please load it");
                     } else {
                         authorities = authoritiesByCategory.stream()
                                 .map(Authority::getName)
