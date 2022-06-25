@@ -1,7 +1,7 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.authority.Authority;
-import com.trading.journal.authentication.verification.service.impl.service.AuthorityService;
+import com.trading.journal.authentication.authority.service.AuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

@@ -6,7 +6,7 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.jwt.JwtTokenAuthenticationFilter;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
-import com.trading.journal.authentication.verification.service.impl.service.AuthorityService;
+import com.trading.journal.authentication.authority.service.AuthorityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

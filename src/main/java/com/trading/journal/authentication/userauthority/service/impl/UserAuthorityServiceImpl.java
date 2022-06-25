@@ -7,7 +7,7 @@ import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
-import com.trading.journal.authentication.verification.service.impl.service.AuthorityService;
+import com.trading.journal.authentication.authority.service.AuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;

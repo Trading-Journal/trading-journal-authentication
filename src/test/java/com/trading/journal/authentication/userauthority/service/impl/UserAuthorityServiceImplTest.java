@@ -6,7 +6,7 @@ import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
-import com.trading.journal.authentication.verification.service.impl.service.AuthorityService;
+import com.trading.journal.authentication.authority.service.AuthorityService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
