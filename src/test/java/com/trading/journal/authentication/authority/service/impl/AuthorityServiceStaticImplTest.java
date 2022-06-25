@@ -1,8 +1,8 @@
-package com.trading.journal.authentication.authority.impl;
+package com.trading.journal.authentication.authority.service.impl;
 
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
-import com.trading.journal.authentication.verification.service.impl.service.impl.AuthorityServiceStaticImpl;
+import com.trading.journal.authentication.authority.service.impl.AuthorityServiceStaticImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

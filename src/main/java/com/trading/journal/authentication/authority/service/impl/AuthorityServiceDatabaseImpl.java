@@ -1,9 +1,9 @@
-package com.trading.journal.authentication.verification.service.impl.service.impl;
+package com.trading.journal.authentication.authority.service.impl;
 
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.AuthorityRepository;
-import com.trading.journal.authentication.verification.service.impl.service.AuthorityService;
+import com.trading.journal.authentication.authority.service.AuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;

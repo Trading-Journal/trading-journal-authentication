@@ -1,4 +1,4 @@
-package com.trading.journal.authentication.verification.service.impl.service;
+package com.trading.journal.authentication.authority.service;
 
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;

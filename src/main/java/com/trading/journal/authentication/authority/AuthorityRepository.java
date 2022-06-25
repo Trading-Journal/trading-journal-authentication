@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.authority;
 
-import com.trading.journal.authentication.verification.service.impl.service.impl.AuthorityServiceDatabaseImpl;
+import com.trading.journal.authentication.authority.service.impl.AuthorityServiceDatabaseImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.repository.CrudRepository;
 
