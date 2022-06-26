@@ -147,7 +147,7 @@ public class ApplicationUserServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.of(2022, 2, 1, 10, 30, 50));
 
-        when(applicationUserRepository.findByEmail(disabledUser.getEmail())).thenReturn(disabledUser);
+        when(applicationUserRepository.findByEmail(disabledUser.getEmail())).thenReturn(Optional.of(disabledUser));
         when(applicationUserRepository.save(enabledUser)).thenReturn(enabledUser);
 
         applicationUserServiceImpl.verifyNewUser(disabledUser.getEmail());
@@ -156,7 +156,7 @@ public class ApplicationUserServiceImplTest {
     @Test
     @DisplayName("Enable and verify user that does not exist, return an exception")
     void enableAndVerifyException() {
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(null);
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.verifyNewUser("mail@mail.com"), "User mail@mail.com does not exist");
     }
 
@@ -290,7 +290,7 @@ public class ApplicationUserServiceImplTest {
                 emptyList(),
                 LocalDateTime.of(2022, 12, 12, 12, 12, 12));
 
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(applicationUser);
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Optional.of(applicationUser));
         when(passwordService.encodePassword("password")).thenReturn("new_password_encoded");
 
         ApplicationUser applicationUserWithNewPassword = new ApplicationUser(
@@ -312,7 +312,7 @@ public class ApplicationUserServiceImplTest {
     @Test
     @DisplayName("Change password when user email does not exist return exception")
     void changePasswordException() {
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(null);
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.changePassword("mail@mail.com", "password"), "User email@mail.com does not exist");
     }
 
@@ -331,7 +331,7 @@ public class ApplicationUserServiceImplTest {
                 emptyList(),
                 LocalDateTime.of(2022, 12, 12, 12, 12, 12));
 
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(applicationUser);
+        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
 
         when(userAuthorityService.getByUserId(1L)).thenReturn(Arrays.asList(
                 new UserAuthority(1L, 1L, 1L, "ROLE_USER"),

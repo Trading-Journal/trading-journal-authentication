@@ -31,6 +31,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -98,7 +99,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 .expectStatus()
                 .isOk();
 
-        Verification verification = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email);
+        Verification verification = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email).get();
         assertThat(verification.getStatus()).isEqualTo(VerificationStatus.PENDING);
         assertThat(verification.getHash()).isNotBlank();
     }
@@ -124,8 +125,8 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                         assertThat(response.get("error")).isEqualTo("User mail@mail.com does not exist")
                 );
 
-        Verification verification = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email);
-        assertThat(verification).isNull();
+        Optional<Verification> verification = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email);
+        assertThat(verification).isEmpty();
 
         verify(verificationEmailService, never()).sendEmail(any(), any());
     }
@@ -271,7 +272,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
 
         ChangePassword changePassword = new ChangePassword(email, tokenData.token(), "&UeK0j@tYRnhVGS&S64d", "&UeK0j@tYRnhVGS&S64d");
 
-        String oldPasswordEncoded = applicationUserRepository.findByEmail(email).getPassword();
+        String oldPasswordEncoded = applicationUserRepository.findByEmail(email).get().getPassword();
         assertThat(oldPasswordEncoded).isNotBlank();
 
 
@@ -295,7 +296,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
         List<Verification> verifications = verificationRepository.findAll();
         assertThat(verifications).isEmpty();
 
-        String newPasswordEncoded = applicationUserRepository.findByEmail(email).getPassword();
+        String newPasswordEncoded = applicationUserRepository.findByEmail(email).get().getPassword();
         assertThat(newPasswordEncoded).isNotBlank();
 
         assertThat(oldPasswordEncoded).isNotEqualTo(newPasswordEncoded);
