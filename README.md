@@ -2,9 +2,7 @@
 
 ## Pending
 
-* Admin endpoints
-  * Enable OneToMany to User->UserAuths
-* Test change to Functional with Consumers, functions and atc
+* Optional for repositories
 * Manage Authorities via API when Database authorities (ConditionalOnProperty???)
   * Admin access only
   * Validate if entity authorities is enabled before manage

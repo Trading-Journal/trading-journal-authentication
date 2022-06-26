@@ -70,7 +70,7 @@ class ApplicationAdminUserServiceImplIntegratedTest {
         applicationAdminUserService.createAdmin(adminRegistration);
 
         Long userId;
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail(adminUserProperties.email());
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail(adminUserProperties.email()).get();
         assertThat(applicationUser.getEnabled()).isFalse();
         assertThat(applicationUser.getVerified()).isFalse();
         userId = applicationUser.getId();
@@ -79,7 +79,7 @@ class ApplicationAdminUserServiceImplIntegratedTest {
         assertThat(userAuthorities).hasSize(2);
         assertThat(userAuthorities).extracting(UserAuthority::getName).containsAnyOf("ROLE_USER", "ROLE_ADMIN");
 
-        Verification verification = verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, adminUserProperties.email());
+        Verification verification = verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, adminUserProperties.email()).get();
         assertThat(verification.getHash()).isNotBlank();
     }
 }

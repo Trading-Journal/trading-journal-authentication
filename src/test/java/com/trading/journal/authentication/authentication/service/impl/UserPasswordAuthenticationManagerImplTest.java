@@ -19,6 +19,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -57,7 +58,7 @@ class UserPasswordAuthenticationManagerImplTest {
                 true,
                 emptyList(),
                 LocalDateTime.now());
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(applicationUser);
+        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
         when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(singletonList(new SimpleGrantedAuthority("ROLE_USER")));
 
@@ -74,7 +75,7 @@ class UserPasswordAuthenticationManagerImplTest {
     @Test
     void userNotFound() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(null);
+        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -100,7 +101,7 @@ class UserPasswordAuthenticationManagerImplTest {
                 false,
                 emptyList(),
                 LocalDateTime.now());
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(applicationUser);
+        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -126,7 +127,7 @@ class UserPasswordAuthenticationManagerImplTest {
                 true,
                 emptyList(),
                 LocalDateTime.now());
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(applicationUser);
+        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(false);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
@@ -152,7 +153,7 @@ class UserPasswordAuthenticationManagerImplTest {
                 true,
                 emptyList(),
                 LocalDateTime.now());
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(applicationUser);
+        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
         when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(emptyList());
 
@@ -177,7 +178,7 @@ class UserPasswordAuthenticationManagerImplTest {
                 true,
                 emptyList(),
                 LocalDateTime.now());
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(applicationUser);
+        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
         when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(null);
 

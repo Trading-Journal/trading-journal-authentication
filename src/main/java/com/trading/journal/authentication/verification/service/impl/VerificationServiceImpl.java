@@ -26,10 +26,8 @@ public class VerificationServiceImpl implements VerificationService {
 
     @Override
     public void send(VerificationType verificationType, ApplicationUser applicationUser) {
-        Verification verification = verificationRepository.getByTypeAndEmail(verificationType, applicationUser.getEmail());
-        if (verification == null) {
-            verification = Verification.builder().email(applicationUser.getEmail()).type(verificationType).build();
-        }
+        Verification verification = verificationRepository.getByTypeAndEmail(verificationType, applicationUser.getEmail())
+                .orElseGet(() -> Verification.builder().email(applicationUser.getEmail()).type(verificationType).build());
         verification = verification.renew(hashProvider.generateHash(verification.getEmail()));
         verification = verificationRepository.save(verification);
         verificationEmailService.sendEmail(verification, applicationUser);
@@ -38,11 +36,8 @@ public class VerificationServiceImpl implements VerificationService {
     @Override
     public Verification retrieve(String hash) {
         String email = hashProvider.readHashValue(hash);
-        Verification verification = verificationRepository.getByHashAndEmail(hash, email);
-        if (verification == null) {
-            throw new ApplicationException(HttpStatus.BAD_REQUEST, "Request is invalid");
-        }
-        return verification;
+        return verificationRepository.getByHashAndEmail(hash, email)
+                .orElseThrow(() -> new ApplicationException(HttpStatus.BAD_REQUEST, "Request is invalid"));
     }
 
     @Override

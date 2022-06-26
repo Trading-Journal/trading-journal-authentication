@@ -138,7 +138,7 @@ public class SecurityConfigurationTest {
                 "dad231#$#4");
         applicationAdminUserService.createAdmin(userRegistration);
 
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com");
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com").get();
         applicationUser.enable();
         applicationUser.verify();
         applicationUser.changePassword(encoder.encode("dad231#$#4"));
@@ -195,7 +195,7 @@ public class SecurityConfigurationTest {
                 "dad231#$#4");
         applicationAdminUserService.createAdmin(userRegistration);
 
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com");
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com").get();
         applicationUser.enable();
         applicationUser.verify();
         applicationUser.changePassword(encoder.encode("dad231#$#4"));

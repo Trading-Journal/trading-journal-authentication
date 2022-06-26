@@ -7,7 +7,6 @@ import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
-import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,13 +31,12 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
     @Override
     public ApplicationUser getUserByEmail(@NotBlank String email) {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail(email);
-        if (applicationUser == null) {
-            throw new UsernameNotFoundException(String.format("User %s does not exist", email));
-        }
-        List<UserAuthority> authorities = userAuthorityService.getByUserId(applicationUser.getId());
-        applicationUser.loadAuthorities(authorities);
-        return applicationUser;
+        return applicationUserRepository.findByEmail(email)
+                .map(applicationUser -> {
+                    applicationUser.loadAuthorities(userAuthorityService.getByUserId(applicationUser.getId()));
+                    return applicationUser;
+                })
+                .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s does not exist", email)));
     }
 
     @Override
@@ -73,9 +70,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
     @Override
     public UserInfo getUserInfo(@NotBlank String email) {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail(email);
-        List<UserAuthority> authorities = userAuthorityService.getByUserId(applicationUser.getId());
-        applicationUser.loadAuthorities(authorities);
+        ApplicationUser applicationUser = this.getUserByEmail(email);
         return new UserInfo(applicationUser);
     }
 

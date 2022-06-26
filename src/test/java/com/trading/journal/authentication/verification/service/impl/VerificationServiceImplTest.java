@@ -19,6 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
@@ -68,7 +69,7 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(null);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
@@ -99,7 +100,7 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(null);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Optional.empty());
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
@@ -130,7 +131,7 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(null);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
@@ -161,7 +162,7 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(verificationSaved);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
@@ -192,7 +193,7 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(verificationSaved);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
@@ -223,7 +224,7 @@ class VerificationServiceImplTest {
                 Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
                 LocalDateTime.now());
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(verificationSaved);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
@@ -244,7 +245,7 @@ class VerificationServiceImplTest {
                 LocalDateTime.now());
 
         when(hashProvider.readHashValue(hash)).thenReturn(email);
-        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(verificationSaved);
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Optional.of(verificationSaved));
 
         Verification verification = verificationService.retrieve(hash);
         assertThat(verificationSaved).isEqualTo(verification);
@@ -263,7 +264,7 @@ class VerificationServiceImplTest {
                 LocalDateTime.now());
 
         when(hashProvider.readHashValue(hash)).thenReturn(email);
-        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(verificationSaved);
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Optional.of(verificationSaved));
 
         Verification verification = verificationService.retrieve(hash);
 
@@ -283,7 +284,7 @@ class VerificationServiceImplTest {
                 LocalDateTime.now());
 
         when(hashProvider.readHashValue(hash)).thenReturn(email);
-        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(verificationSaved);
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Optional.of(verificationSaved));
 
         Verification verification = verificationService.retrieve(hash);
 
@@ -296,7 +297,7 @@ class VerificationServiceImplTest {
         String hash = "12456";
         String email = "mail@mail.com";
         when(hashProvider.readHashValue(hash)).thenReturn(email);
-        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(null);
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> verificationService.retrieve(hash));
         assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
@@ -376,7 +377,7 @@ class VerificationServiceImplTest {
                 LocalDateTime.now());
 
         when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
-        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(null);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(Optional.empty());
         when(hashProvider.generateHash(email)).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(changerPassword);
         doNothing().when(verificationEmailService).sendEmail(any(), any());

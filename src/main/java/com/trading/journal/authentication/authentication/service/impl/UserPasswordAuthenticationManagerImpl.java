@@ -31,10 +31,8 @@ public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthen
     @Override
     public Authentication authenticate(Authentication authentication) {
         String email = (String) authentication.getPrincipal();
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail(email);
-        if (applicationUser == null) {
-            throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Bad Credentials");
-        }
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail(email)
+                .orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "Bad Credentials"));
         if (!applicationUser.getEnabled()) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Locked Credentials");
         }
@@ -45,7 +43,7 @@ public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthen
         }
 
         List<SimpleGrantedAuthority> authorities = userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser);
-        if(ofNullable(authorities).map(List::isEmpty).orElse(true)){
+        if (ofNullable(authorities).map(List::isEmpty).orElse(true)) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "No Authorities");
         }
 

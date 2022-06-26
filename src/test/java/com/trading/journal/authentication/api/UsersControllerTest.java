@@ -26,6 +26,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -81,9 +82,7 @@ class UsersControllerTest {
     @DisplayName("Get user by id")
     @Test
     void getUserById() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("ermablack@email.com");
-        assertThat(applicationUser).isNotNull();
-        long userId = applicationUser.getId();
+        long userId = getUserId("ermablack@email.com");
 
         webTestClient
                 .get()
@@ -130,9 +129,7 @@ class UsersControllerTest {
     @DisplayName("Disable user by id")
     @Test
     void disableUserById() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("ernestokim@email.com");
-        assertThat(applicationUser).isNotNull();
-        long userId = applicationUser.getId();
+        long userId = getUserId("ernestokim@email.com");
 
         webTestClient
                 .patch()
@@ -190,7 +187,7 @@ class UsersControllerTest {
     @DisplayName("Enable user by id")
     @Test
     void enableUserById() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("fanniehines@email.com");
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("fanniehines@email.com").get();
         assertThat(applicationUser).isNotNull();
         long userId = applicationUser.getId();
 
@@ -254,7 +251,7 @@ class UsersControllerTest {
     @DisplayName("Delete user by id")
     @Test
     void deleteUserById() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("garylogan@email.com");
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("garylogan@email.com").get();
         assertThat(applicationUser).isNotNull();
         long userId = applicationUser.getId();
 
@@ -269,8 +266,8 @@ class UsersControllerTest {
                 .expectStatus()
                 .isOk();
 
-        ApplicationUser byEmail = applicationUserRepository.findByEmail("garylogan@email.com");
-        assertThat(byEmail).isNull();
+        Optional<ApplicationUser> byEmail = applicationUserRepository.findByEmail("garylogan@email.com");
+        assertThat(byEmail).isEmpty();
     }
 
     @DisplayName("Delete user by id not found")
@@ -297,7 +294,7 @@ class UsersControllerTest {
     @DisplayName("Delete user by id user recently deleted return not found")
     @Test
     void deleteUserByIdRecentlyDeleted() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("laurieadams@email.com");
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("laurieadams@email.com").get();
         assertThat(applicationUser).isNotNull();
         long userId = applicationUser.getId();
 
@@ -312,8 +309,8 @@ class UsersControllerTest {
                 .expectStatus()
                 .isOk();
 
-        ApplicationUser byEmail = applicationUserRepository.findByEmail("laurieadams@email.com");
-        assertThat(byEmail).isNull();
+        Optional<ApplicationUser> byEmail = applicationUserRepository.findByEmail("laurieadams@email.com");
+        assertThat(byEmail).isEmpty();
 
         webTestClient
                 .delete()
@@ -335,7 +332,7 @@ class UsersControllerTest {
     @DisplayName("Add authorities to user")
     @Test
     void addAuthorities() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("lorettastanley@email.com");
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("lorettastanley@email.com").get();
         assertThat(applicationUser).isNotNull();
         long userId = applicationUser.getId();
 
@@ -388,7 +385,7 @@ class UsersControllerTest {
     @DisplayName("Add same authorities that is already for the user do not add it again")
     @Test
     void addSameAuthorities() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("natasharivera@email.com");
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("natasharivera@email.com").get();
         assertThat(applicationUser).isNotNull();
         long userId = applicationUser.getId();
 
@@ -441,7 +438,7 @@ class UsersControllerTest {
     @DisplayName("Add authorities with invalid name do not add it")
     @Test
     void addAuthoritiesInvalidName() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("natasharivera@email.com");
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("natasharivera@email.com").get();
         assertThat(applicationUser).isNotNull();
         long userId = applicationUser.getId();
 
@@ -501,7 +498,7 @@ class UsersControllerTest {
     @DisplayName("Delete authority from user")
     @Test
     void deleteAuthority() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("norawaters@email.com");
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("norawaters@email.com").get();
         assertThat(applicationUser).isNotNull();
         long userId = applicationUser.getId();
 
@@ -567,7 +564,7 @@ class UsersControllerTest {
     @DisplayName("Delete authority that does not exist for the user")
     @Test
     void deleteAuthorityNotThere() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("pedrosullivan@email.com");
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("pedrosullivan@email.com").get();
         assertThat(applicationUser).isNotNull();
         long userId = applicationUser.getId();
 
@@ -620,7 +617,7 @@ class UsersControllerTest {
     @DisplayName("Delete authority that is invalid for the user")
     @Test
     void deleteAuthorityInvalid() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("phyllisterry@email.com");
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("phyllisterry@email.com").get();
         assertThat(applicationUser).isNotNull();
         long userId = applicationUser.getId();
 
@@ -673,9 +670,7 @@ class UsersControllerTest {
     @DisplayName("Delete all authorities from user")
     @Test
     void deleteAllAuthorities() {
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("sabrinagarcia@email.com");
-        assertThat(applicationUser).isNotNull();
-        long userId = applicationUser.getId();
+        long userId = getUserId("sabrinagarcia@email.com");
 
         AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
         webTestClient
@@ -756,5 +751,11 @@ class UsersControllerTest {
                 .value(response ->
                         assertThat(response.get("error")).isEqualTo("User id not found")
                 );
+    }
+
+    private long getUserId(String email) {
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail(email).get();
+        assertThat(applicationUser).isNotNull();
+        return applicationUser.getId();
     }
 }
