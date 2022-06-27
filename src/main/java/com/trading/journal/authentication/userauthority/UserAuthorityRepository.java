@@ -8,4 +8,6 @@ public interface UserAuthorityRepository extends CrudRepository<UserAuthority, L
 
     @Override
     List<UserAuthority> findAll();
+
+    Boolean existsByAuthorityId(Long authorityId);
 }

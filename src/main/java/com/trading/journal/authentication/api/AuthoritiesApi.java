@@ -51,5 +51,5 @@ public interface AuthoritiesApi {
     @ApiResponses(@ApiResponse(code = 200, message = "Authority deleted"))
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Authority> delete(@PathVariable Long id);
+    ResponseEntity<Void> delete(@PathVariable Long id);
 }
