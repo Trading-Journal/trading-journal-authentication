@@ -2,6 +2,8 @@ package com.trading.journal.authentication.verification.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
@@ -53,7 +55,10 @@ class HashProviderJwtTest {
                 "mail@mail.com",
                 true,
                 true,
-                Arrays.asList(new UserAuthority(null,"ROLE_USER", 1L), new UserAuthority(null,"ROLE_ADMIN", 2L)),
+                Arrays.asList(
+                        new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(null,"ROLE_ADMIN", new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                ),
                 LocalDateTime.now());
 
         TokenData tokenData = jwtTokenProvider.generateAccessToken(applicationUser);

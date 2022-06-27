@@ -68,6 +68,6 @@ public class AuthenticationControllerTest {
 
         List<UserAuthority> userAuthorities = userAuthorityRepository.findAll();
         assert userAuthorities != null;
-        userAuthorities.forEach(userAuthority -> assertThat(userAuthority.getAuthorityId()).isNotNull());
+        userAuthorities.forEach(userAuthority -> assertThat(userAuthority.getAuthority()).isNotNull());
     }
 }

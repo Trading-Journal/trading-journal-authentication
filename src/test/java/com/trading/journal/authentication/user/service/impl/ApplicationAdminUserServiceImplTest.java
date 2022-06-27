@@ -1,5 +1,7 @@
 package com.trading.journal.authentication.user.service.impl;
 
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
@@ -84,7 +86,7 @@ class ApplicationAdminUserServiceImplTest {
                 emptyList(),
                 LocalDateTime.now());
 
-        UserAuthority userAuthority = new UserAuthority(applicationUser, "ADMIN", 1L);
+        UserAuthority userAuthority = new UserAuthority(applicationUser, "ADMIN", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"));
 
         when(passwordService.randomPassword()).thenReturn("password_secret");
         when(applicationUserRepository.save(any())).thenReturn(applicationUser);

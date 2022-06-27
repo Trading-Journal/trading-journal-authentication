@@ -1,5 +1,7 @@
 package com.trading.journal.authentication.verification.service.impl;
 
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.configuration.properties.HostProperties;
 import com.trading.journal.authentication.email.EmailField;
@@ -57,7 +59,7 @@ class VerificationEmailServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         String url = String.format("http://site.com/auth/email-verified?hash=%s", hash);
@@ -96,7 +98,7 @@ class VerificationEmailServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         String url = String.format("http://site.com/auth/change-password?hash=%s", hash);
@@ -135,7 +137,7 @@ class VerificationEmailServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         String url = String.format("http://site.com/auth/email-verified?hash=%s", hash);

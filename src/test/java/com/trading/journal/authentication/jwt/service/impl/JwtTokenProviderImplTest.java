@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
@@ -58,7 +60,7 @@ public class JwtTokenProviderImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         TokenData tokenData = tokenProvider.generateAccessToken(appUser);
@@ -79,7 +81,7 @@ public class JwtTokenProviderImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         TokenData tokenData = tokenProvider.generateRefreshToken(appUser);

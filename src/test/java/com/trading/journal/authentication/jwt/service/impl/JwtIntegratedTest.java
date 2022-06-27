@@ -1,6 +1,8 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.jwt.data.TokenData;
@@ -62,7 +64,10 @@ public class JwtIntegratedTest {
                 "mail@mail.com",
                 true,
                 true,
-                Arrays.asList(new UserAuthority(null,"ROLE_USER", 1L), new UserAuthority(null,"ROLE_ADMIN", 2L)),
+                Arrays.asList(
+                        new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(null, "ROLE_ADMIN", new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                ),
                 LocalDateTime.now());
 
         TokenData accessToken = jwtTokenProvider.generateAccessToken(appUser);
@@ -96,7 +101,10 @@ public class JwtIntegratedTest {
                 "mail@mail.com",
                 true,
                 true,
-                Arrays.asList(new UserAuthority(null,"ROLE_USER", 1L), new UserAuthority(null,"ROLE_ADMIN", 2L)),
+                Arrays.asList(
+                        new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(null, "ROLE_ADMIN", new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                ),
                 LocalDateTime.now());
 
         TokenData refreshToken = jwtTokenProvider.generateRefreshToken(appUser);

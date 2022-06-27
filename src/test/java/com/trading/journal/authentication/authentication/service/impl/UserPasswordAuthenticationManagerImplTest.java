@@ -1,6 +1,8 @@
 package com.trading.journal.authentication.authentication.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.user.ApplicationUser;
@@ -52,7 +54,7 @@ class UserPasswordAuthenticationManagerImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                singletonList(new UserAuthority(null, "ROLE_USER", 1L)),
+                singletonList(new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);

@@ -1,6 +1,8 @@
 package com.trading.journal.authentication.user.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
@@ -72,7 +74,7 @@ public class ApplicationUserServiceImplTest {
 
         when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
         when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, "USER", 1L)));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, "USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(appUser);
         when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));
@@ -108,7 +110,7 @@ public class ApplicationUserServiceImplTest {
 
         when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
         when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, "USER", 1L)));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, "USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(appUser);
         when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));
@@ -327,8 +329,10 @@ public class ApplicationUserServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                asList(new UserAuthority(new ApplicationUser(), "ROLE_USER", 1L),
-                        new UserAuthority(new ApplicationUser(), "ROLE_ADMIN", 2L)),
+                asList(
+                        new UserAuthority(new ApplicationUser(), "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(new ApplicationUser(), "ROLE_ADMIN", new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                ),
                 LocalDateTime.of(2022, 12, 12, 12, 12, 12));
 
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));

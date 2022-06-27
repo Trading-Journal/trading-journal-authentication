@@ -1,6 +1,8 @@
 package com.trading.journal.authentication.registration.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
@@ -61,7 +63,7 @@ public class RegistrationServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         when(applicationUserService.createNewUser(userRegistration)).thenReturn(applicationUser);
@@ -93,7 +95,7 @@ public class RegistrationServiceImplTest {
                 "mail@mail.com",
                 false,
                 false,
-                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         when(applicationUserService.createNewUser(userRegistration)).thenReturn(applicationUser);
@@ -151,7 +153,7 @@ public class RegistrationServiceImplTest {
                 email,
                 false,
                 false,
-                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         when(verificationProperties.isEnabled()).thenReturn(true);
@@ -191,7 +193,7 @@ public class RegistrationServiceImplTest {
                 email,
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         when(verificationProperties.isEnabled()).thenReturn(true);

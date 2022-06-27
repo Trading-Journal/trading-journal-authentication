@@ -3,8 +3,7 @@
 ## Pending
 
 * Manage Authorities via API when Database authorities
-  * Use JPA Relationship for ApplicationUser/UserAuthority
-  * Use JPA Relationship for UserAuthority/ Authority
+  * Remove Role Name from UserAuthorities
   * Admin access only
   * Manage authorities (add, delete, update)
 * Enable/Disable Multitenancy

@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.userauthority;
 
+import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.user.ApplicationUser;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +26,9 @@ public class UserAuthority {
     @JoinColumn(name = "userId")
     private ApplicationUser applicationUser;
 
-    private Long authorityId;
+    @OneToOne
+    @JoinColumn(name = "authorityId")
+    private Authority authority;
 
     @NotBlank(message = "Name is required")
     private String name;
@@ -34,9 +37,9 @@ public class UserAuthority {
         this.applicationUser = applicationUser;
     }
 
-    public UserAuthority(ApplicationUser applicationUser, String name, Long authorityId) {
+    public UserAuthority(ApplicationUser applicationUser, String name, Authority authority) {
         this.applicationUser = applicationUser;
         this.name = name;
-        this.authorityId = authorityId;
+        this.authority = authority;
     }
 }

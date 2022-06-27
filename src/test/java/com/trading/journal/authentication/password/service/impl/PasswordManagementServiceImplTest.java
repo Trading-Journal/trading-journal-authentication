@@ -1,6 +1,8 @@
 package com.trading.journal.authentication.password.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.ChangePassword;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.email.EmailField;
@@ -48,7 +50,17 @@ class PasswordManagementServiceImplTest {
     @Test
     void passwordChangeRequest() {
         String email = "mail@mail.com";
-        ApplicationUser applicationUser = new ApplicationUser(1L, "UserAdm", "123456", "User", "Admin", email, true, true, Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)), LocalDateTime.now());
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserAdm",
+                "123456",
+                "User",
+                "Admin",
+                email,
+                true,
+                true,
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
+                LocalDateTime.now());
 
         when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
         doNothing().when(verificationService).send(VerificationType.CHANGE_PASSWORD, applicationUser);

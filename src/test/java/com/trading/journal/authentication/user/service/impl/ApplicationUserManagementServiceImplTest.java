@@ -1,6 +1,8 @@
 package com.trading.journal.authentication.user.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.user.ApplicationUser;
@@ -58,7 +60,7 @@ class ApplicationUserManagementServiceImplTest {
                         "mail@mail.com",
                         true,
                         true,
-                        singletonList(new UserAuthority(null, "ROLE_USER", 1L)),
+                        singletonList(new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                         LocalDateTime.now())),
                 pageableRequest.pageable(),
                 2
@@ -85,7 +87,7 @@ class ApplicationUserManagementServiceImplTest {
                         "mail@mail.com",
                         true,
                         true,
-                        singletonList(new UserAuthority(null, "ROLE_USER", 1L)),
+                        singletonList(new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                         LocalDateTime.now())),
                 pageableRequest.pageable(),
                 2
@@ -250,8 +252,8 @@ class ApplicationUserManagementServiceImplTest {
         when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 
         List<UserAuthority> userAuthorities = Arrays.asList(
-                new UserAuthority(null, "ROLE_USER", 1L),
-                new UserAuthority(null, "ROLE_ADMIN", 2L)
+                new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                new UserAuthority(null, "ROLE_ADMIN", new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
         );
         AuthoritiesChange change = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
         when(userAuthorityService.addAuthorities(applicationUser, change))
@@ -288,15 +290,15 @@ class ApplicationUserManagementServiceImplTest {
                 false,
                 true,
                 Arrays.asList(
-                        new UserAuthority(null, "ROLE_USER", 1L),
-                        new UserAuthority(null, "ROLE_ADMIN", 2L)
+                        new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(null, "ROLE_ADMIN", new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
                 ),
                 LocalDateTime.now());
 
         when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 
         List<UserAuthority> userAuthorities = singletonList(
-                new UserAuthority(null, "ROLE_USER", 1L)
+                new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
         );
         AuthoritiesChange change = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
         when(userAuthorityService.deleteAuthorities(applicationUser, change))
