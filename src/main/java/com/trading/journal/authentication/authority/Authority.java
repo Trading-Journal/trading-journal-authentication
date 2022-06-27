@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.authority;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public class Authority {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
     @Enumerated(EnumType.STRING)

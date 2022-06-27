@@ -2,11 +2,9 @@
 
 ## Pending
 
-* Optional for repositories
-* Manage Authorities via API when Database authorities (ConditionalOnProperty???)
+* Manage Authorities via API when Database authorities
   * Admin access only
-  * Validate if entity authorities is enabled before manage
-  * Manage user authorities
+  * Manage authorities (add, delete, update)
 * Enable/Disable Multitenancy
 * When user request password change, disable it, it cannot perform login until change password
 * Postman Test run
