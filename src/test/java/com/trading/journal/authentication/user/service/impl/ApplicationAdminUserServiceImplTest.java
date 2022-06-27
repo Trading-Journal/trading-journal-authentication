@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,7 +85,7 @@ class ApplicationAdminUserServiceImplTest {
                 emptyList(),
                 LocalDateTime.now());
 
-        UserAuthority userAuthority = new UserAuthority(applicationUser, "ADMIN", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"));
+        UserAuthority userAuthority = new UserAuthority(applicationUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"));
 
         when(passwordService.randomPassword()).thenReturn("password_secret");
         when(applicationUserRepository.save(any())).thenReturn(applicationUser);

@@ -44,7 +44,7 @@ public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthen
                 .map(ApplicationUser::getAuthorities)
                 .orElse(emptyList())
                 .stream()
-                .map(userAuthorities -> new SimpleGrantedAuthority(userAuthorities.getName())).toList();
+                .map(userAuthorities -> new SimpleGrantedAuthority(userAuthorities.getAuthority().getName())).toList();
 
         if (authorities.isEmpty()) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "No Authorities");

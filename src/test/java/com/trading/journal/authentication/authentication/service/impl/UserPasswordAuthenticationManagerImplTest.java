@@ -54,7 +54,7 @@ class UserPasswordAuthenticationManagerImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                singletonList(new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
+                singletonList(new UserAuthority(null,  new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);

@@ -74,7 +74,7 @@ public class ApplicationUserServiceImplTest {
 
         when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
         when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, "USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(appUser);
         when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));
@@ -110,7 +110,7 @@ public class ApplicationUserServiceImplTest {
 
         when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
         when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, "USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(appUser);
         when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));
@@ -330,8 +330,8 @@ public class ApplicationUserServiceImplTest {
                 true,
                 true,
                 asList(
-                        new UserAuthority(new ApplicationUser(), "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
-                        new UserAuthority(new ApplicationUser(), "ROLE_ADMIN", new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                        new UserAuthority(new ApplicationUser(), new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(new ApplicationUser(), new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
                 ),
                 LocalDateTime.of(2022, 12, 12, 12, 12, 12));
 

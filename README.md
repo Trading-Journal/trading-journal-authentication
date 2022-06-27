@@ -3,7 +3,6 @@
 ## Pending
 
 * Manage Authorities via API when Database authorities
-  * Remove Role Name from UserAuthorities
   * Admin access only
   * Manage authorities (add, delete, update)
 * Enable/Disable Multitenancy
@@ -90,8 +89,7 @@ CREATE TABLE `Authorities` (
 CREATE TABLE `UserAuthorities` (
   `id` int NOT NULL AUTO_INCREMENT,
   `userId` int NOT NULL,
-  `authorityId` int DEFAULT NULL,
-  `name` varchar(45) NOT NULL,
+  `authorityId` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `userIdFk_idx` (`userId`),
   KEY `authorityIdFk_idx` (`authorityId`),

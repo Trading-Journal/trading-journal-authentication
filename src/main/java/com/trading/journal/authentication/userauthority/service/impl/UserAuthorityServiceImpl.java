@@ -29,7 +29,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     public List<UserAuthority> saveCommonUserAuthorities(ApplicationUser applicationUser) {
         return authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)
                 .stream()
-                .map(authority -> new UserAuthority(applicationUser, authority.getName(), authority))
+                .map(authority -> new UserAuthority(applicationUser, authority))
                 .map(userAuthorityRepository::save)
                 .collect(Collectors.toList());
     }
@@ -38,7 +38,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     public List<UserAuthority> saveAdminUserAuthorities(ApplicationUser applicationUser) {
         return authorityService.getAll()
                 .stream()
-                .map(authority -> new UserAuthority(applicationUser, authority.getName(), authority))
+                .map(authority -> new UserAuthority(applicationUser, authority))
                 .map(userAuthorityRepository::save)
                 .collect(Collectors.toList());
     }
@@ -52,7 +52,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
 
         List<UserAuthority> userAuthoritiesToAdd = authorities.stream()
                 .filter(filterOutEqualAuthorities(applicationUser))
-                .map(authority -> new UserAuthority(applicationUser, authority.getName(), authority))
+                .map(authority -> new UserAuthority(applicationUser, authority))
                 .toList();
 
         return userAuthoritiesToAdd.stream()
@@ -79,13 +79,13 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
         return authority -> applicationUser
                 .getAuthorities()
                 .stream()
-                .noneMatch(userAuthority -> userAuthority.getName().equals(authority.getName())
+                .noneMatch(userAuthority -> userAuthority.getAuthority().getName().equals(authority.getName())
                         && Objects.equals(userAuthority.getAuthority().getId(), authority.getId()));
     }
 
     private Predicate<UserAuthority> filterUserRolesToRemove(List<Authority> authorities) {
         return userAuthority -> authorities.stream()
-                .anyMatch(authority -> userAuthority.getName().equals(authority.getName())
+                .anyMatch(authority -> userAuthority.getAuthority().getName().equals(authority.getName())
                         && Objects.equals(userAuthority.getAuthority().getId(), authority.getId())
                 );
     }

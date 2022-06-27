@@ -1,8 +1,21 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
+import com.trading.journal.authentication.jwt.data.JwtProperties;
+import com.trading.journal.authentication.jwt.data.ServiceType;
+import com.trading.journal.authentication.jwt.data.TokenData;
+import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
+import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
+import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.userauthority.UserAuthority;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,24 +26,9 @@ import java.security.PrivateKey;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
-import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.authority.Authority;
-import com.trading.journal.authentication.authority.AuthorityCategory;
-import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
-import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
-import com.trading.journal.authentication.jwt.data.JwtProperties;
-import com.trading.journal.authentication.jwt.data.ServiceType;
-import com.trading.journal.authentication.jwt.data.TokenData;
-import com.trading.journal.authentication.jwt.service.impl.JwtTokenProviderImpl;
-import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.userauthority.UserAuthority;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class JwtTokenProviderImplTest {
@@ -60,7 +58,7 @@ public class JwtTokenProviderImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
+                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         TokenData tokenData = tokenProvider.generateAccessToken(appUser);
@@ -81,7 +79,7 @@ public class JwtTokenProviderImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
+                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         TokenData tokenData = tokenProvider.generateRefreshToken(appUser);

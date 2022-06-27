@@ -55,7 +55,7 @@ class UserAuthorityServiceImplTest {
         Authority authority = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
         when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(singletonList(authority));
 
-        UserAuthority userAuthority = new UserAuthority(applicationUser, authority.getName(), authority);
+        UserAuthority userAuthority = new UserAuthority(applicationUser, authority);
         when(userAuthorityRepository.save(any())).thenReturn(userAuthority);
 
         List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(applicationUser);
@@ -82,8 +82,8 @@ class UserAuthorityServiceImplTest {
         Authority authority2 = Authority.builder().id(2L).category(AuthorityCategory.COMMON_USER).name("ADMIN").build();
         when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(Arrays.asList(authority1, authority2));
 
-        UserAuthority userAuthority1 = new UserAuthority(applicationUser, authority1.getName(), authority1);
-        UserAuthority userAuthority2 = new UserAuthority(applicationUser, authority2.getName(), authority2);
+        UserAuthority userAuthority1 = new UserAuthority(applicationUser, authority1);
+        UserAuthority userAuthority2 = new UserAuthority(applicationUser, authority2);
         when(userAuthorityRepository.save(userAuthority1)).thenReturn(userAuthority1);
         when(userAuthorityRepository.save(userAuthority2)).thenReturn(userAuthority2);
 
@@ -112,8 +112,8 @@ class UserAuthorityServiceImplTest {
         Authority authorityUser = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
         when(authorityService.getAll()).thenReturn(Arrays.asList(authorityAdmin, authorityUser));
 
-        UserAuthority userAuthorityUser = new UserAuthority(applicationUser, authorityAdmin.getName(), authorityAdmin);
-        UserAuthority userAuthorityAdmin = new UserAuthority(applicationUser, authorityUser.getName(), authorityUser);
+        UserAuthority userAuthorityUser = new UserAuthority(applicationUser, authorityAdmin);
+        UserAuthority userAuthorityAdmin = new UserAuthority(applicationUser, authorityUser);
         when(userAuthorityRepository.save(userAuthorityUser)).thenReturn(userAuthorityUser);
         when(userAuthorityRepository.save(userAuthorityAdmin)).thenReturn(userAuthorityAdmin);
 
@@ -139,7 +139,7 @@ class UserAuthorityServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                List.of(new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
+                List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
@@ -165,7 +165,7 @@ class UserAuthorityServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                List.of(new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
+                List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
@@ -191,8 +191,8 @@ class UserAuthorityServiceImplTest {
                 true,
                 true,
                 List.of(
-                        new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
-                        new UserAuthority(null, "ROLE_ADMIN", new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))),
+                        new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))),
                 LocalDateTime.now());
 
         userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
@@ -217,7 +217,7 @@ class UserAuthorityServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                List.of(new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
+                List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
                 LocalDateTime.now());
 
         userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
@@ -242,9 +242,9 @@ class UserAuthorityServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                List.of(new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
-                        , new UserAuthority(null, "ROLE_ADMIN", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
-                        , new UserAuthority(null, "ANOTHER_ROLE", new Authority(3L, AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"))),
+                List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
+                        , new UserAuthority(null, new Authority(2L, AuthorityCategory.COMMON_USER, "ROLE_ADMIN"))
+                        , new UserAuthority(null, new Authority(3L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE"))),
                 LocalDateTime.now());
 
         userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
@@ -270,8 +270,8 @@ class UserAuthorityServiceImplTest {
                 true,
                 true,
                 List.of(
-                        new UserAuthority(null, "ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
-                        , new UserAuthority(null, "ROLE_ADMIN", new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                        new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
+                        , new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
                 ),
                 LocalDateTime.now());
 

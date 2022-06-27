@@ -4,10 +4,10 @@ import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
-import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.verification.service.HashProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,8 +56,8 @@ class HashProviderJwtTest {
                 true,
                 true,
                 Arrays.asList(
-                        new UserAuthority(null,"ROLE_USER", new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
-                        new UserAuthority(null,"ROLE_ADMIN", new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                        new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
                 ),
                 LocalDateTime.now());
 

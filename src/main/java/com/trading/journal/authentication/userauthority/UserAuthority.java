@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,16 +29,8 @@ public class UserAuthority {
     @JoinColumn(name = "authorityId")
     private Authority authority;
 
-    @NotBlank(message = "Name is required")
-    private String name;
-
-    public void setApplicationUser(ApplicationUser applicationUser) {
+    public UserAuthority(ApplicationUser applicationUser, Authority authority) {
         this.applicationUser = applicationUser;
-    }
-
-    public UserAuthority(ApplicationUser applicationUser, String name, Authority authority) {
-        this.applicationUser = applicationUser;
-        this.name = name;
         this.authority = authority;
     }
 }

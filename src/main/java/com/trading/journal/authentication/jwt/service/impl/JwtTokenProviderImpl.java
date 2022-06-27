@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
 import com.trading.journal.authentication.jwt.data.JwtProperties;
@@ -51,7 +52,8 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .filter(list -> !list.isEmpty())
                 .orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "User has no authorities"))
                 .stream()
-                .map(UserAuthority::getName)
+                .map(UserAuthority::getAuthority)
+                .map(Authority::getName)
                 .collect(Collectors.toList());
 
         Date issuedAt = DateHelper.getUTCDatetimeAsDate();
