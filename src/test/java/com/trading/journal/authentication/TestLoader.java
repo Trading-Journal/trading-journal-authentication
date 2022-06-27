@@ -46,7 +46,7 @@ public class TestLoader {
                             .createdAt(LocalDateTime.now())
                             .build();
                 }).map(applicationUserRepository::save)
-                .map(applicationUser -> new UserAuthority(applicationUser.getId(), AuthoritiesHelper.ROLE_USER.getLabel(), authority.getId()))
+                .map(applicationUser -> new UserAuthority(applicationUser, AuthoritiesHelper.ROLE_USER.getLabel(), authority.getId()))
                 .forEach(userAuthorityRepository::save);
 
     }

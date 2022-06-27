@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -80,10 +81,10 @@ class ApplicationAdminUserServiceImplTest {
                 "mail@mail.com",
                 false,
                 false,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                emptyList(),
                 LocalDateTime.now());
 
-        UserAuthority userAuthority = new UserAuthority(1L, "ADMIN", 1L);
+        UserAuthority userAuthority = new UserAuthority(applicationUser, "ADMIN", 1L);
 
         when(passwordService.randomPassword()).thenReturn("password_secret");
         when(applicationUserRepository.save(any())).thenReturn(applicationUser);

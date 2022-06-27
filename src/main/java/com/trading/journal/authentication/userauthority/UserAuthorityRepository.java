@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.userauthority;
 
+import com.trading.journal.authentication.user.ApplicationUser;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
@@ -9,5 +10,5 @@ public interface UserAuthorityRepository extends CrudRepository<UserAuthority, L
     @Override
     List<UserAuthority> findAll();
 
-    List<UserAuthority> findByUserId(Long userId);
+    List<UserAuthority> findByApplicationUser(ApplicationUser applicationUser);
 }

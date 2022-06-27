@@ -53,7 +53,7 @@ class HashProviderJwtTest {
                 "mail@mail.com",
                 true,
                 true,
-                Arrays.asList(new UserAuthority(1L, 1L, 1L, "ROLE_USER"), new UserAuthority(1L, 1L, 1L, "ROLE_ADMIN")),
+                Arrays.asList(new UserAuthority(null,"ROLE_USER", 1L), new UserAuthority(null,"ROLE_ADMIN", 2L)),
                 LocalDateTime.now());
 
         TokenData tokenData = jwtTokenProvider.generateAccessToken(applicationUser);

@@ -48,7 +48,7 @@ class PasswordManagementServiceImplTest {
     @Test
     void passwordChangeRequest() {
         String email = "mail@mail.com";
-        ApplicationUser applicationUser = new ApplicationUser(1L, "UserAdm", "123456", "User", "Admin", email, true, true, Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")), LocalDateTime.now());
+        ApplicationUser applicationUser = new ApplicationUser(1L, "UserAdm", "123456", "User", "Admin", email, true, true, Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)), LocalDateTime.now());
 
         when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
         doNothing().when(verificationService).send(VerificationType.CHANGE_PASSWORD, applicationUser);

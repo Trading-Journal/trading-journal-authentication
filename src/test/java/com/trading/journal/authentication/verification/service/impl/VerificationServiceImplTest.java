@@ -66,7 +66,7 @@ class VerificationServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
@@ -97,7 +97,7 @@ class VerificationServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Optional.empty());
@@ -128,7 +128,7 @@ class VerificationServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
@@ -159,7 +159,7 @@ class VerificationServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
@@ -190,7 +190,7 @@ class VerificationServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
@@ -221,7 +221,7 @@ class VerificationServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));

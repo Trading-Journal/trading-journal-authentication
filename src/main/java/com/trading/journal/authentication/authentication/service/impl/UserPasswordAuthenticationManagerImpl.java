@@ -6,7 +6,6 @@ import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
-import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,15 +15,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static java.util.Optional.ofNullable;
+import static java.util.Collections.emptyList;
+import static java.util.Optional.of;
 
 @Service
 @RequiredArgsConstructor
 public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthenticationManager {
 
     private final ApplicationUserRepository applicationUserRepository;
-
-    private final UserAuthorityService userAuthorityService;
 
     private final PasswordService passwordService;
 
@@ -42,8 +40,13 @@ public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthen
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Bad Credentials");
         }
 
-        List<SimpleGrantedAuthority> authorities = userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser);
-        if (ofNullable(authorities).map(List::isEmpty).orElse(true)) {
+        List<SimpleGrantedAuthority> authorities = of(applicationUser)
+                .map(ApplicationUser::getAuthorities)
+                .orElse(emptyList())
+                .stream()
+                .map(userAuthorities -> new SimpleGrantedAuthority(userAuthorities.getName())).toList();
+
+        if (authorities.isEmpty()) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "No Authorities");
         }
 

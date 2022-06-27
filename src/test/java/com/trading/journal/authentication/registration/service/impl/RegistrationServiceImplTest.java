@@ -61,7 +61,7 @@ public class RegistrationServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         when(applicationUserService.createNewUser(userRegistration)).thenReturn(applicationUser);
@@ -93,7 +93,7 @@ public class RegistrationServiceImplTest {
                 "mail@mail.com",
                 false,
                 false,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         when(applicationUserService.createNewUser(userRegistration)).thenReturn(applicationUser);
@@ -151,7 +151,7 @@ public class RegistrationServiceImplTest {
                 email,
                 false,
                 false,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         when(verificationProperties.isEnabled()).thenReturn(true);
@@ -191,7 +191,7 @@ public class RegistrationServiceImplTest {
                 email,
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         when(verificationProperties.isEnabled()).thenReturn(true);

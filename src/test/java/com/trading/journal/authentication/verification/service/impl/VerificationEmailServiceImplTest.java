@@ -57,7 +57,7 @@ class VerificationEmailServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         String url = String.format("http://site.com/auth/email-verified?hash=%s", hash);
@@ -96,7 +96,7 @@ class VerificationEmailServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         String url = String.format("http://site.com/auth/change-password?hash=%s", hash);
@@ -135,7 +135,7 @@ class VerificationEmailServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         String url = String.format("http://site.com/auth/email-verified?hash=%s", hash);

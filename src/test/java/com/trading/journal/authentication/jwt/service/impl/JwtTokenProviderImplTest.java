@@ -58,7 +58,7 @@ public class JwtTokenProviderImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L,1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         TokenData tokenData = tokenProvider.generateAccessToken(appUser);
@@ -79,7 +79,7 @@ public class JwtTokenProviderImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L,1L, "ROLE_USER")),
+                Collections.singletonList(new UserAuthority(null,"ROLE_USER", 1L)),
                 LocalDateTime.now());
 
         TokenData tokenData = tokenProvider.generateRefreshToken(appUser);

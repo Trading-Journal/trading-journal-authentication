@@ -5,7 +5,7 @@ import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
-import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -31,10 +30,7 @@ import static org.mockito.Mockito.*;
 class UserPasswordAuthenticationManagerImplTest {
 
     @Mock
-    ApplicationUserRepository applicationUserRepository;;
-
-    @Mock
-    UserAuthorityService userAuthorityService;
+    ApplicationUserRepository applicationUserRepository;
 
     @Mock
     PasswordService passwordService;
@@ -56,11 +52,10 @@ class UserPasswordAuthenticationManagerImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                emptyList(),
+                singletonList(new UserAuthority(null, "ROLE_USER", 1L)),
                 LocalDateTime.now());
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
-        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(singletonList(new SimpleGrantedAuthority("ROLE_USER")));
 
         Authentication authenticated = authenticationManager.authenticate(authenticationToken);
         ContextUser principal = (ContextUser) authenticated.getPrincipal();
@@ -81,7 +76,6 @@ class UserPasswordAuthenticationManagerImplTest {
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(exception.getStatusText()).isEqualTo("Bad Credentials");
 
-        verify(userAuthorityService, never()).loadListAsSimpleGrantedAuthority(any());
         verify(passwordService, never()).matches(anyString(), anyString());
     }
 
@@ -107,7 +101,6 @@ class UserPasswordAuthenticationManagerImplTest {
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(exception.getStatusText()).isEqualTo("Locked Credentials");
 
-        verify(userAuthorityService, never()).loadListAsSimpleGrantedAuthority(any());
         verify(passwordService, never()).matches(anyString(), anyString());
     }
 
@@ -133,8 +126,6 @@ class UserPasswordAuthenticationManagerImplTest {
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(exception.getStatusText()).isEqualTo("Bad Credentials");
-
-        verify(userAuthorityService, never()).loadListAsSimpleGrantedAuthority(any());
     }
 
     @DisplayName("None Authorities found for the user return 401 Authorities")
@@ -155,7 +146,6 @@ class UserPasswordAuthenticationManagerImplTest {
                 LocalDateTime.now());
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
-        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(emptyList());
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -176,11 +166,10 @@ class UserPasswordAuthenticationManagerImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                emptyList(),
+                null,
                 LocalDateTime.now());
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
-        when(userAuthorityService.loadListAsSimpleGrantedAuthority(applicationUser)).thenReturn(null);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);

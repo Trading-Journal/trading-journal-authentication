@@ -74,9 +74,8 @@ class ApplicationAdminUserServiceImplIntegratedTest {
         assertThat(applicationUser.getVerified()).isFalse();
         userId = applicationUser.getId();
 
-        List<UserAuthority> userAuthorities = userAuthorityRepository.findByUserId(userId);
-        assertThat(userAuthorities).hasSize(2);
-        assertThat(userAuthorities).extracting(UserAuthority::getName).containsAnyOf("ROLE_USER", "ROLE_ADMIN");
+        assertThat(applicationUser.getAuthorities()).hasSize(2);
+        assertThat(applicationUser.getAuthorities()).extracting(UserAuthority::getName).containsAnyOf("ROLE_USER", "ROLE_ADMIN");
 
         Verification verification = verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, adminUserProperties.email()).get();
         assertThat(verification.getHash()).isNotBlank();
