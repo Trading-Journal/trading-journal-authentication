@@ -41,7 +41,6 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
-@TestPropertySource(properties = {"journal.authentication.authority.type=STATIC"})
 public class AuthenticationControllerChangePasswordIntegratedTest {
 
     @Autowired

@@ -126,15 +126,6 @@ INSERT INTO Authorities (category, name) VALUES ('ADMINISTRATOR','ROLE_ADMIN');
 * **journal.authentication.datasource.username** *e.g. user*
 * **journal.authentication.datasource.password** *e.g. root*
 
-### Handle Authority/Roles
-
-There are two ways to handle Authority/Roles:
-* STATIC: No authorities are persisted in the database, there are initially two possible roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
-* DATABASE: Authorities will be persisted and retrieved from database, a initial load is made in the table  **Authorities** with roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
-  This configuration can be changed using the property **journal.authentication.authority.type** with none is defined, the default behavior is **STATIC**
-* **journal.authentication.authority.type** *e.g. STATIC*
-* **journal.authentication.authority.type** *e.g. DATABASE*
-
 ### Email Verification
 In case there is need for new users confirm their emails, then enable the configuration property:
 * **journal.authentication.verification.enabled** *e.g. true*

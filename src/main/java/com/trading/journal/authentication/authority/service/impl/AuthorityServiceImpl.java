@@ -5,7 +5,6 @@ import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.AuthorityRepository;
 import com.trading.journal.authentication.authority.service.AuthorityService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,8 +12,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "journal.authentication.authority", name = "type", havingValue = "DATABASE")
-public class AuthorityServiceDatabaseImpl implements AuthorityService {
+public class AuthorityServiceImpl implements AuthorityService {
 
     private final AuthorityRepository authorityRepository;
 

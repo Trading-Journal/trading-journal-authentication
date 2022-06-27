@@ -1,6 +1,8 @@
 package com.trading.journal.authentication;
 
 import com.trading.journal.authentication.authority.AuthoritiesHelper;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
@@ -12,7 +14,7 @@ import java.util.stream.Stream;
 
 public class TestLoader {
 
-    public static void load50Users(ApplicationUserRepository applicationUserRepository, UserAuthorityRepository userAuthorityRepository) {
+    public static void load50Users(ApplicationUserRepository applicationUserRepository, UserAuthorityRepository userAuthorityRepository, AuthorityService authorityService) {
         applicationUserRepository.deleteAll();
         userAuthorityRepository.deleteAll();
 
@@ -23,6 +25,8 @@ public class TestLoader {
                 "Jerome Pratt", "Joel Dunn", "Julie Carson", "Kathy Oliver", "Katrina Hawkins", "Larry Robbins", "Laurie Adams", "Loretta Stanley", "Luke Tyler", "Melinda Fields",
                 "Natasha Rivera", "Nora Waters", "Pedro Sullivan", "Phyllis Terry", "Rochelle Graves", "Sabrina Garcia", "Sadie Davis", "Vera Lamb", "Verna Wilkins", "Victoria Luna"
         );
+
+        Authority authority = authorityService.getByName(AuthoritiesHelper.ROLE_USER.getLabel()).get();
 
         users.map(user -> {
                     String userName = user.replace(" ", "").toLowerCase();
@@ -42,7 +46,7 @@ public class TestLoader {
                             .createdAt(LocalDateTime.now())
                             .build();
                 }).map(applicationUserRepository::save)
-                .map(applicationUser -> new UserAuthority(applicationUser.getId(), AuthoritiesHelper.ROLE_USER.getLabel(), null))
+                .map(applicationUser -> new UserAuthority(applicationUser.getId(), AuthoritiesHelper.ROLE_USER.getLabel(), authority.getId()))
                 .forEach(userAuthorityRepository::save);
 
     }

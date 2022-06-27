@@ -18,7 +18,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -31,8 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
-@TestPropertySource(properties = {"journal.authentication.authority.type=STATIC"})
-class AuthoritiesControllerStaticTest {
+class AuthoritiesControllerTest {
 
     private static String token;
 
@@ -48,18 +46,18 @@ class AuthoritiesControllerStaticTest {
     ) {
         ApplicationUser applicationUser = applicationUserRepository.save(new ApplicationUser(
                 null,
-                "johnwick2",
+                "johnwick3",
                 encoder.encode("dad231#$#4"),
                 "John",
                 "Wick",
-                "johnwick2@mail.com",
+                "johnwick3@mail.com",
                 true,
                 true,
                 emptyList(),
                 LocalDateTime.now()));
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
 
-        Login login = new Login("johnwick2@mail.com", "dad231#$#4");
+        Login login = new Login("johnwick3@mail.com", "dad231#$#4");
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
         token = loginResponse.accessToken();
@@ -82,7 +80,6 @@ class AuthoritiesControllerStaticTest {
                     assertThat(response).hasSize(2);
                     assertThat(response).extracting(Authority::getName).containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
                     assertThat(response).extracting(Authority::getCategory).containsExactlyInAnyOrder(AuthorityCategory.COMMON_USER, AuthorityCategory.ADMINISTRATOR);
-                    assertThat(response).extracting(Authority::getId).containsExactlyInAnyOrder(null, null);
                 });
     }
 }

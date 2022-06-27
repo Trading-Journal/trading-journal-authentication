@@ -2,6 +2,7 @@ package com.trading.journal.authentication.user.service.impl;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.TestLoader;
+import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
@@ -27,8 +28,12 @@ class ApplicationUserManagementServiceImplPageableIntegratedTest {
     ApplicationUserManagementService applicationUserManagementService;
 
     @BeforeAll
-    public static void setUp(@Autowired ApplicationUserRepository applicationUserRepository, @Autowired UserAuthorityRepository userAuthorityRepository) {
-        TestLoader.load50Users(applicationUserRepository, userAuthorityRepository);
+    public static void setUp(
+            @Autowired ApplicationUserRepository applicationUserRepository,
+            @Autowired UserAuthorityRepository userAuthorityRepository,
+            @Autowired AuthorityService authorityService
+    ) {
+        TestLoader.load50Users(applicationUserRepository, userAuthorityRepository, authorityService);
     }
 
     @DisplayName("Given default PageableRequest return first 10 items")
