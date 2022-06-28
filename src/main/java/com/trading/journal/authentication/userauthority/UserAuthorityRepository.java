@@ -9,5 +9,5 @@ public interface UserAuthorityRepository extends CrudRepository<UserAuthority, L
     @Override
     List<UserAuthority> findAll();
 
-    List<UserAuthority> findByUserId(Long userId);
+    Boolean existsByAuthorityId(Long authorityId);
 }

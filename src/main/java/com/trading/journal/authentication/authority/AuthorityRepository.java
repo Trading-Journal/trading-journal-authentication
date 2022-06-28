@@ -1,13 +1,13 @@
 package com.trading.journal.authentication.authority;
 
-import com.trading.journal.authentication.authority.service.impl.AuthorityServiceDatabaseImpl;
+import com.trading.journal.authentication.authority.service.impl.AuthorityServiceImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-@ConditionalOnBean(AuthorityServiceDatabaseImpl.class)
+@ConditionalOnBean(AuthorityServiceImpl.class)
 public interface AuthorityRepository extends CrudRepository<Authority, Long> {
 
     @Override
@@ -17,4 +17,5 @@ public interface AuthorityRepository extends CrudRepository<Authority, Long> {
 
     Optional<Authority> getByName(String name);
 
+    Optional<Authority> getByNameAndIdNot(String name, Long id);
 }

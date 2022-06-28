@@ -1,5 +1,7 @@
 package com.trading.journal.authentication.user.service.impl;
 
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
@@ -16,10 +18,10 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -80,10 +82,10 @@ class ApplicationAdminUserServiceImplTest {
                 "mail@mail.com",
                 false,
                 false,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                emptyList(),
                 LocalDateTime.now());
 
-        UserAuthority userAuthority = new UserAuthority(1L, "ADMIN", 1L);
+        UserAuthority userAuthority = new UserAuthority(applicationUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"));
 
         when(passwordService.randomPassword()).thenReturn("password_secret");
         when(applicationUserRepository.save(any())).thenReturn(applicationUser);

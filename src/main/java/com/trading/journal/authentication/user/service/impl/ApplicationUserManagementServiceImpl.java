@@ -40,7 +40,6 @@ public class ApplicationUserManagementServiceImpl implements ApplicationUserMana
         }
         Page<ApplicationUser> users = applicationUserRepository.findAll(specification, pageRequest.pageable());
         List<UserInfo> list = users.stream()
-                .peek(applicationUser -> applicationUser.loadAuthorities(userAuthorityService.getByUserId(applicationUser.getId())))
                 .map(UserInfo::new).collect(Collectors.toList());
         return new PageResponse<>(users.getTotalElements(), users.getTotalPages(), users.getNumber(), list);
     }
@@ -48,10 +47,6 @@ public class ApplicationUserManagementServiceImpl implements ApplicationUserMana
     @Override
     public UserInfo getUserById(Long id) {
         return applicationUserRepository.findById(id)
-                .map(applicationUser -> {
-                    applicationUser.loadAuthorities(userAuthorityService.getByUserId(applicationUser.getId()));
-                    return applicationUser;
-                })
                 .map(UserInfo::new)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
     }
@@ -89,10 +84,6 @@ public class ApplicationUserManagementServiceImpl implements ApplicationUserMana
     @Override
     public List<UserAuthority> addAuthorities(Long id, AuthoritiesChange authorities) {
         return applicationUserRepository.findById(id)
-                .map(applicationUser -> {
-                    applicationUser.loadAuthorities(userAuthorityService.getByUserId(applicationUser.getId()));
-                    return applicationUser;
-                })
                 .map(applicationUser -> userAuthorityService.addAuthorities(applicationUser, authorities))
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
     }
@@ -100,10 +91,6 @@ public class ApplicationUserManagementServiceImpl implements ApplicationUserMana
     @Override
     public List<UserAuthority> deleteAuthorities(Long id, AuthoritiesChange authorities) {
         return applicationUserRepository.findById(id)
-                .map(applicationUser -> {
-                    applicationUser.loadAuthorities(userAuthorityService.getByUserId(applicationUser.getId()));
-                    return applicationUser;
-                })
                 .map(applicationUser -> userAuthorityService.deleteAuthorities(applicationUser, authorities))
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
     }

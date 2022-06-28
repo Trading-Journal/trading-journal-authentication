@@ -2,11 +2,6 @@
 
 ## Pending
 
-* Optional for repositories
-* Manage Authorities via API when Database authorities (ConditionalOnProperty???)
-  * Admin access only
-  * Validate if entity authorities is enabled before manage
-  * Manage user authorities
 * Enable/Disable Multitenancy
 * When user request password change, disable it, it cannot perform login until change password
 * Postman Test run
@@ -91,8 +86,7 @@ CREATE TABLE `Authorities` (
 CREATE TABLE `UserAuthorities` (
   `id` int NOT NULL AUTO_INCREMENT,
   `userId` int NOT NULL,
-  `authorityId` int DEFAULT NULL,
-  `name` varchar(45) NOT NULL,
+  `authorityId` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `userIdFk_idx` (`userId`),
   KEY `authorityIdFk_idx` (`authorityId`),
@@ -127,15 +121,6 @@ INSERT INTO Authorities (category, name) VALUES ('ADMINISTRATOR','ROLE_ADMIN');
 * **journal.authentication.datasource.database** *e.g. dbname*
 * **journal.authentication.datasource.username** *e.g. user*
 * **journal.authentication.datasource.password** *e.g. root*
-
-### Handle Authority/Roles
-
-There are two ways to handle Authority/Roles:
-* STATIC: No authorities are persisted in the database, there are initially two possible roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
-* DATABASE: Authorities will be persisted and retrieved from database, a initial load is made in the table  **Authorities** with roles defined in the file **AuthoritiesHelper** **ROLE_USER** and **ROLE_ADMIN**
-  This configuration can be changed using the property **journal.authentication.authority.type** with none is defined, the default behavior is **STATIC**
-* **journal.authentication.authority.type** *e.g. STATIC*
-* **journal.authentication.authority.type** *e.g. DATABASE*
 
 ### Email Verification
 In case there is need for new users confirm their emails, then enable the configuration property:

@@ -2,10 +2,12 @@ package com.trading.journal.authentication.verification.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.verification.service.HashProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,7 +55,10 @@ class HashProviderJwtTest {
                 "mail@mail.com",
                 true,
                 true,
-                Arrays.asList(new UserAuthority(1L, 1L, 1L, "ROLE_USER"), new UserAuthority(1L, 1L, 1L, "ROLE_ADMIN")),
+                Arrays.asList(
+                        new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                ),
                 LocalDateTime.now());
 
         TokenData tokenData = jwtTokenProvider.generateAccessToken(applicationUser);

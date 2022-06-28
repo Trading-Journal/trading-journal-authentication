@@ -3,6 +3,7 @@ package com.trading.journal.authentication.authority.service;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,4 +14,14 @@ public interface AuthorityService {
     List<Authority> getAll();
 
     Optional<Authority> getByName(String name);
+
+    List<AuthorityCategory> getAllCategories();
+
+    Authority getById(Long id);
+
+    Authority add(@Valid Authority authority);
+
+    Authority update(Long id, @Valid Authority authority);
+
+    void delete(Long id);
 }

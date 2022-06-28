@@ -15,6 +15,6 @@ public interface ApplicationUserRepository extends PagingAndSortingRepository<Ap
 
     Optional<ApplicationUser> findByEmail(String email);
 
-    @Query(value = "SELECT COUNT(Users.id) FROM Users inner join UserAuthorities where Users.id = UserAuthorities.userId and UserAuthorities.name in (:roles)", nativeQuery = true)
+    @Query(value = "SELECT COUNT(Users.id) FROM Users inner join UserAuthorities on Users.id = UserAuthorities.userId inner join Authorities on Authorities.id = UserAuthorities.authorityId where Authorities.name in  (:roles)", nativeQuery = true)
     Integer countAdmins(List<String> roles);
 }

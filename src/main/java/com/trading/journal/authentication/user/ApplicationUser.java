@@ -15,7 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Builder
-@Entity(name = "Users")
+@Entity
+@Table(name = "Users")
 public class ApplicationUser {
 
     @Id
@@ -36,14 +37,10 @@ public class ApplicationUser {
 
     private Boolean verified;
 
-    @Transient
+    @OneToMany(mappedBy = "applicationUser")
     private List<UserAuthority> authorities;
 
     private LocalDateTime createdAt;
-
-    public void loadAuthorities(List<UserAuthority> authorities) {
-        this.authorities = authorities;
-    }
 
     public void enable() {
         this.enabled = true;

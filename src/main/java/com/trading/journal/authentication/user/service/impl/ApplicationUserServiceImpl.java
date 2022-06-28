@@ -32,10 +32,6 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     @Override
     public ApplicationUser getUserByEmail(@NotBlank String email) {
         return applicationUserRepository.findByEmail(email)
-                .map(applicationUser -> {
-                    applicationUser.loadAuthorities(userAuthorityService.getByUserId(applicationUser.getId()));
-                    return applicationUser;
-                })
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s does not exist", email)));
     }
 

@@ -2,6 +2,7 @@ package com.trading.journal.authentication.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import lombok.AllArgsConstructor;
@@ -47,7 +48,7 @@ public class UserInfo {
         this.email = applicationUser.getEmail();
         this.enabled = applicationUser.getEnabled();
         this.verified = applicationUser.getVerified();
-        this.authorities = applicationUser.getAuthorities().stream().map(UserAuthority::getName).collect(Collectors.toList());
+        this.authorities = applicationUser.getAuthorities().stream().map(UserAuthority::getAuthority).map(Authority::getName).collect(Collectors.toList());
         this.createdAt = applicationUser.getCreatedAt();
     }
 }

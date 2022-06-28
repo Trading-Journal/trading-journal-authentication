@@ -1,13 +1,15 @@
 package com.trading.journal.authentication.password.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.password.ChangePassword;
-import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.email.EmailField;
 import com.trading.journal.authentication.email.EmailRequest;
 import com.trading.journal.authentication.email.service.EmailSender;
+import com.trading.journal.authentication.password.ChangePassword;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationStatus;
 import com.trading.journal.authentication.verification.VerificationType;
@@ -48,7 +50,17 @@ class PasswordManagementServiceImplTest {
     @Test
     void passwordChangeRequest() {
         String email = "mail@mail.com";
-        ApplicationUser applicationUser = new ApplicationUser(1L, "UserAdm", "123456", "User", "Admin", email, true, true, Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")), LocalDateTime.now());
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserAdm",
+                "123456",
+                "User",
+                "Admin",
+                email,
+                true,
+                true,
+                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
+                LocalDateTime.now());
 
         when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
         doNothing().when(verificationService).send(VerificationType.CHANGE_PASSWORD, applicationUser);

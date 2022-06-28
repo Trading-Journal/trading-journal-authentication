@@ -1,13 +1,15 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenParser;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +64,10 @@ public class JwtIntegratedTest {
                 "mail@mail.com",
                 true,
                 true,
-                Arrays.asList(new UserAuthority(1L, 1L, 1L, "ROLE_USER"), new UserAuthority(1L, 1L, 1L, "ROLE_ADMIN")),
+                Arrays.asList(
+                        new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                ),
                 LocalDateTime.now());
 
         TokenData accessToken = jwtTokenProvider.generateAccessToken(appUser);
@@ -96,7 +101,10 @@ public class JwtIntegratedTest {
                 "mail@mail.com",
                 true,
                 true,
-                Arrays.asList(new UserAuthority(1L, 1L, 1L, "ROLE_USER"), new UserAuthority(1L, 1L, 1L, "ROLE_ADMIN")),
+                Arrays.asList(
+                        new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                ),
                 LocalDateTime.now());
 
         TokenData refreshToken = jwtTokenProvider.generateRefreshToken(appUser);

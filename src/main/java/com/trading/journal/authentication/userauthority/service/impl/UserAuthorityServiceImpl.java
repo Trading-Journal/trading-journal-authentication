@@ -2,14 +2,13 @@ package com.trading.journal.authentication.userauthority.service.impl;
 
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
+import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
-import com.trading.journal.authentication.authority.service.AuthorityService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,7 +29,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     public List<UserAuthority> saveCommonUserAuthorities(ApplicationUser applicationUser) {
         return authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)
                 .stream()
-                .map(authority -> new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId()))
+                .map(authority -> new UserAuthority(applicationUser, authority))
                 .map(userAuthorityRepository::save)
                 .collect(Collectors.toList());
     }
@@ -39,7 +38,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     public List<UserAuthority> saveAdminUserAuthorities(ApplicationUser applicationUser) {
         return authorityService.getAll()
                 .stream()
-                .map(authority -> new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId()))
+                .map(authority -> new UserAuthority(applicationUser, authority))
                 .map(userAuthorityRepository::save)
                 .collect(Collectors.toList());
     }
@@ -53,7 +52,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
 
         List<UserAuthority> userAuthoritiesToAdd = authorities.stream()
                 .filter(filterOutEqualAuthorities(applicationUser))
-                .map(authority -> new UserAuthority(applicationUser.getId(), authority.getName(), authority.getId()))
+                .map(authority -> new UserAuthority(applicationUser, authority))
                 .toList();
 
         return userAuthoritiesToAdd.stream()
@@ -76,31 +75,18 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
         return userAuthoritiesToRemove;
     }
 
-    @Override
-    public List<UserAuthority> getByUserId(Long userId) {
-        return userAuthorityRepository.findByUserId(userId);
-    }
-
-    @Override
-    public List<SimpleGrantedAuthority> loadListAsSimpleGrantedAuthority(ApplicationUser applicationUser) {
-        return userAuthorityRepository.findByUserId(applicationUser.getId())
-                .stream()
-                .map(userAuthorities -> new SimpleGrantedAuthority(userAuthorities.getName()))
-                .collect(Collectors.toList());
-    }
-
     private Predicate<Authority> filterOutEqualAuthorities(ApplicationUser applicationUser) {
         return authority -> applicationUser
                 .getAuthorities()
                 .stream()
-                .noneMatch(userAuthority -> userAuthority.getName().equals(authority.getName())
-                        && Objects.equals(userAuthority.getAuthorityId(), authority.getId()));
+                .noneMatch(userAuthority -> userAuthority.getAuthority().getName().equals(authority.getName())
+                        && Objects.equals(userAuthority.getAuthority().getId(), authority.getId()));
     }
 
     private Predicate<UserAuthority> filterUserRolesToRemove(List<Authority> authorities) {
         return userAuthority -> authorities.stream()
-                .anyMatch(authority -> userAuthority.getName().equals(authority.getName())
-                        && Objects.equals(userAuthority.getAuthorityId(), authority.getId())
+                .anyMatch(authority -> userAuthority.getAuthority().getName().equals(authority.getName())
+                        && Objects.equals(userAuthority.getAuthority().getId(), authority.getId())
                 );
     }
 }

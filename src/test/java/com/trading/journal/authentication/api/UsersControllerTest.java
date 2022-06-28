@@ -5,6 +5,7 @@ import com.trading.journal.authentication.TestLoader;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
+import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.AuthoritiesChange;
@@ -54,11 +55,12 @@ class UsersControllerTest {
     public static void setUp(
             @Autowired ApplicationUserRepository applicationUserRepository,
             @Autowired UserAuthorityRepository userAuthorityRepository,
+            @Autowired AuthorityService authorityService,
             @Autowired PasswordEncoder encoder,
             @Autowired AuthenticationService authenticationService,
             @Autowired UserAuthorityService userAuthorityService
     ) {
-        TestLoader.load50Users(applicationUserRepository, userAuthorityRepository);
+        TestLoader.load50Users(applicationUserRepository, userAuthorityRepository, authorityService);
 
         ApplicationUser applicationUser = applicationUserRepository.save(new ApplicationUser(
                 null,

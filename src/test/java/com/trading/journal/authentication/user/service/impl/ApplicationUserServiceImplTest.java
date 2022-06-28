@@ -1,6 +1,8 @@
 package com.trading.journal.authentication.user.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.ApplicationUser;
@@ -18,10 +20,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,12 +69,12 @@ public class ApplicationUserServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                emptyList(),
                 LocalDateTime.now());
 
         when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
         when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(1L, 1L, 1L, "USER")));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(appUser);
         when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));
@@ -104,12 +105,12 @@ public class ApplicationUserServiceImplTest {
                 "mail@mail.com",
                 false,
                 false,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                emptyList(),
                 LocalDateTime.now());
 
         when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
         when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(1L, 1L, 1L, "USER")));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(applicationUserRepository.save(any())).thenReturn(appUser);
         when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));
@@ -132,7 +133,7 @@ public class ApplicationUserServiceImplTest {
                 "mail@mail.com",
                 false,
                 false,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                emptyList(),
                 LocalDateTime.of(2022, 2, 1, 10, 30, 50));
 
         ApplicationUser enabledUser = new ApplicationUser(
@@ -144,7 +145,7 @@ public class ApplicationUserServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                Collections.singletonList(new UserAuthority(1L, 1L, 1L, "ROLE_USER")),
+                emptyList(),
                 LocalDateTime.of(2022, 2, 1, 10, 30, 50));
 
         when(applicationUserRepository.findByEmail(disabledUser.getEmail())).thenReturn(Optional.of(disabledUser));
@@ -328,15 +329,13 @@ public class ApplicationUserServiceImplTest {
                 "mail@mail.com",
                 true,
                 true,
-                emptyList(),
+                asList(
+                        new UserAuthority(new ApplicationUser(), new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(new ApplicationUser(), new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                ),
                 LocalDateTime.of(2022, 12, 12, 12, 12, 12));
 
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
-
-        when(userAuthorityService.getByUserId(1L)).thenReturn(Arrays.asList(
-                new UserAuthority(1L, 1L, 1L, "ROLE_USER"),
-                new UserAuthority(2L, 1L, 1L, "ROLE_ADMIN")
-        ));
 
         UserInfo info = applicationUserServiceImpl.getUserInfo("mail@mail.com");
         assertThat(info.getId()).isEqualTo(1L);
