@@ -9,8 +9,9 @@ import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.AuthorityRepository;
 import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,6 +41,12 @@ class AuthoritiesControllerTest {
 
     @Autowired
     AuthorityRepository authorityRepository;
+
+    @Autowired
+    UserAuthorityRepository userAuthorityRepository;
+
+    @Autowired
+    ApplicationUserRepository applicationUserRepository;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -198,5 +204,125 @@ class AuthoritiesControllerTest {
                 );
 
         authorityRepository.deleteById(3L);
+    }
+
+    @DisplayName("Update a authority")
+    @Test
+    void update() {
+        webTestClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/authorities/{id}")
+                        .build(1L))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_USER_UPDATED"))
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Authority.class)
+                .value(response -> {
+                    assertThat(response.getCategory()).isEqualTo(AuthorityCategory.COMMON_USER);
+                    assertThat(response.getName()).isEqualTo("ROLE_USER_UPDATED");
+                });
+
+        List<Authority> authorities = authorityRepository.findAll();
+        assertThat(authorities).extracting(Authority::getName).containsExactlyInAnyOrder("ROLE_USER_UPDATED", "ROLE_ADMIN");
+
+        webTestClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/authorities/{id}")
+                        .build(1L))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_ADMIN"))
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT)
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("Authority name already exists")
+                );
+
+        webTestClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/authorities/{id}")
+                        .build(3L))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_ADMIN"))
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.NOT_FOUND)
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("Authority id not found")
+                );
+
+        authorityRepository.save(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"));
+    }
+
+    @DisplayName("Delete a authority")
+    @Test
+    void delete() {
+
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail("johnwick3@mail.com").orElse(null);
+        assertThat(applicationUser).isNotNull();
+        Authority anotherRole = authorityRepository.save(new Authority(AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"));
+        UserAuthority anotherRoleUserAuthority = userAuthorityRepository.save(
+                UserAuthority.builder()
+                        .authority(anotherRole)
+                        .applicationUser(applicationUser)
+                        .build()
+        );
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/authorities/{id}")
+                        .build(anotherRole.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("Authority is used by one or more user")
+                );
+
+        userAuthorityRepository.delete(anotherRoleUserAuthority);
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/authorities/{id}")
+                        .build(anotherRole.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/authorities/{id}")
+                        .build(anotherRole.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.NOT_FOUND)
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("Authority id not found")
+                );
     }
 }

@@ -2,9 +2,6 @@
 
 ## Pending
 
-* Manage Authorities via API when Database authorities
-  * Admin access only
-  * Manage authorities (add, delete, update)
 * Enable/Disable Multitenancy
 * When user request password change, disable it, it cannot perform login until change password
 * Postman Test run
