@@ -31,7 +31,7 @@ public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthen
         String email = (String) authentication.getPrincipal();
         ApplicationUser applicationUser = applicationUserRepository.findByEmail(email)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "Bad Credentials"));
-        if (!applicationUser.getEnabled()) {
+        if (!applicationUser.getEnabled() || !applicationUser.getVerified()) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Locked Credentials");
         }
 

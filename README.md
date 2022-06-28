@@ -2,13 +2,11 @@
 
 ## Pending
 
-* Enable/Disable Multitenancy
-* When user request password change, disable it, it cannot perform login until change password
-* Postman Test run
 * Test Coverage with fail under X percent
 * Delete account
 * Set and document environment variables
 * Test Container/Kubernetes deploy with adding keys files
+* Postman Test run
 * One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
 * Lib for token validation to be used in other projects
   * ApplicationUser Interface, ContextUser and Token Provider, JwtTokenAuthenticationFilter and All JWT package must be here

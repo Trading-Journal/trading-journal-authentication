@@ -54,6 +54,10 @@ public class ApplicationUser {
         this.verified = true;
     }
 
+    public void unproven() {
+        this.verified = false;
+    }
+
     public void changePassword(@NotBlank String newPassword) {
         this.password = newPassword;
     }

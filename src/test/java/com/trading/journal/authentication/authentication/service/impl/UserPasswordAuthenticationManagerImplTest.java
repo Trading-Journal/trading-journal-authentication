@@ -106,6 +106,31 @@ class UserPasswordAuthenticationManagerImplTest {
         verify(passwordService, never()).matches(anyString(), anyString());
     }
 
+    @DisplayName("User found by Principal/Email but not verified return 401 Locked Credentials")
+    @Test
+    void userUnverified() {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserAdm",
+                "encoded_password",
+                "user",
+                "admin",
+                "mail@mail.com",
+                true,
+                false,
+                emptyList(),
+                LocalDateTime.now());
+        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(exception.getStatusText()).isEqualTo("Locked Credentials");
+
+        verify(passwordService, never()).matches(anyString(), anyString());
+    }
+
     @DisplayName("Passwords do not match return 401 Bad Credentials")
     @Test
     void noMatchPassword() {

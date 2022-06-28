@@ -71,12 +71,20 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     }
 
     @Override
-    public void verifyNewUser(@NotBlank String email) {
+    public void verifyUser(@NotBlank String email) {
         ApplicationUser applicationUser = this.getUserByEmail(email);
         applicationUser.enable();
         applicationUser.verify();
         applicationUserRepository.save(applicationUser);
     }
+
+    @Override
+    public void unprovenUser(String email) {
+        ApplicationUser applicationUser = this.getUserByEmail(email);
+        applicationUser.unproven();
+        applicationUserRepository.save(applicationUser);
+    }
+
 
     @Override
     public ApplicationUser changePassword(@NotBlank String email, @NotBlank String password) {

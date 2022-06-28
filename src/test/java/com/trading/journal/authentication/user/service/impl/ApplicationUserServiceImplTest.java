@@ -151,14 +151,54 @@ public class ApplicationUserServiceImplTest {
         when(applicationUserRepository.findByEmail(disabledUser.getEmail())).thenReturn(Optional.of(disabledUser));
         when(applicationUserRepository.save(enabledUser)).thenReturn(enabledUser);
 
-        applicationUserServiceImpl.verifyNewUser(disabledUser.getEmail());
+        applicationUserServiceImpl.verifyUser(disabledUser.getEmail());
     }
 
     @Test
     @DisplayName("Enable and verify user that does not exist, return an exception")
     void enableAndVerifyException() {
         when(applicationUserRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.verifyNewUser("mail@mail.com"), "User mail@mail.com does not exist");
+        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.verifyUser("mail@mail.com"), "User mail@mail.com does not exist");
+    }
+
+    @Test
+    @DisplayName("Make user unverified by unproven it")
+    void unprovenUser() {
+        ApplicationUser verifiedUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "sdsa54ds56a4ds564d",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                emptyList(),
+                LocalDateTime.of(2022, 2, 1, 10, 30, 50));
+
+        ApplicationUser unprovenUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "sdsa54ds56a4ds564d",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                false,
+                emptyList(),
+                LocalDateTime.of(2022, 2, 1, 10, 30, 50));
+
+        when(applicationUserRepository.findByEmail(verifiedUser.getEmail())).thenReturn(Optional.of(verifiedUser));
+        when(applicationUserRepository.save(unprovenUser)).thenReturn(unprovenUser);
+
+        applicationUserServiceImpl.unprovenUser(verifiedUser.getEmail());
+    }
+
+    @Test
+    @DisplayName("Unproven user that does not exist, return an exception")
+    void unprovenUserException() {
+        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.unprovenUser("mail@mail.com"), "User mail@mail.com does not exist");
     }
 
     @Test

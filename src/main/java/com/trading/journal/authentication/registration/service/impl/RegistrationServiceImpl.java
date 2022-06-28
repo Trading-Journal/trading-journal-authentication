@@ -33,7 +33,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public void verify(String hash) {
         Verification verification = verificationService.retrieve(hash);
-        applicationUserService.verifyNewUser(verification.getEmail());
+        applicationUserService.verifyUser(verification.getEmail());
         verificationService.verify(verification);
     }
 

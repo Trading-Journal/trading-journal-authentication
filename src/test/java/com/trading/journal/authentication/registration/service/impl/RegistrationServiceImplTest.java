@@ -122,7 +122,7 @@ public class RegistrationServiceImplTest {
                 LocalDateTime.now());
 
         when(verificationService.retrieve(hash)).thenReturn(verification);
-        doNothing().when(applicationUserService).verifyNewUser(verification.getEmail());
+        doNothing().when(applicationUserService).verifyUser(verification.getEmail());
         doNothing().when(verificationService).verify(verification);
 
         registrationService.verify(hash);
@@ -135,7 +135,7 @@ public class RegistrationServiceImplTest {
         when(verificationService.retrieve(hash)).thenThrow(new ApplicationException("any error message"));
 
         assertThrows(ApplicationException.class, () -> registrationService.verify(hash), "any error message");
-        verify(applicationUserService, never()).verifyNewUser(any());
+        verify(applicationUserService, never()).verifyUser(any());
         verify(verificationService, never()).verify(any());
     }
 
