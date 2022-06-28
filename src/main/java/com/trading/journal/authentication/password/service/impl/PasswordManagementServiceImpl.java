@@ -33,6 +33,7 @@ public class PasswordManagementServiceImpl implements PasswordManagementService 
     public void requestPasswordChange(String email) {
         ApplicationUser applicationUser = applicationUserService.getUserByEmail(email);
         verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
+        applicationUserService.unprovenUser(email);
     }
 
     @Override
@@ -41,6 +42,7 @@ public class PasswordManagementServiceImpl implements PasswordManagementService 
         if (validateVerification(changePassword, verification)) {
             ApplicationUser applicationUser = applicationUserService.changePassword(changePassword.email(), changePassword.getPassword());
             EmailRequest emailRequest = passwordChangeConfirmation(applicationUser);
+            applicationUserService.verifyUser(applicationUser.getEmail());
             emailSender.send(emailRequest);
             verificationService.verify(verification);
         } else {

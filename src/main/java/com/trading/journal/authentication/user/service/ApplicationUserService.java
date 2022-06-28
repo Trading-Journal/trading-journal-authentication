@@ -22,7 +22,9 @@ public interface ApplicationUserService {
 
     UserInfo getUserInfo(String email);
 
-    void verifyNewUser(String email);
+    void verifyUser(String email);
+
+    void unprovenUser(String email);
 
     ApplicationUser changePassword(String email, String password);
 }

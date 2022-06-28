@@ -66,6 +66,8 @@ class PasswordManagementServiceImplTest {
         doNothing().when(verificationService).send(VerificationType.CHANGE_PASSWORD, applicationUser);
 
         passwordService.requestPasswordChange(email);
+
+        verify(applicationUserService).unprovenUser(email);
     }
 
     @DisplayName("Password change hash not found return exception")
@@ -82,6 +84,7 @@ class PasswordManagementServiceImplTest {
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
         verify(verificationService, never()).verify(any());
+        verify(applicationUserService, never()).verifyUser(anyString());
     }
 
     @DisplayName("Password change hash email and change request email are different return exception")
@@ -102,6 +105,7 @@ class PasswordManagementServiceImplTest {
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
         verify(verificationService, never()).verify(any());
+        verify(applicationUserService, never()).verifyUser(anyString());
     }
 
     @DisplayName("Password change verification is not CHANGE_PASSWORD return exception")
@@ -122,6 +126,7 @@ class PasswordManagementServiceImplTest {
         verify(applicationUserService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
         verify(verificationService, never()).verify(any());
+        verify(applicationUserService, never()).verifyUser(anyString());
     }
 
     @DisplayName("Password change verification executed successfully")
@@ -157,5 +162,7 @@ class PasswordManagementServiceImplTest {
         doNothing().when(verificationService).verify(verification);
 
         passwordService.changePassword(changePassword);
+
+        verify(applicationUserService).verifyUser(email);
     }
 }

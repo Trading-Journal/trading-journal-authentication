@@ -8,6 +8,7 @@ import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.user.ApplicationUser;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.verification.Verification;
@@ -84,6 +85,11 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 "dad231#$#4");
 
         applicationUserService.createNewUser(user);
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
+        assertThat(applicationUser).isNotNull();
+        applicationUser.enable();
+        applicationUser.verify();
+        applicationUserRepository.save(applicationUser);
 
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
@@ -101,6 +107,11 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
         Verification verification = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email).get();
         assertThat(verification.getStatus()).isEqualTo(VerificationStatus.PENDING);
         assertThat(verification.getHash()).isNotBlank();
+
+        applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
+        assertThat(applicationUser).isNotNull();
+        assertThat(applicationUser.getEnabled()).isTrue();
+        assertThat(applicationUser.getVerified()).isFalse();
     }
 
     @Test
@@ -258,6 +269,11 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 "dad231#$#4");
 
         applicationUserService.createNewUser(user);
+        ApplicationUser applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
+        assertThat(applicationUser).isNotNull();
+        applicationUser.enable();
+        applicationUser.unproven();
+        applicationUserRepository.save(applicationUser);
 
         TokenData tokenData = jwtTokenProvider.generateTemporaryToken(email);
         verificationRepository.save(Verification.builder()
@@ -299,5 +315,9 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
         assertThat(newPasswordEncoded).isNotBlank();
 
         assertThat(oldPasswordEncoded).isNotEqualTo(newPasswordEncoded);
+
+        applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
+        assertThat(applicationUser).isNotNull();
+        assertThat(applicationUser.getVerified()).isTrue();
     }
 }
