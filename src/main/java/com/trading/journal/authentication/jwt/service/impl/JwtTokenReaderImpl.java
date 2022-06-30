@@ -19,7 +19,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,10 +63,9 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
         boolean isValid = false;
         try {
             Jws<Claims> claims = tokenParser.parseToken(token);
-            boolean notExpired = !claims.getBody().getExpiration().before(new Date());
             boolean sameIssuer = properties.getIssuer().equals(claims.getBody().getIssuer());
             boolean sameAudience = properties.getAudience().equals(claims.getBody().getAudience());
-            isValid = notExpired && sameIssuer && sameAudience;
+            isValid = sameIssuer && sameAudience;
         } catch (ApplicationException e) {
             log.info("Invalid JWT token.");
             log.trace("Invalid JWT token trace.", e);

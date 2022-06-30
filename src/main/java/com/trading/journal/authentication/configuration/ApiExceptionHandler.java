@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.configuration;
 
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -22,6 +23,7 @@ import static org.springframework.http.ResponseEntity.status;
 
 @RestControllerAdvice
 @Slf4j
+@NoArgsConstructor
 public class ApiExceptionHandler {
     private static final String CLIENT_EXCEPTION_HAPPENED = "Client Exception happened";
     private static final String UNEXPECTED_EXCEPTION_HAPPENED = "Unexpected Exception happened";

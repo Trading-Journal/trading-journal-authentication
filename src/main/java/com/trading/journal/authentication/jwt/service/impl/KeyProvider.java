@@ -14,9 +14,11 @@ import java.util.function.Function;
 
 import com.trading.journal.authentication.jwt.JwtException;
 
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@NoArgsConstructor
 public class KeyProvider {
     public <T extends Key> T loadRsaKey(File file, String keyType, Function<String, EncodedKeySpec> keySpec,
             BiFunction<KeyFactory, EncodedKeySpec, T> keyGenerator) throws IOException {

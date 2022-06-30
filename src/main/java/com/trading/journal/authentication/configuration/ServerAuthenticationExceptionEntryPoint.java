@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.configuration;
 
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -11,8 +12,8 @@ import java.io.IOException;
 
 @Component
 @Slf4j
+@NoArgsConstructor
 public class ServerAuthenticationExceptionEntryPoint implements AuthenticationEntryPoint {
-
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {

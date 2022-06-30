@@ -2,13 +2,11 @@ package com.trading.journal.authentication.jwt.service.impl;
 
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtResolveToken;
-import com.trading.journal.authentication.jwt.service.impl.JwtResolveTokenHttpHeader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.http.HttpHeaders;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +40,25 @@ public class JwtResolveTokenHttpHeaderTest {
     @DisplayName("Given server request without token return null")
     void requestWithoutToken() {
         HttpServletRequest request = mock(HttpServletRequest.class);
+        String resolved = jwtResolveToken.resolve(request);
+        assertThat(resolved).isNull();
+    }
+
+    @Test
+    @DisplayName("Given server request without token because header values does not have the prefix return null")
+    void requestWithoutToken2() {
+        String token = UUID.randomUUID().toString();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(token);
+        String resolved = jwtResolveToken.resolve(request);
+        assertThat(resolved).isNull();
+    }
+
+    @Test
+    @DisplayName("Given server request without because value is empty token return token value")
+    void requestWithToken3() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("");
         String resolved = jwtResolveToken.resolve(request);
         assertThat(resolved).isNull();
     }

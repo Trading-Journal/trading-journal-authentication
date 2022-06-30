@@ -1,27 +1,20 @@
 package com.trading.journal.authentication.configuration;
 
-import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authentication.service.UserPasswordAuthenticationManager;
-import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.jwt.JwtTokenAuthenticationFilter;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
-import com.trading.journal.authentication.authority.service.AuthorityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 @Configuration
@@ -32,7 +25,8 @@ public class SecurityConfiguration {
     private final UserPasswordAuthenticationManager authenticationManager;
     private final ServerAuthenticationExceptionEntryPoint serverAuthenticationExceptionEntryPoint;
     private final JwtTokenReader tokenReader;
-    private final AuthorityService authorityService;
+
+    private final LoadAuthorities loadAuthorities;
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     @Bean
@@ -50,7 +44,7 @@ public class SecurityConfiguration {
         httpSecurity.csrf().disable();
         httpSecurity.headers().frameOptions().disable();
 
-        Map<AuthorityCategory, String[]> authorityCategoryMap = getAuthorityCategoryMap();
+        Map<AuthorityCategory, String[]> authorityCategoryMap = loadAuthorities.getAuthorityCategoryMap();
         httpSecurity.authorizeRequests().antMatchers(getAdminPath()).hasAnyAuthority(authorityCategoryMap.get(AuthorityCategory.ADMINISTRATOR));
         httpSecurity.authorizeRequests().anyRequest().hasAnyAuthority(authorityCategoryMap.get(AuthorityCategory.COMMON_USER));
         return httpSecurity.authenticationManager(authenticationManager).build();
@@ -65,24 +59,5 @@ public class SecurityConfiguration {
 
     private String[] getAdminPath() {
         return new String[]{"/admin/**"};
-    }
-
-    private Map<AuthorityCategory, String[]> getAuthorityCategoryMap() {
-        Map<AuthorityCategory, String[]> categoryAuthorities = new ConcurrentHashMap<>();
-
-        Arrays.stream(AuthorityCategory.values()).toList()
-                .forEach(category -> {
-                    String[] authorities;
-                    List<Authority> authoritiesByCategory = authorityService.getAuthoritiesByCategory(category);
-                    if (authoritiesByCategory.isEmpty()) {
-                        throw new ApplicationException(HttpStatus.INTERNAL_SERVER_ERROR, "No authorities found in the database, please load it");
-                    } else {
-                        authorities = authoritiesByCategory.stream()
-                                .map(Authority::getName)
-                                .toArray(String[]::new);
-                    }
-                    categoryAuthorities.put(category, authorities);
-                });
-        return categoryAuthorities;
     }
 }

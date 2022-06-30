@@ -1,10 +1,13 @@
 package com.trading.journal.authentication.password.validation;
 
+import lombok.NoArgsConstructor;
+
 import java.util.Optional;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+@NoArgsConstructor
 public class PasswordConfirmedValidator implements ConstraintValidator<PasswordConfirmed, PasswordAndConfirmation> {
 
     @Override

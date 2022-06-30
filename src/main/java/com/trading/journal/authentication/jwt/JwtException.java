@@ -10,10 +10,6 @@ public class JwtException extends RuntimeException {
         super(message);
     }
 
-    public JwtException(Exception e) {
-        super(e);
-    }
-
     public JwtException(String message, Exception e) {
         super(message, e);
     }

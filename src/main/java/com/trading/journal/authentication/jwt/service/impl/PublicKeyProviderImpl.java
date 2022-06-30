@@ -1,8 +1,8 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
-import com.trading.journal.authentication.jwt.JwtException;
 import com.trading.journal.authentication.jwt.service.PublicKeyProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,6 @@ import java.security.Key;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.EncodedKeySpec;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 @Component
@@ -33,11 +32,8 @@ public class PublicKeyProviderImpl implements PublicKeyProvider {
         return new X509EncodedKeySpec(Base64.decodeBase64(data));
     }
 
+    @SneakyThrows
     private PublicKey publicKeyGenerator(KeyFactory kf, EncodedKeySpec spec) {
-        try {
-            return kf.generatePublic(spec);
-        } catch (InvalidKeySpecException e) {
-            throw new JwtException(e);
-        }
+        return kf.generatePublic(spec);
     }
 }

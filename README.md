@@ -2,7 +2,6 @@
 
 ## Pending
 
-* Test Coverage with fail under X percent
 * Delete account
 * Set and document environment variables
 * Test Container/Kubernetes deploy with adding keys files

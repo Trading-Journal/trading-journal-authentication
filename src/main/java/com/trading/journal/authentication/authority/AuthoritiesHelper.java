@@ -23,12 +23,4 @@ public enum AuthoritiesHelper {
                 .filter(authoritiesHelper -> category.equals(authoritiesHelper.getCategory()))
                 .collect(Collectors.toList());
     }
-
-    public static AuthoritiesHelper getByName(String name) {
-        AuthoritiesHelper authority = null;
-        if (Arrays.stream(AuthoritiesHelper.values()).anyMatch(authoritiesHelper -> authoritiesHelper.getLabel().equals(name))) {
-            authority = AuthoritiesHelper.valueOf(name);
-        }
-        return authority;
-    }
 }

@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.configuration;
 
+import lombok.NoArgsConstructor;
 import org.passay.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
+@NoArgsConstructor
 public class PasswordConfiguration {
 
 	private static final int MIN_COMPLEX_RULES = 3;
