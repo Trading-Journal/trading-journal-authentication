@@ -147,6 +147,33 @@ class UserAuthorityServiceImplTest {
         verify(userAuthorityRepository).save(any());
     }
 
+    @DisplayName("Add new authority to the user but one of the authority requested to delete is not in user collection")
+    @Test
+    void addAuthorities2() {
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ROLE_USER", "ROLE_ADMIN", "ANOTHER_ROLE"));
+
+        when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
+        when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "12345679",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                List.of(
+                        new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
+                ),
+                LocalDateTime.now());
+
+        userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
+
+        verify(userAuthorityRepository).save(any());
+    }
+
     @DisplayName("Add two new authorities to the user")
     @Test
     void addTwoAuthorities() {
@@ -218,6 +245,35 @@ class UserAuthorityServiceImplTest {
                 true,
                 true,
                 List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
+                LocalDateTime.now());
+
+        userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
+
+        verify(userAuthorityRepository).delete(any());
+    }
+
+    @DisplayName("Delete authority from the user but one of the authority requested to delete is not in user collection")
+    @Test
+    void deleteAuthorities2() {
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(Arrays.asList("ROLE_USER", "ROLE_ADMIN", "ANOTHER_ROLE"));
+
+        when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
+        when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
+        when(authorityService.getByName("ANOTHER_ROLE")).thenReturn(Optional.of(new Authority(5L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE")));
+
+        ApplicationUser applicationUser = new ApplicationUser(
+                1L,
+                "UserName",
+                "12345679",
+                "firstName",
+                "lastName",
+                "mail@mail.com",
+                true,
+                true,
+                List.of(
+                        new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(null, new Authority(3L, AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"))
+                ),
                 LocalDateTime.now());
 
         userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);

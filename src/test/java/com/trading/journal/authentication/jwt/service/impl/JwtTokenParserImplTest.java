@@ -134,6 +134,36 @@ public class JwtTokenParserImplTest {
         assertThat(exception.getRawStatusCode()).isEqualTo(401);
     }
 
+    @DisplayName("Given token return MalformedJwtException")
+    @Test
+    void malformedJwtException() throws NoSuchAlgorithmException, IOException {
+        KeyPair keyPair = mockKeyPair();
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L, "issuer", "audience");
+        when(publicKeyProvider.provide(new File("arg"))).thenReturn(keyPair.getPublic());
+        JwtTokenParser jwtTokenParser = new JwtTokenParserImpl(publicKeyProvider, properties);
+
+        ApplicationException exception = assertThrows(ApplicationException.class,
+                () -> jwtTokenParser.parseToken("1231231231321"));
+
+        assertThat(exception.getMessage()).contains("Request to parse invalid JWT");
+        assertThat(exception.getRawStatusCode()).isEqualTo(401);
+    }
+
+    @DisplayName("Given token return IllegalArgumentException")
+    @Test
+    void emptyJwt() throws NoSuchAlgorithmException, IOException {
+        KeyPair keyPair = mockKeyPair();
+        JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L, "issuer", "audience");
+        when(publicKeyProvider.provide(new File("arg"))).thenReturn(keyPair.getPublic());
+        JwtTokenParser jwtTokenParser = new JwtTokenParserImpl(publicKeyProvider, properties);
+
+        ApplicationException exception = assertThrows(ApplicationException.class,
+                () -> jwtTokenParser.parseToken(""));
+
+        assertThat(exception.getMessage()).contains("Request to parse empty or null JWT");
+        assertThat(exception.getRawStatusCode()).isEqualTo(401);
+    }
+
     private KeyPair mockKeyPair() throws NoSuchAlgorithmException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048);

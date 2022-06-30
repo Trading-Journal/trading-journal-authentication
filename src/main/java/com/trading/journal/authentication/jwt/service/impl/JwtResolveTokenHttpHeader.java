@@ -2,6 +2,7 @@ package com.trading.journal.authentication.jwt.service.impl;
 
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtResolveToken;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -9,6 +10,7 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 
 @Component
+@NoArgsConstructor
 public class JwtResolveTokenHttpHeader implements JwtResolveToken {
 
     @Override

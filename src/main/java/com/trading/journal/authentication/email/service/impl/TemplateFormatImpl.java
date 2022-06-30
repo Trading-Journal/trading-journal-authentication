@@ -3,6 +3,7 @@ package com.trading.journal.authentication.email.service.impl;
 import com.trading.journal.authentication.email.EmailConstants;
 import com.trading.journal.authentication.email.EmailField;
 import com.trading.journal.authentication.email.service.TemplateFormat;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import static java.util.stream.Collectors.joining;
 
 @Component
 @Slf4j
+@NoArgsConstructor
 public class TemplateFormatImpl implements TemplateFormat {
 
     @Override
@@ -34,8 +36,8 @@ public class TemplateFormatImpl implements TemplateFormat {
 
     @Override
     public String addBodyToEmail(String body) {
-        List<EmailField> fields = singletonList(new EmailField(EmailConstants.TemplateFields.MESSAGE_BODY, body));
-        return format(EmailConstants.Resources.EMAIL_TEMPLATE, fields);
+        List<EmailField> fields = singletonList(new EmailField(EmailConstants.MESSAGE_BODY, body));
+        return format(EmailConstants.EMAIL_TEMPLATE, fields);
     }
 
     private String getResource(String resourceName) {

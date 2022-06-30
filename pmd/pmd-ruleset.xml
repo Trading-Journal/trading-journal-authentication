@@ -11,7 +11,6 @@
         <exclude name="ShortMethodName" />
         <exclude name="LocalVariableCouldBeFinal" />
         <exclude name="MethodArgumentCouldBeFinal" />
-        <exclude name="AtLeastOneConstructor" />
     </rule>
     <rule ref="category/java/codestyle.xml/ClassNamingConventions">
         <properties>

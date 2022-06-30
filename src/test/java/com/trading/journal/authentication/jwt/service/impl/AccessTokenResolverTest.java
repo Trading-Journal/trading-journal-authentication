@@ -1,9 +1,9 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
+import com.trading.journal.authentication.jwt.data.AccessToken;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
-import com.trading.journal.authentication.jwt.service.impl.AccessTokenResolver;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +44,7 @@ public class AccessTokenResolverTest {
 
     @DisplayName("Given a access token resolve into AccessTokenInfo")
     @Test
-    public void retrieveTokenInfo() throws Exception {
+    public void retrieveTokenInfo() {
         String token = UUID.randomUUID().toString();
 
         NativeWebRequest nativeWebRequest = mock(NativeWebRequest.class);
@@ -59,11 +59,19 @@ public class AccessTokenResolverTest {
                         singletonList("USER")));
 
         AccessTokenInfo tokenInfo = (AccessTokenInfo) accessTokenResolver
-                .resolveArgument(methodParameter,modelAndViewContainer, nativeWebRequest, webDataBinderFactory);
+                .resolveArgument(methodParameter, modelAndViewContainer, nativeWebRequest, webDataBinderFactory);
 
         assert tokenInfo != null;
         assertThat(tokenInfo.subject()).isEqualTo("UserAdm");
         assertThat(tokenInfo.tenancy()).isEqualTo("tenancy_1");
         assertThat(tokenInfo.scopes()).containsExactly("USER");
+    }
+
+    @DisplayName("Support parameter is false ")
+    @Test
+    void supportFalse() {
+        when(methodParameter.getMethodAnnotation(AccessToken.class)).thenReturn(null);
+        boolean supportsParameter = accessTokenResolver.supportsParameter(methodParameter);
+        assertThat(supportsParameter).isFalse();
     }
 }

@@ -1,8 +1,8 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
-import com.trading.journal.authentication.jwt.JwtException;
 import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,6 @@ import java.security.Key;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.spec.EncodedKeySpec;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 @Component
@@ -33,11 +32,8 @@ public class PrivateKeyProviderImpl implements PrivateKeyProvider {
         return new PKCS8EncodedKeySpec(Base64.decodeBase64(data));
     }
 
+    @SneakyThrows
     private PrivateKey privateKeyGenerator(KeyFactory kf, EncodedKeySpec spec) {
-        try {
-            return kf.generatePrivate(spec);
-        } catch (InvalidKeySpecException e) {
-            throw new JwtException(e);
-        }
+        return kf.generatePrivate(spec);
     }
 }

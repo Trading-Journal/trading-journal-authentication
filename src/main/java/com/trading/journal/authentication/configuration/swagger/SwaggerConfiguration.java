@@ -1,6 +1,7 @@
 package com.trading.journal.authentication.configuration.swagger;
 
 import com.trading.journal.authentication.ApplicationException;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,7 @@ import static java.util.Collections.singletonList;
 
 @Configuration
 @EnableWebMvc
+@NoArgsConstructor
 public class SwaggerConfiguration implements WebMvcConfigurer {
 
     private static final List<Response> GLOBAL_RESPONSES = Arrays.asList(

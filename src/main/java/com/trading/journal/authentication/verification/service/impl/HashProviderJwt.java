@@ -12,28 +12,32 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
+
 @Component
 @RequiredArgsConstructor
 public class HashProviderJwt implements HashProvider {
 
-    private final JwtTokenProvider provider;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    private final JwtTokenReader reader;
+    private final JwtTokenReader jwtTokenReader;
 
     @Override
     public String generateHash(String value) {
-        return provider.generateTemporaryToken(value).token();
+        return jwtTokenProvider.generateTemporaryToken(value).token();
     }
 
     @Override
     public String readHashValue(String hash) {
-        if (!reader.isTokenValid(hash)) {
+        if (!jwtTokenReader.isTokenValid(hash)) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Invalid hash value");
         }
-        AccessTokenInfo tokenInfo = reader.getTokenInfo(hash);
-        if (tokenInfo.scopes().size() > 1 && tokenInfo.scopes().stream().noneMatch(JwtConstants.TEMPORARY_TOKEN::equals)) {
+        Optional<AccessTokenInfo> tokenInfo = ofNullable(jwtTokenReader.getTokenInfo(hash));
+        if (tokenInfo.map(AccessTokenInfo::scopes).map(list -> list.size() > 1).orElse(true)
+                || tokenInfo.map(AccessTokenInfo::scopes).orElse(emptyList()).stream().noneMatch(JwtConstants.TEMPORARY_TOKEN::equals)) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Hash is not in the right format");
         }
-        return Optional.of(tokenInfo).map(AccessTokenInfo::subject).orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "Invalid hash content"));
+        return tokenInfo.map(AccessTokenInfo::subject).orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "Invalid hash content"));
     }
 }

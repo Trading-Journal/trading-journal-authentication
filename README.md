@@ -2,7 +2,10 @@
 
 ## Pending
 
-* Test Coverage with fail under X percent
+* Tests
+  * Test Coverage with fail under X percent
+  * Test Mutation
+  * Contract tests
 * Delete account
 * Set and document environment variables
 * Test Container/Kubernetes deploy with adding keys files

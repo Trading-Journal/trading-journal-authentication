@@ -1,5 +1,8 @@
 package com.trading.journal.authentication.jwt.helper;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
@@ -7,6 +10,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DateHelper {
 
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
@@ -29,7 +33,7 @@ public class DateHelper {
         try {
             dateToReturn = dateFormat.parse(stringDate);
         } catch (ParseException e) {
-            throw (DateTimeException) new DateTimeException("Invalid date").initCause(e);
+            throw new DateTimeException("Invalid date", e);
         }
         return dateToReturn;
     }

@@ -118,7 +118,7 @@ class VerificationEmailServiceImplTest {
         verificationEmailService.sendEmail(verification, applicationUser);
     }
 
-    @DisplayName("Given verification CHANGE_PASSWORD and application user end and email with correct URL")
+    @DisplayName("Given verification ADMIN_REGISTRATION and application user end and email with correct URL")
     @Test
     void sendAdminRegistration() {
         String hash = UUID.randomUUID().toString();

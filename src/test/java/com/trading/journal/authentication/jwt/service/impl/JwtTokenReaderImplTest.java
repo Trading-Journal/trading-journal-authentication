@@ -1,8 +1,24 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.when;
+import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
+import com.trading.journal.authentication.jwt.data.ContextUser;
+import com.trading.journal.authentication.jwt.data.JwtProperties;
+import com.trading.journal.authentication.jwt.data.ServiceType;
+import com.trading.journal.authentication.jwt.helper.JwtConstants;
+import com.trading.journal.authentication.jwt.service.JwtTokenParser;
+import com.trading.journal.authentication.jwt.service.JwtTokenReader;
+import com.trading.journal.authentication.jwt.service.PublicKeyProvider;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,29 +31,9 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
 
-import com.trading.journal.authentication.jwt.service.JwtTokenParser;
-import com.trading.journal.authentication.jwt.service.JwtTokenReader;
-import com.trading.journal.authentication.jwt.service.PublicKeyProvider;
-import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
-import com.trading.journal.authentication.jwt.data.ContextUser;
-import com.trading.journal.authentication.jwt.data.JwtProperties;
-import com.trading.journal.authentication.jwt.data.ServiceType;
-import com.trading.journal.authentication.jwt.helper.JwtConstants;
-
-import com.trading.journal.authentication.jwt.service.impl.JwtTokenParserImpl;
-import com.trading.journal.authentication.jwt.service.impl.JwtTokenReaderImpl;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class JwtTokenReaderImplTest {
@@ -223,33 +219,6 @@ public class JwtTokenReaderImplTest {
 
         boolean tokenValid = jwtTokenReader.isTokenValid(token);
         assertThat(tokenValid).isTrue();
-    }
-
-    @Test
-    @DisplayName("Given access token return it is invalid because it is expired 2 seconds ago")
-    void invalidToken() {
-        KeyPair keyPair = mockKeyPair();
-        assert keyPair != null;
-        String token = Jwts.builder()
-                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
-                .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
-                .setIssuer("TOKEN_ISSUER")
-                .setAudience("TOKEN_AUDIENCE")
-                .setSubject("user_name")
-                .setIssuedAt(Date.from(LocalDateTime.of(2022, Month.APRIL, 1, 13, 14, 15).atZone(ZoneId.systemDefault())
-                        .toInstant()))
-                .setExpiration(Date.from(LocalDateTime.now().minusSeconds(2)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()))
-                .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
-                .claim(JwtConstants.TENANCY, "tenancy_1")
-                .compact();
-
-        JwtTokenParser mockParser = mockParser(keyPair);
-        JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
-
-        boolean tokenValid = jwtTokenReader.isTokenValid(token);
-        assertThat(tokenValid).isFalse();
     }
 
     @Test

@@ -1,16 +1,15 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.jwt.JwtException;
+import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.service.JwtTokenParser;
 import com.trading.journal.authentication.jwt.service.PublicKeyProvider;
-import com.trading.journal.authentication.jwt.data.JwtProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.security.Key;
 
 @Component
@@ -18,12 +17,9 @@ public class JwtTokenParserImpl implements JwtTokenParser {
 
     private final Key publicKey;
 
+    @SneakyThrows
     public JwtTokenParserImpl(PublicKeyProvider publicKeyProvider, JwtProperties properties) {
-        try {
-            this.publicKey = publicKeyProvider.provide(properties.getPublicKey());
-        } catch (IOException e) {
-            throw new JwtException(e.getMessage(), e);
-        }
+        this.publicKey = publicKeyProvider.provide(properties.getPublicKey());
     }
 
     @SuppressWarnings("PMD")
