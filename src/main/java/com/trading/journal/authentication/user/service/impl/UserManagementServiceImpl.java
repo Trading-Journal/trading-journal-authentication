@@ -3,10 +3,11 @@ package com.trading.journal.authentication.user.service.impl;
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
-import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserRepository;
+import com.trading.journal.authentication.pageable.specifications.FilterLike;
 import com.trading.journal.authentication.user.AuthoritiesChange;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.service.UserManagementService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
@@ -17,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,10 +33,11 @@ public class UserManagementServiceImpl implements UserManagementService {
     public PageResponse<UserInfo> getAll(PageableRequest pageRequest) {
         Specification<User> specification = null;
         if (pageRequest.hasFilter()) {
-            specification = filterLike(Columns.USER_NAME, pageRequest.getFilter())
-                    .or(filterLike(Columns.FIRST_NAME, pageRequest.getFilter()))
-                    .or(filterLike(Columns.LAST_NAME, pageRequest.getFilter()))
-                    .or(filterLike(Columns.EMAIL, pageRequest.getFilter()));
+            specification = new FilterLike<User>(pageRequest.getFilter()).apply(Columns.USER_NAME)
+                    .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.USER_NAME))
+                    .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.FIRST_NAME))
+                    .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.LAST_NAME))
+                    .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.EMAIL));
         }
         Page<User> users = userRepository.findAll(specification, pageRequest.pageable());
         List<UserInfo> list = users.stream()
@@ -93,11 +94,6 @@ public class UserManagementServiceImpl implements UserManagementService {
         return userRepository.findById(id)
                 .map(applicationUser -> userAuthorityService.deleteAuthorities(applicationUser, authorities))
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
-    }
-
-    private Specification<User> filterLike(String column, String value) {
-        return (root, query, criteriaBuilder)
-                -> criteriaBuilder.like(root.get(column), "%" + value.toLowerCase(Locale.getDefault()) + "%");
     }
 
     private static class Columns {

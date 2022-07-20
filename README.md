@@ -8,15 +8,20 @@
     * Add company name to registry as optional
     * If it is not there create like the username
   * During login return tenancy (company name) in JWT
-* Companies endpoints
+* Tenancy Management
+  * Endpoints
+  * Enable/Disable - Reflect this on long in
+  * Set user limits on creation
+  * Endpoint to retrieve tenancy usage and available
 * Role tenancy (Company) Administrator
   * Can load and change user for the same tenancy (Company)
+  * Can manage users - based on tenancy limits
 * Delete account
   * Delete common user
   * Delete tenancy (Company) admin user:
     * Set another user as admin
     * Or remove the whole tenancy (Company)
-* Set and document environment variables
+* Set and document environment variables and properties
 * Test Container/Kubernetes deploy with adding keys files
 * Postman Test run
 * One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
@@ -63,7 +68,8 @@ openssl rsa -in secret_key.pem -pubout -outform PEM -out public_key.pem
 CREATE TABLE `Tenancy` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(254) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
 );
 
 CREATE TABLE `Users` (

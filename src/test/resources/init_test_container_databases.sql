@@ -1,7 +1,8 @@
 CREATE TABLE `Tenancy` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(254) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
 );
 
 CREATE TABLE `Users` (
