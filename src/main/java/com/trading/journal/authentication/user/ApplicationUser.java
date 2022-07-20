@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.user;
 
+import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,8 +21,12 @@ import java.util.List;
 public class ApplicationUser {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "tenancyId")
+    private Tenancy tenancy;
 
     private String userName;
 

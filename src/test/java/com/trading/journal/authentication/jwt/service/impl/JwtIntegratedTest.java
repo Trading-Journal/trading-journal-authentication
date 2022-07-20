@@ -55,27 +55,28 @@ public class JwtIntegratedTest {
     @DisplayName("Generate and read access token")
     @Test
     void generateAndReadAccessToken() {
-        ApplicationUser appUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                Arrays.asList(
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(Arrays.asList(
                         new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
                         new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
-                ),
-                LocalDateTime.now());
+                ))
+                .build();
 
-        TokenData accessToken = jwtTokenProvider.generateAccessToken(appUser);
+        TokenData accessToken = jwtTokenProvider.generateAccessToken(applicationUser);
 
         assertThat(accessToken.token()).isNotBlank();
         Jws<Claims> accessTokenClaims = jwtTokenParser.parseToken(accessToken.token());
-        assertThat(accessTokenClaims.getBody().getSubject()).isEqualTo(appUser.getEmail());
-        assertThat(accessTokenClaims.getBody().get(JwtConstants.TENANCY)).isEqualTo(appUser.getUserName());
+        assertThat(accessTokenClaims.getBody().getSubject()).isEqualTo(applicationUser.getEmail());
+        assertThat(accessTokenClaims.getBody().get(JwtConstants.TENANCY)).isEqualTo(applicationUser.getUserName());
         assertThat(accessTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
         assertThat(accessTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
         Date start = Date.from(LocalDateTime.now().plusSeconds(3500L).atZone(ZoneId.systemDefault()).toInstant());
@@ -92,25 +93,26 @@ public class JwtIntegratedTest {
     @DisplayName("Generate and read refresh token")
     @Test
     void generateAndReadRefreshToken() {
-        ApplicationUser appUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                Arrays.asList(
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(Arrays.asList(
                         new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
                         new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
-                ),
-                LocalDateTime.now());
+                ))
+                .build();
 
-        TokenData refreshToken = jwtTokenProvider.generateRefreshToken(appUser);
+        TokenData refreshToken = jwtTokenProvider.generateRefreshToken(applicationUser);
         assertThat(refreshToken.token()).isNotBlank();
         Jws<Claims> refreshTokenClaims = jwtTokenParser.parseToken(refreshToken.token());
-        assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo(appUser.getEmail());
+        assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo(applicationUser.getEmail());
         assertThat(refreshTokenClaims.getBody().get(JwtConstants.TENANCY)).isNull();
         assertThat(refreshTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
         assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");

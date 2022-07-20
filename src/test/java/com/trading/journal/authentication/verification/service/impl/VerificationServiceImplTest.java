@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,17 +59,18 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "User",
-                "Admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
@@ -90,17 +91,18 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "User",
-                "Admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Optional.empty());
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
@@ -121,17 +123,18 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "User",
-                "Admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
@@ -152,17 +155,18 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "User",
-                "Admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
@@ -183,17 +187,18 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "User",
-                "Admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
@@ -214,17 +219,18 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "User",
-                "Admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
@@ -366,17 +372,18 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "User",
-                "Admin",
-                email,
-                false,
-                false,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(Optional.empty());

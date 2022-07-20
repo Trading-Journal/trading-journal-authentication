@@ -60,24 +60,25 @@ public class ApplicationUserServiceImplTest {
                 "123456",
                 "123456");
 
-        ApplicationUser appUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
         when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(applicationUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
-        when(applicationUserRepository.save(any())).thenReturn(appUser);
-        when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));
+        when(applicationUserRepository.save(any())).thenReturn(applicationUser);
+        when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(applicationUser));
         when(verificationProperties.isEnabled()).thenReturn(false);
 
         ApplicationUser newUser = applicationUserServiceImpl.createNewUser(userRegistration);
@@ -96,24 +97,25 @@ public class ApplicationUserServiceImplTest {
                 "123456",
                 "123456");
 
-        ApplicationUser appUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                false,
-                false,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
         when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
-        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(appUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
+        when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(applicationUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
-        when(applicationUserRepository.save(any())).thenReturn(appUser);
-        when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(appUser));
+        when(applicationUserRepository.save(any())).thenReturn(applicationUser);
+        when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(applicationUser));
         when(verificationProperties.isEnabled()).thenReturn(true);
 
         ApplicationUser newUser = applicationUserServiceImpl.createNewUser(userRegistration);
@@ -124,29 +126,32 @@ public class ApplicationUserServiceImplTest {
     @Test
     @DisplayName("Enable and verify user")
     void enableAndVerify() {
-        ApplicationUser disabledUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                false,
-                false,
-                emptyList(),
-                LocalDateTime.of(2022, 2, 1, 10, 30, 50));
+        ApplicationUser disabledUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(false)
+                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .authorities(emptyList())
+                .build();
 
-        ApplicationUser enabledUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.of(2022, 2, 1, 10, 30, 50));
+        ApplicationUser enabledUser =  ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .authorities(emptyList())
+                .build();
+
 
         when(applicationUserRepository.findByEmail(disabledUser.getEmail())).thenReturn(Optional.of(disabledUser));
         when(applicationUserRepository.save(enabledUser)).thenReturn(enabledUser);
@@ -164,29 +169,31 @@ public class ApplicationUserServiceImplTest {
     @Test
     @DisplayName("Make user unverified by unproven it")
     void unprovenUser() {
-        ApplicationUser verifiedUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.of(2022, 2, 1, 10, 30, 50));
+        ApplicationUser verifiedUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .authorities(emptyList())
+                .build();
 
-        ApplicationUser unprovenUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                false,
-                emptyList(),
-                LocalDateTime.of(2022, 2, 1, 10, 30, 50));
+        ApplicationUser unprovenUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(false)
+                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .authorities(emptyList())
+                .build();
 
         when(applicationUserRepository.findByEmail(verifiedUser.getEmail())).thenReturn(Optional.of(verifiedUser));
         when(applicationUserRepository.save(unprovenUser)).thenReturn(unprovenUser);
@@ -319,32 +326,34 @@ public class ApplicationUserServiceImplTest {
     @Test
     @DisplayName("Change password")
     void changePassword() {
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "password",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.of(2022, 12, 12, 12, 12, 12));
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .authorities(emptyList())
+                .build();
 
         when(applicationUserRepository.findByEmail(anyString())).thenReturn(Optional.of(applicationUser));
         when(passwordService.encodePassword("password")).thenReturn("new_password_encoded");
 
-        ApplicationUser applicationUserWithNewPassword = new ApplicationUser(
-                1L,
-                "UserName",
-                "new_password_encoded",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.of(2022, 12, 12, 12, 12, 12));
+        ApplicationUser applicationUserWithNewPassword = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("new_password_encoded")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .authorities(emptyList())
+                .build();
         when(applicationUserRepository.save(applicationUserWithNewPassword)).thenReturn(applicationUserWithNewPassword);
 
         applicationUserServiceImpl.changePassword("mail@mail.com", "password");
@@ -360,20 +369,21 @@ public class ApplicationUserServiceImplTest {
     @Test
     @DisplayName("Given an email load user info")
     void userInfo() {
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "new_password_encoded",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                asList(
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("firstName")
+                .lastName("lastName")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .authorities(asList(
                         new UserAuthority(new ApplicationUser(), new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
                         new UserAuthority(new ApplicationUser(), new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
-                ),
-                LocalDateTime.of(2022, 12, 12, 12, 12, 12));
+                ))
+                .build();
 
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
 

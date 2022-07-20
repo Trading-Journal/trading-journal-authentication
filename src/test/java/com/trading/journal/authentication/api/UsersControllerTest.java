@@ -62,17 +62,17 @@ class UsersControllerTest {
     ) {
         TestLoader.load50Users(applicationUserRepository, userAuthorityRepository, authorityService);
 
-        ApplicationUser applicationUser = applicationUserRepository.save(new ApplicationUser(
-                null,
-                "johnwick",
-                encoder.encode("dad231#$#4"),
-                "John",
-                "Wick",
-                "johnwick@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now()));
+        ApplicationUser user = ApplicationUser.builder()
+                .userName("johnwick")
+                .password(encoder.encode("dad231#$#4"))
+                .firstName("John")
+                .lastName("Wick")
+                .email("johnwick@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+        ApplicationUser applicationUser = applicationUserRepository.save(user);
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
 
         Login login = new Login("johnwick@mail.com", "dad231#$#4");

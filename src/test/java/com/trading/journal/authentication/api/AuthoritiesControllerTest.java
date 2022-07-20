@@ -58,17 +58,17 @@ class AuthoritiesControllerTest {
             @Autowired AuthenticationService authenticationService,
             @Autowired UserAuthorityService userAuthorityService
     ) {
-        ApplicationUser applicationUser = applicationUserRepository.save(new ApplicationUser(
-                null,
-                "johnwick3",
-                encoder.encode("dad231#$#4"),
-                "John",
-                "Wick",
-                "johnwick3@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now()));
+        ApplicationUser user = ApplicationUser.builder()
+                .userName("johnwick3")
+                .password(encoder.encode("dad231#$#4"))
+                .firstName("John")
+                .lastName("Wick")
+                .email("johnwick3@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+        ApplicationUser applicationUser = applicationUserRepository.save(user);
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
 
         Login login = new Login("johnwick3@mail.com", "dad231#$#4");

@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -50,17 +51,18 @@ class PasswordManagementServiceImplTest {
     @Test
     void passwordChangeRequest() {
         String email = "mail@mail.com";
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "User",
-                "Admin",
-                email,
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
         doNothing().when(verificationService).send(VerificationType.CHANGE_PASSWORD, applicationUser);
@@ -134,17 +136,18 @@ class PasswordManagementServiceImplTest {
     void passwordChange() {
         String email = "mail@email.com";
         String hash = UUID.randomUUID().toString();
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                email,
-                true,
-                true,
-                Collections.emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         EmailRequest emailRequest = new EmailRequest(
                 "Confirmação de alteração senha",

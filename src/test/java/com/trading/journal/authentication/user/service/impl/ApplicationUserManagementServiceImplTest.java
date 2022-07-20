@@ -51,17 +51,18 @@ class ApplicationUserManagementServiceImplTest {
         PageableRequest pageableRequest = new PageableRequest(0, 10, null, null);
 
         when(applicationUserRepository.findAll(null, pageableRequest.pageable())).thenReturn(new PageImpl<>(
-                singletonList(new ApplicationUser(
-                        1L,
-                        "UserAdm",
-                        "encoded_password",
-                        "user",
-                        "admin",
-                        "mail@mail.com",
-                        true,
-                        true,
-                        singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                        LocalDateTime.now())),
+                singletonList(ApplicationUser.builder()
+                        .id(1L)
+                        .userName("UserName")
+                        .password("password_secret")
+                        .firstName("lastName")
+                        .lastName("Wick")
+                        .email("mail@mail.com")
+                        .enabled(true)
+                        .verified(true)
+                        .createdAt(LocalDateTime.now())
+                        .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                        .build()),
                 pageableRequest.pageable(),
                 2
         ));
@@ -78,17 +79,18 @@ class ApplicationUserManagementServiceImplTest {
         PageableRequest pageableRequest = new PageableRequest(0, 10, null, "any string");
 
         when(applicationUserRepository.findAll(any(), eq(pageableRequest.pageable()))).thenReturn(new PageImpl<>(
-                singletonList(new ApplicationUser(
-                        1L,
-                        "UserAdm",
-                        "encoded_password",
-                        "user",
-                        "admin",
-                        "mail@mail.com",
-                        true,
-                        true,
-                        singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                        LocalDateTime.now())),
+                singletonList(ApplicationUser.builder()
+                        .id(1L)
+                        .userName("UserName")
+                        .password("password_secret")
+                        .firstName("lastName")
+                        .lastName("Wick")
+                        .email("mail@mail.com")
+                        .enabled(true)
+                        .verified(true)
+                        .createdAt(LocalDateTime.now())
+                        .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                        .build()),
                 pageableRequest.pageable(),
                 2
         ));
@@ -104,17 +106,18 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void getUserById() {
         Long userId = 10L;
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now())));
+        when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build()));
 
         UserInfo userInfo = applicationUserManagementService.getUserById(userId);
         assertThat(userInfo).isNotNull();
@@ -135,17 +138,18 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void disableUser() {
         Long userId = 10L;
-        ApplicationUser applicationUser = new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 
@@ -169,17 +173,18 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void enableUser() {
         Long userId = 10L;
-        ApplicationUser applicationUser = new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                false,
-                true,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 
@@ -203,17 +208,18 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void deleteUser() {
         Long userId = 10L;
-        ApplicationUser applicationUser = new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                false,
-                true,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 
@@ -237,17 +243,18 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void changeUserAuthorities() {
         Long userId = 10L;
-        ApplicationUser applicationUser = new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                false,
-                true,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 
@@ -280,20 +287,21 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void removeUserAuthorities() {
         Long userId = 10L;
-        ApplicationUser applicationUser = new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                false,
-                true,
-                Arrays.asList(
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(Arrays.asList(
                         new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
                         new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
-                ),
-                LocalDateTime.now());
+                ))
+                .build();
 
         when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 

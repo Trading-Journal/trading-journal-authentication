@@ -20,7 +20,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,17 +48,18 @@ class VerificationEmailServiceImplTest {
         when(hostProperties.getVerificationPage()).thenReturn("auth/email-verified");
         Verification verification = new Verification(1L, "mail@mail.com", VerificationType.REGISTRATION, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "User",
-                "Admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         String url = String.format("http://site.com/auth/email-verified?hash=%s", hash);
         List<EmailField> fields = Arrays.asList(
@@ -88,17 +88,18 @@ class VerificationEmailServiceImplTest {
         when(hostProperties.getChangePasswordPage()).thenReturn("auth/change-password");
         Verification verification = new Verification(1L, "mail@mail.com", VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "User",
-                "Admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         String url = String.format("http://site.com/auth/change-password?hash=%s", hash);
         List<EmailField> fields = Arrays.asList(
@@ -127,17 +128,18 @@ class VerificationEmailServiceImplTest {
         when(hostProperties.getVerificationPage()).thenReturn("auth/email-verified");
         Verification verification = new Verification(1L, "mail@mail.com", VerificationType.ADMIN_REGISTRATION, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "User",
-                "Admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         String url = String.format("http://site.com/auth/email-verified?hash=%s", hash);
         List<EmailField> fields = Arrays.asList(

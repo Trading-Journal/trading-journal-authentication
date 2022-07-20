@@ -73,17 +73,18 @@ class ApplicationAdminUserServiceImplTest {
     void createAdmin() {
         UserRegistration adminRegistration = new UserRegistration("john", "rambo", "admin", "mail@mail.com", null, null);
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "admin",
-                "password_secret",
-                "john",
-                "rambo",
-                "mail@mail.com",
-                false,
-                false,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         UserAuthority userAuthority = new UserAuthority(applicationUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"));
 

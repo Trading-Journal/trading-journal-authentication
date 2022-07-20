@@ -44,18 +44,18 @@ class UserPasswordAuthenticationManagerImplTest {
     @Test
     void authenticated() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
-
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                singletonList(new UserAuthority(null,  new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserAdm")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
 
@@ -86,17 +86,18 @@ class UserPasswordAuthenticationManagerImplTest {
     void userDisabled() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                false,
-                false,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("12345679")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
@@ -111,17 +112,18 @@ class UserPasswordAuthenticationManagerImplTest {
     void userUnverified() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                false,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("12345679")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
@@ -136,17 +138,18 @@ class UserPasswordAuthenticationManagerImplTest {
     void noMatchPassword() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(false);
 
@@ -160,17 +163,18 @@ class UserPasswordAuthenticationManagerImplTest {
     void emptyAuthorities() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
 
@@ -184,17 +188,18 @@ class UserPasswordAuthenticationManagerImplTest {
     void nullAuthorities() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                null,
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(null)
+                .build();
         when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
 

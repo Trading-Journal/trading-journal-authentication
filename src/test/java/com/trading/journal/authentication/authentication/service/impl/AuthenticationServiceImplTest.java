@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,17 +65,18 @@ public class AuthenticationServiceImplTest {
         when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password())))
                 .thenReturn(authentication);
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("12345679")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+
         when(applicationUserService.getUserByEmail(login.email())).thenReturn(applicationUser);
 
         TokenData accessToken = new TokenData("token", LocalDateTime.now());
@@ -118,17 +120,18 @@ public class AuthenticationServiceImplTest {
                 Collections.singletonList("ROLE_USER"), LocalDateTime.now());
         when(applicationUserService.getUserInfo("subject")).thenReturn(userInfo);
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.emptyList(),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("12345679")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
         when(applicationUserService.getUserByEmail("email@mail.com")).thenReturn(applicationUser);
 
         TokenData tokenData = new TokenData("new_token", LocalDateTime.now());

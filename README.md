@@ -2,7 +2,20 @@
 
 ## Pending
 
+* Tenancy
+  * Create tenancy (Company) entity and registry it during signup
+    * Set the current signup user as company admin (for now just a property in company table)
+    * Add company name to registry as optional
+    * If it is not there create like the username
+  * During login return tenancy (company name) in JWT
+* Companies endpoints
+* Role tenancy (Company) Administrator
+  * Can load and change user for the same tenancy (Company)
 * Delete account
+  * Delete common user
+  * Delete tenancy (Company) admin user:
+    * Set another user as admin
+    * Or remove the whole tenancy (Company)
 * Set and document environment variables
 * Test Container/Kubernetes deploy with adding keys files
 * Postman Test run
@@ -33,17 +46,6 @@ Or just [http://localhost:8080](http://localhost:8080)
 docker run -d -e MYSQL_USER=trade-journal -e MYSQL_PASSWORD=trade-journal -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=trade-journal -p 3306:3306 mysql:latest
 ```
 
-#### SMTP Server
-
-```bash
-docker run -d -p 587:587 --name mail \
-    -e RELAY_HOST=smtp.example.com \
-    -e RELAY_PORT=587 \
-    -e RELAY_USERNAME=alice@example.com \
-    -e RELAY_PASSWORD=secretpassword \
-    -d bytemark/smtp
-```
-
 ### Keys Dependencies
 
 ```bash
@@ -58,8 +60,15 @@ openssl rsa -in secret_key.pem -pubout -outform PEM -out public_key.pem
 ### Database Schema
 
 ```
+CREATE TABLE `Tenancy` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(254) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
 CREATE TABLE `Users` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `tenancyId` int NULL,
   `userName` varchar(45) NOT NULL,
   `password` varchar(2000) NOT NULL,
   `firstName` varchar(45) NOT NULL,
@@ -68,8 +77,8 @@ CREATE TABLE `Users` (
   `enabled` tinyint(1) NOT NULL,
   `verified` tinyint(1) NOT NULL,
   `createdAt` datetime NOT NULL,
-  `authorities` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tenancyIdFk` FOREIGN KEY (`tenancyId`) REFERENCES `Tenancy` (`id`)
 );
 
 CREATE TABLE `Authorities` (

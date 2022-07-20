@@ -21,9 +21,9 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.UUID;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -54,17 +54,18 @@ public class RegistrationServiceImplTest {
                 "123456",
                 "123456");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(applicationUserService.createNewUser(userRegistration)).thenReturn(applicationUser);
         when(verificationProperties.isEnabled()).thenReturn(false);
@@ -86,17 +87,18 @@ public class RegistrationServiceImplTest {
                 "123456",
                 "123456");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                false,
-                false,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(applicationUserService.createNewUser(userRegistration)).thenReturn(applicationUser);
         when(applicationUserService.getUserByEmail("mail@mail.com")).thenReturn(applicationUser);
@@ -144,17 +146,18 @@ public class RegistrationServiceImplTest {
     void newEmailVerification() {
         String email = "mail@mail.com";
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                email,
-                false,
-                false,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(false)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(verificationProperties.isEnabled()).thenReturn(true);
         when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
@@ -184,17 +187,18 @@ public class RegistrationServiceImplTest {
     void newEmailVerificationUserEnabled() {
         String email = "mail@mail.com";
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                email,
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(verificationProperties.isEnabled()).thenReturn(true);
         when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
