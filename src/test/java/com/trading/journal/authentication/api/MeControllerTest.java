@@ -7,7 +7,7 @@ import com.trading.journal.authentication.authentication.service.AuthenticationS
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.doNothing;
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 public class MeControllerTest {
     @Autowired
-    private ApplicationUserService applicationUserService;
+    private UserService userService;
 
     @Autowired
     private AuthenticationService authenticationService;
@@ -51,7 +51,7 @@ public class MeControllerTest {
     @ParameterizedTest
     @MethodSource("feedUsers")
     void meEndpoint(UserRegistration user) {
-        applicationUserService.createNewUser(user);
+        userService.createNewUser(user);
 
         Login login = new Login(user.email(), user.password());
 

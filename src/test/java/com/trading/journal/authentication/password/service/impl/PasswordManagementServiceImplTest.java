@@ -8,7 +8,7 @@ import com.trading.journal.authentication.email.EmailRequest;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.password.ChangePassword;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationStatus;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 class PasswordManagementServiceImplTest {
 
     @Mock
-    ApplicationUserService applicationUserService;
+    UserService userService;
 
     @Mock
     VerificationService verificationService;
@@ -64,12 +64,12 @@ class PasswordManagementServiceImplTest {
                 .authorities(Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
+        when(userService.getUserByEmail(email)).thenReturn(applicationUser);
         doNothing().when(verificationService).send(VerificationType.CHANGE_PASSWORD, applicationUser);
 
         passwordService.requestPasswordChange(email);
 
-        verify(applicationUserService).unprovenUser(email);
+        verify(userService).unprovenUser(email);
     }
 
     @DisplayName("Password change hash not found return exception")
@@ -83,10 +83,10 @@ class PasswordManagementServiceImplTest {
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("Change password request is invalid");
 
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
         verify(verificationService, never()).verify(any());
-        verify(applicationUserService, never()).verifyUser(anyString());
+        verify(userService, never()).verifyUser(anyString());
     }
 
     @DisplayName("Password change hash email and change request email are different return exception")
@@ -104,10 +104,10 @@ class PasswordManagementServiceImplTest {
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("Change password request is invalid");
 
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
         verify(verificationService, never()).verify(any());
-        verify(applicationUserService, never()).verifyUser(anyString());
+        verify(userService, never()).verifyUser(anyString());
     }
 
     @DisplayName("Password change verification is not CHANGE_PASSWORD return exception")
@@ -125,10 +125,10 @@ class PasswordManagementServiceImplTest {
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("Change password request is invalid");
 
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(emailSender, never()).send(any());
         verify(verificationService, never()).verify(any());
-        verify(applicationUserService, never()).verifyUser(anyString());
+        verify(userService, never()).verifyUser(anyString());
     }
 
     @DisplayName("Password change verification executed successfully")
@@ -159,13 +159,13 @@ class PasswordManagementServiceImplTest {
         Verification verification = new Verification(1L, email, VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
         when(verificationService.retrieve(changePassword.hash())).thenReturn(verification);
-        when(applicationUserService.changePassword(email, "dad231#$#4")).thenReturn(applicationUser);
-        when(applicationUserService.getUserByEmail(changePassword.email())).thenReturn(applicationUser);
+        when(userService.changePassword(email, "dad231#$#4")).thenReturn(applicationUser);
+        when(userService.getUserByEmail(changePassword.email())).thenReturn(applicationUser);
         doNothing().when(emailSender).send(emailRequest);
         doNothing().when(verificationService).verify(verification);
 
         passwordService.changePassword(changePassword);
 
-        verify(applicationUserService).verifyUser(email);
+        verify(userService).verifyUser(email);
     }
 }

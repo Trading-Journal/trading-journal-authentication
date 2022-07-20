@@ -4,7 +4,7 @@ import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationRepository;
@@ -40,7 +40,7 @@ class VerificationServiceImplTest {
     VerificationEmailService verificationEmailService;
 
     @Mock
-    ApplicationUserService applicationUserService;
+    UserService userService;
 
     @Mock
     HashProvider hashProvider;
@@ -326,7 +326,7 @@ class VerificationServiceImplTest {
 
         verificationService.verify(verificationSaved);
 
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(hashProvider, never()).generateHash(anyString());
         verify(verificationRepository, never()).save(any());
         verify(verificationEmailService, never()).sendEmail(any(), any());
@@ -346,7 +346,7 @@ class VerificationServiceImplTest {
 
         verificationService.verify(verificationSaved);
 
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(hashProvider, never()).generateHash(anyString());
         verify(verificationRepository, never()).save(any());
         verify(verificationEmailService, never()).sendEmail(any(), any());
@@ -385,7 +385,7 @@ class VerificationServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
+        when(userService.getUserByEmail(email)).thenReturn(applicationUser);
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(Optional.empty());
         when(hashProvider.generateHash(email)).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(changerPassword);

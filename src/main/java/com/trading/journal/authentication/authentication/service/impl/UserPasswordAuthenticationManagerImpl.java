@@ -5,7 +5,7 @@ import com.trading.journal.authentication.authentication.service.UserPasswordAut
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,14 +22,14 @@ import static java.util.Optional.of;
 @RequiredArgsConstructor
 public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthenticationManager {
 
-    private final ApplicationUserRepository applicationUserRepository;
+    private final UserRepository userRepository;
 
     private final PasswordService passwordService;
 
     @Override
     public Authentication authenticate(Authentication authentication) {
         String email = (String) authentication.getPrincipal();
-        User applicationUser = applicationUserRepository.findByEmail(email)
+        User applicationUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "Bad Credentials"));
         if (!applicationUser.getEnabled() || !applicationUser.getVerified()) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Locked Credentials");

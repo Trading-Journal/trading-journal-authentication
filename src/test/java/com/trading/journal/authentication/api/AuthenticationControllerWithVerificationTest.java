@@ -4,7 +4,7 @@ import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationStatus;
 import com.trading.journal.authentication.verification.VerificationType;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.doNothing;
 public class AuthenticationControllerWithVerificationTest {
 
     @Autowired
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Autowired
     VerificationRepository verificationRepository;
@@ -49,7 +49,7 @@ public class AuthenticationControllerWithVerificationTest {
 
     @BeforeEach
     public void setUp() {
-        applicationUserRepository.deleteAll();
+        userRepository.deleteAll();
         verificationRepository.deleteAll();
         doNothing().when(verificationEmailService).sendEmail(any(), any());
     }
@@ -84,7 +84,7 @@ public class AuthenticationControllerWithVerificationTest {
         assertThat(verification.getStatus()).isEqualTo(VerificationStatus.PENDING);
 
 
-        User applicationUser = applicationUserRepository.findByEmail("mail2@mail.com").get();
+        User applicationUser = userRepository.findByEmail("mail2@mail.com").get();
         assertThat(applicationUser.getEnabled()).isFalse();
         assertThat(applicationUser.getVerified()).isFalse();
     }
@@ -129,7 +129,7 @@ public class AuthenticationControllerWithVerificationTest {
         Optional<Verification> verificationNull = verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, "mail2@mail.com");
         assertThat(verificationNull).isEmpty();
 
-        User applicationUser = applicationUserRepository.findByEmail("mail2@mail.com").get();
+        User applicationUser = userRepository.findByEmail("mail2@mail.com").get();
         assertThat(applicationUser.getEnabled()).isTrue();
         assertThat(applicationUser.getVerified()).isTrue();
     }
@@ -196,7 +196,7 @@ public class AuthenticationControllerWithVerificationTest {
         Optional<Verification> verificationNull = verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, "mail2@mail.com");
         assertThat(verificationNull).isEmpty();
 
-        User applicationUser = applicationUserRepository.findByEmail("mail2@mail.com").get();
+        User applicationUser = userRepository.findByEmail("mail2@mail.com").get();
         assertThat(applicationUser.getEnabled()).isTrue();
         assertThat(applicationUser.getVerified()).isTrue();
     }

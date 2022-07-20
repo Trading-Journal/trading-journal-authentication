@@ -7,7 +7,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface ApplicationUserRepository extends PagingAndSortingRepository<User, Long>, JpaSpecificationExecutor<User> {
+public interface UserRepository extends PagingAndSortingRepository<User, Long>, JpaSpecificationExecutor<User> {
 
     Boolean existsByUserName(String userName);
 

@@ -10,7 +10,7 @@ import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +40,7 @@ import static org.mockito.Mockito.*;
 public class AuthenticationServiceImplTest {
 
     @Mock
-    ApplicationUserService applicationUserService;
+    UserService userService;
 
     @Mock
     AuthenticationManager authenticationManager;
@@ -77,7 +77,7 @@ public class AuthenticationServiceImplTest {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        when(applicationUserService.getUserByEmail(login.email())).thenReturn(applicationUser);
+        when(userService.getUserByEmail(login.email())).thenReturn(applicationUser);
 
         TokenData accessToken = new TokenData("token", LocalDateTime.now());
         when(jwtTokenProvider.generateAccessToken(applicationUser)).thenReturn(accessToken);
@@ -101,7 +101,7 @@ public class AuthenticationServiceImplTest {
         assertThrows(AuthenticationServiceException.class, () -> authenticationService.signIn(login),
                 "Authentication failed");
 
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(jwtTokenProvider, never()).generateAccessToken(any());
     }
 
@@ -118,7 +118,7 @@ public class AuthenticationServiceImplTest {
 
         UserInfo userInfo = new UserInfo(1L, "subject", "firstName", "lastName", "email@mail.com", true, true,
                 Collections.singletonList("ROLE_USER"), LocalDateTime.now());
-        when(applicationUserService.getUserInfo("subject")).thenReturn(userInfo);
+        when(userService.getUserInfo("subject")).thenReturn(userInfo);
 
         User applicationUser = User.builder()
                 .id(1L)
@@ -132,7 +132,7 @@ public class AuthenticationServiceImplTest {
                 .createdAt(LocalDateTime.now())
                 .authorities(emptyList())
                 .build();
-        when(applicationUserService.getUserByEmail("email@mail.com")).thenReturn(applicationUser);
+        when(userService.getUserByEmail("email@mail.com")).thenReturn(applicationUser);
 
         TokenData tokenData = new TokenData("new_token", LocalDateTime.now());
         when(jwtTokenProvider.generateAccessToken(applicationUser)).thenReturn(tokenData);
@@ -154,8 +154,8 @@ public class AuthenticationServiceImplTest {
         assertThat(exception.getStatusText()).isEqualTo("Refresh token is expired");
 
         verify(jwtTokenReader, never()).getTokenInfo(anyString());
-        verify(applicationUserService, never()).getUserInfo(anyString());
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserInfo(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(jwtTokenProvider, never()).generateAccessToken(any());
     }
 
@@ -174,8 +174,8 @@ public class AuthenticationServiceImplTest {
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(exception.getStatusText()).isEqualTo("Refresh token is invalid or is not a refresh token");
 
-        verify(applicationUserService, never()).getUserInfo(anyString());
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserInfo(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(jwtTokenProvider, never()).generateAccessToken(any());
     }
 }

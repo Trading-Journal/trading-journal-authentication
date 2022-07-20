@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.constraints.NotNull;
 
 @Service
-public interface ApplicationUserService {
+public interface UserService {
 
     User getUserByEmail(String email);
 

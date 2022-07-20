@@ -5,8 +5,8 @@ import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
-import com.trading.journal.authentication.user.service.ApplicationAdminUserService;
+import com.trading.journal.authentication.user.UserRepository;
+import com.trading.journal.authentication.user.service.AdminUserService;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationService;
@@ -19,9 +19,9 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ApplicationAdminUserServiceImpl implements ApplicationAdminUserService {
+public class AdminUserServiceImpl implements AdminUserService {
 
-    private final ApplicationUserRepository applicationUserRepository;
+    private final UserRepository userRepository;
 
     private final UserAuthorityService userAuthorityService;
 
@@ -32,13 +32,13 @@ public class ApplicationAdminUserServiceImpl implements ApplicationAdminUserServ
     @Override
     public Boolean thereIsAdmin() {
         List<String> roles = AuthoritiesHelper.getByCategory(AuthorityCategory.ADMINISTRATOR).stream().map(AuthoritiesHelper::getLabel).toList();
-        Integer admins = applicationUserRepository.countAdmins(roles);
+        Integer admins = userRepository.countAdmins(roles);
         return admins > 0;
     }
 
     @Override
     public void createAdmin(@Valid UserRegistration userRegistration) {
-        User applicationUser = applicationUserRepository.save(adminUser(userRegistration));
+        User applicationUser = userRepository.save(adminUser(userRegistration));
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
         verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
     }

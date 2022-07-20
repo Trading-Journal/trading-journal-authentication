@@ -4,7 +4,7 @@ import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.doNothing;
 public class AuthenticationControllerSignUpIntegratedTest {
 
     @Autowired
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -39,7 +39,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
 
     @BeforeEach
     public void setUp() {
-        applicationUserRepository.deleteAll();
+        userRepository.deleteAll();
         doNothing().when(emailSender).send(any());
     }
 

@@ -6,7 +6,7 @@ import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
@@ -35,7 +35,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public class UserServiceImplTest {
 
     @Mock
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Mock
     UserAuthorityService userAuthorityService;
@@ -47,7 +47,7 @@ public class UserServiceImplTest {
     VerificationProperties verificationProperties;
 
     @InjectMocks
-    ApplicationUserServiceImpl applicationUserServiceImpl;
+    UserServiceImpl applicationUserServiceImpl;
 
     @Test
     @DisplayName("When create user and the verification is disabled return user response enabled and verified")
@@ -73,12 +73,12 @@ public class UserServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
-        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
+        when(userRepository.existsByUserName(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(applicationUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
-        when(applicationUserRepository.save(any())).thenReturn(applicationUser);
-        when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(applicationUser));
+        when(userRepository.save(any())).thenReturn(applicationUser);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(applicationUser));
         when(verificationProperties.isEnabled()).thenReturn(false);
 
         User newUser = applicationUserServiceImpl.createNewUser(userRegistration);
@@ -110,12 +110,12 @@ public class UserServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
-        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
+        when(userRepository.existsByUserName(anyString())).thenReturn(false);
         when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(applicationUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
-        when(applicationUserRepository.save(any())).thenReturn(applicationUser);
-        when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(applicationUser));
+        when(userRepository.save(any())).thenReturn(applicationUser);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(applicationUser));
         when(verificationProperties.isEnabled()).thenReturn(true);
 
         User newUser = applicationUserServiceImpl.createNewUser(userRegistration);
@@ -153,8 +153,8 @@ public class UserServiceImplTest {
                 .build();
 
 
-        when(applicationUserRepository.findByEmail(disabledUser.getEmail())).thenReturn(Optional.of(disabledUser));
-        when(applicationUserRepository.save(enabledUser)).thenReturn(enabledUser);
+        when(userRepository.findByEmail(disabledUser.getEmail())).thenReturn(Optional.of(disabledUser));
+        when(userRepository.save(enabledUser)).thenReturn(enabledUser);
 
         applicationUserServiceImpl.verifyUser(disabledUser.getEmail());
     }
@@ -162,7 +162,7 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Enable and verify user that does not exist, return an exception")
     void enableAndVerifyException() {
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.verifyUser("mail@mail.com"), "User mail@mail.com does not exist");
     }
 
@@ -195,8 +195,8 @@ public class UserServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(applicationUserRepository.findByEmail(verifiedUser.getEmail())).thenReturn(Optional.of(verifiedUser));
-        when(applicationUserRepository.save(unprovenUser)).thenReturn(unprovenUser);
+        when(userRepository.findByEmail(verifiedUser.getEmail())).thenReturn(Optional.of(verifiedUser));
+        when(userRepository.save(unprovenUser)).thenReturn(unprovenUser);
 
         applicationUserServiceImpl.unprovenUser(verifiedUser.getEmail());
     }
@@ -204,7 +204,7 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Unproven user that does not exist, return an exception")
     void unprovenUserException() {
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.unprovenUser("mail@mail.com"), "User mail@mail.com does not exist");
     }
 
@@ -219,14 +219,14 @@ public class UserServiceImplTest {
                 "123456",
                 "123456");
 
-        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(true);
-        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
+        when(userRepository.existsByUserName(anyString())).thenReturn(true);
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
         assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("User name or email already exist");
 
-        verify(applicationUserRepository, never()).save(any());
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -240,14 +240,14 @@ public class UserServiceImplTest {
                 "123456",
                 "123456");
 
-        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
-        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(true);
+        when(userRepository.existsByUserName(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
         assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("User name or email already exist");
 
-        verify(applicationUserRepository, never()).save(any());
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -261,14 +261,14 @@ public class UserServiceImplTest {
                 "123456",
                 "123456");
 
-        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(true);
-        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(true);
+        when(userRepository.existsByUserName(anyString())).thenReturn(true);
+        when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
         assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("User name or email already exist");
 
-        verify(applicationUserRepository, never()).save(any());
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -277,8 +277,8 @@ public class UserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
-        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
+        when(userRepository.existsByUserName(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
 
         Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
         assertThat(userValid).isTrue();
@@ -290,8 +290,8 @@ public class UserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(true);
-        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(false);
+        when(userRepository.existsByUserName(anyString())).thenReturn(true);
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
 
         Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
         assertThat(userValid).isFalse();
@@ -303,8 +303,8 @@ public class UserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(false);
-        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(true);
+        when(userRepository.existsByUserName(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
         Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
         assertThat(userValid).isFalse();
@@ -316,8 +316,8 @@ public class UserServiceImplTest {
         String userName = "user";
         String email = "mail@mail.com";
 
-        when(applicationUserRepository.existsByUserName(anyString())).thenReturn(true);
-        when(applicationUserRepository.existsByEmail(anyString())).thenReturn(true);
+        when(userRepository.existsByUserName(anyString())).thenReturn(true);
+        when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
         Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
         assertThat(userValid).isFalse();
@@ -339,7 +339,7 @@ public class UserServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Optional.of(applicationUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(applicationUser));
         when(passwordService.encodePassword("password")).thenReturn("new_password_encoded");
 
         User userWithNewPassword = User.builder()
@@ -354,7 +354,7 @@ public class UserServiceImplTest {
                 .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
                 .authorities(emptyList())
                 .build();
-        when(applicationUserRepository.save(userWithNewPassword)).thenReturn(userWithNewPassword);
+        when(userRepository.save(userWithNewPassword)).thenReturn(userWithNewPassword);
 
         applicationUserServiceImpl.changePassword("mail@mail.com", "password");
     }
@@ -362,7 +362,7 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Change password when user email does not exist return exception")
     void changePasswordException() {
-        when(applicationUserRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.changePassword("mail@mail.com", "password"), "User email@mail.com does not exist");
     }
 
@@ -385,7 +385,7 @@ public class UserServiceImplTest {
                 ))
                 .build();
 
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
+        when(userRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
 
         UserInfo info = applicationUserServiceImpl.getUserInfo("mail@mail.com");
         assertThat(info.getId()).isEqualTo(1L);

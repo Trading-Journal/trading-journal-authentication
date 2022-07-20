@@ -1,7 +1,7 @@
 package com.trading.journal.authentication.password.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.email.EmailField;
 import com.trading.journal.authentication.email.EmailRequest;
 import com.trading.journal.authentication.email.service.EmailSender;
@@ -23,7 +23,7 @@ public class PasswordManagementServiceImpl implements PasswordManagementService 
 
     private static final String CONFIRMATION_PASSWORD_EMAIL_TEMPLATE = "mail/change-password-confirmation.html";
     private static final String NAME = "$NAME";
-    private final ApplicationUserService applicationUserService;
+    private final UserService userService;
 
     private final VerificationService verificationService;
 
@@ -31,18 +31,18 @@ public class PasswordManagementServiceImpl implements PasswordManagementService 
 
     @Override
     public void requestPasswordChange(String email) {
-        User applicationUser = applicationUserService.getUserByEmail(email);
+        User applicationUser = userService.getUserByEmail(email);
         verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
-        applicationUserService.unprovenUser(email);
+        userService.unprovenUser(email);
     }
 
     @Override
     public void changePassword(ChangePassword changePassword) {
         Verification verification = verificationService.retrieve(changePassword.hash());
         if (validateVerification(changePassword, verification)) {
-            User applicationUser = applicationUserService.changePassword(changePassword.email(), changePassword.getPassword());
+            User applicationUser = userService.changePassword(changePassword.email(), changePassword.getPassword());
             EmailRequest emailRequest = passwordChangeConfirmation(applicationUser);
-            applicationUserService.verifyUser(applicationUser.getEmail());
+            userService.verifyUser(applicationUser.getEmail());
             emailSender.send(emailRequest);
             verificationService.verify(verification);
         } else {

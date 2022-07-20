@@ -9,8 +9,8 @@ import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.password.ChangePassword;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.UserRepository;
+import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationRepository;
 import com.trading.journal.authentication.verification.VerificationStatus;
@@ -44,10 +44,10 @@ import static org.mockito.Mockito.*;
 public class AuthenticationControllerChangePasswordIntegratedTest {
 
     @Autowired
-    private ApplicationUserService applicationUserService;
+    private UserService userService;
 
     @Autowired
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Autowired
     VerificationRepository verificationRepository;
@@ -66,7 +66,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
 
     @BeforeEach
     public void setUp() {
-        applicationUserRepository.deleteAll();
+        userRepository.deleteAll();
         verificationRepository.deleteAll();
     }
 
@@ -83,12 +83,12 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(user);
-        User applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
+        userService.createNewUser(user);
+        User applicationUser = userRepository.findByEmail(email).orElse(null);
         assertThat(applicationUser).isNotNull();
         applicationUser.enable();
         applicationUser.verify();
-        applicationUserRepository.save(applicationUser);
+        userRepository.save(applicationUser);
 
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
@@ -107,7 +107,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
         assertThat(verification.getStatus()).isEqualTo(VerificationStatus.PENDING);
         assertThat(verification.getHash()).isNotBlank();
 
-        applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
+        applicationUser = userRepository.findByEmail(email).orElse(null);
         assertThat(applicationUser).isNotNull();
         assertThat(applicationUser.getEnabled()).isTrue();
         assertThat(applicationUser.getVerified()).isFalse();
@@ -267,12 +267,12 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(user);
-        User applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
+        userService.createNewUser(user);
+        User applicationUser = userRepository.findByEmail(email).orElse(null);
         assertThat(applicationUser).isNotNull();
         applicationUser.enable();
         applicationUser.unproven();
-        applicationUserRepository.save(applicationUser);
+        userRepository.save(applicationUser);
 
         TokenData tokenData = jwtTokenProvider.generateTemporaryToken(email);
         verificationRepository.save(Verification.builder()
@@ -286,7 +286,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
 
         ChangePassword changePassword = new ChangePassword(email, tokenData.token(), "&UeK0j@tYRnhVGS&S64d", "&UeK0j@tYRnhVGS&S64d");
 
-        String oldPasswordEncoded = applicationUserRepository.findByEmail(email).get().getPassword();
+        String oldPasswordEncoded = userRepository.findByEmail(email).get().getPassword();
         assertThat(oldPasswordEncoded).isNotBlank();
 
 
@@ -310,12 +310,12 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
         List<Verification> verifications = verificationRepository.findAll();
         assertThat(verifications).isEmpty();
 
-        String newPasswordEncoded = applicationUserRepository.findByEmail(email).get().getPassword();
+        String newPasswordEncoded = userRepository.findByEmail(email).get().getPassword();
         assertThat(newPasswordEncoded).isNotBlank();
 
         assertThat(oldPasswordEncoded).isNotEqualTo(newPasswordEncoded);
 
-        applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
+        applicationUser = userRepository.findByEmail(email).orElse(null);
         assertThat(applicationUser).isNotNull();
         assertThat(applicationUser.getVerified()).isTrue();
     }

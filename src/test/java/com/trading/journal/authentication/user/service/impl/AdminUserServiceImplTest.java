@@ -5,7 +5,7 @@ import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.VerificationType;
@@ -29,10 +29,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-class ApplicationAdminUserServiceImplTest {
+class AdminUserServiceImplTest {
 
     @Mock
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Mock
     UserAuthorityService userAuthorityService;
@@ -44,14 +44,14 @@ class ApplicationAdminUserServiceImplTest {
     PasswordService passwordService;
 
     @InjectMocks
-    ApplicationAdminUserServiceImpl applicationAdminUserService;
+    AdminUserServiceImpl applicationAdminUserService;
 
     @DisplayName("When count one user admin true")
     @Test
     void thereIsAdmin() {
         List<String> roles = singletonList("ROLE_ADMIN");
 
-        when(applicationUserRepository.countAdmins(roles)).thenReturn(1);
+        when(userRepository.countAdmins(roles)).thenReturn(1);
 
         Boolean thereIsAdmin = applicationAdminUserService.thereIsAdmin();
         assertThat(thereIsAdmin).isTrue();
@@ -62,7 +62,7 @@ class ApplicationAdminUserServiceImplTest {
     void thereIsNoAdmin() {
         List<String> roles = singletonList("ROLE_ADMIN");
 
-        when(applicationUserRepository.countAdmins(roles)).thenReturn(0);
+        when(userRepository.countAdmins(roles)).thenReturn(0);
 
         Boolean thereIsAdmin = applicationAdminUserService.thereIsAdmin();
         assertThat(thereIsAdmin).isFalse();
@@ -89,9 +89,9 @@ class ApplicationAdminUserServiceImplTest {
         UserAuthority userAuthority = new UserAuthority(applicationUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"));
 
         when(passwordService.randomPassword()).thenReturn("password_secret");
-        when(applicationUserRepository.save(any())).thenReturn(applicationUser);
+        when(userRepository.save(any())).thenReturn(applicationUser);
         when(userAuthorityService.saveAdminUserAuthorities(applicationUser)).thenReturn(singletonList(userAuthority));
-        when(applicationUserRepository.findById(1L)).thenReturn(Optional.of(applicationUser));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(applicationUser));
         doNothing().when(verificationService).send(VerificationType.ADMIN_REGISTRATION, applicationUser);
 
         applicationAdminUserService.createAdmin(adminRegistration);

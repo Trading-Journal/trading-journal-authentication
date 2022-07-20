@@ -4,9 +4,9 @@ import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +19,9 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class ApplicationUserServiceImpl implements ApplicationUserService {
+public class UserServiceImpl implements UserService {
 
-    private final ApplicationUserRepository applicationUserRepository;
+    private final UserRepository userRepository;
 
     private final UserAuthorityService userAuthorityService;
 
@@ -31,7 +31,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
     @Override
     public User getUserByEmail(@NotBlank String email) {
-        return applicationUserRepository.findByEmail(email)
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s does not exist", email)));
     }
 
@@ -39,7 +39,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     public User createNewUser(@NotNull UserRegistration userRegistration) {
         Boolean validUser = validateNewUser(userRegistration.userName(), userRegistration.email());
         if (validUser) {
-            User applicationUser = applicationUserRepository.save(user(userRegistration));
+            User applicationUser = userRepository.save(user(userRegistration));
             userAuthorityService.saveCommonUserAuthorities(applicationUser);
             return applicationUser;
         } else {
@@ -56,12 +56,12 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
     @Override
     public Boolean userNameExists(@NotBlank String userName) {
-        return applicationUserRepository.existsByUserName(userName);
+        return userRepository.existsByUserName(userName);
     }
 
     @Override
     public Boolean emailExists(@NotBlank String email) {
-        return applicationUserRepository.existsByEmail(email);
+        return userRepository.existsByEmail(email);
     }
 
     @Override
@@ -75,14 +75,14 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
         User applicationUser = this.getUserByEmail(email);
         applicationUser.enable();
         applicationUser.verify();
-        applicationUserRepository.save(applicationUser);
+        userRepository.save(applicationUser);
     }
 
     @Override
     public void unprovenUser(String email) {
         User applicationUser = this.getUserByEmail(email);
         applicationUser.unproven();
-        applicationUserRepository.save(applicationUser);
+        userRepository.save(applicationUser);
     }
 
 
@@ -90,7 +90,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     public User changePassword(@NotBlank String email, @NotBlank String password) {
         User applicationUser = this.getUserByEmail(email);
         applicationUser.changePassword(passwordService.encodePassword(password));
-        return applicationUserRepository.save(applicationUser);
+        return userRepository.save(applicationUser);
     }
 
     private User user(UserRegistration userRegistration) {

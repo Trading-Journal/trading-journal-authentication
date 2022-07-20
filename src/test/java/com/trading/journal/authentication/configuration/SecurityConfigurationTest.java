@@ -7,9 +7,9 @@ import com.trading.journal.authentication.authentication.service.AuthenticationS
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
-import com.trading.journal.authentication.user.service.ApplicationAdminUserService;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.UserRepository;
+import com.trading.journal.authentication.user.service.AdminUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,16 +36,16 @@ import static org.mockito.Mockito.doNothing;
 public class SecurityConfigurationTest {
 
     @Autowired
-    ApplicationUserService applicationUserService;
+    UserService userService;
 
     @Autowired
-    ApplicationAdminUserService applicationAdminUserService;
+    AdminUserService adminUserService;
 
     @Autowired
     AuthenticationService authenticationService;
 
     @Autowired
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Autowired
     PasswordEncoder encoder;
@@ -59,7 +59,7 @@ public class SecurityConfigurationTest {
     @BeforeEach
     public void setUp() {
         doNothing().when(emailSender).send(any());
-        applicationUserRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -110,7 +110,7 @@ public class SecurityConfigurationTest {
                 "johnwick@mail.com",
                 "dad231#$#4",
                 "dad231#$#4");
-        applicationUserService.createNewUser(userRegistration);
+        userService.createNewUser(userRegistration);
         Login login = new Login(userRegistration.email(), userRegistration.password());
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
@@ -135,13 +135,13 @@ public class SecurityConfigurationTest {
                 "johnwick@mail.com",
                 "dad231#$#4",
                 "dad231#$#4");
-        applicationAdminUserService.createAdmin(userRegistration);
+        adminUserService.createAdmin(userRegistration);
 
-        User applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com").get();
+        User applicationUser = userRepository.findByEmail("johnwick@mail.com").get();
         applicationUser.enable();
         applicationUser.verify();
         applicationUser.changePassword(encoder.encode("dad231#$#4"));
-        applicationUserRepository.save(applicationUser);
+        userRepository.save(applicationUser);
 
         Login login = new Login(userRegistration.email(), userRegistration.password());
         LoginResponse loginResponse = authenticationService.signIn(login);
@@ -167,7 +167,7 @@ public class SecurityConfigurationTest {
                 "johnwick@mail.com",
                 "dad231#$#4",
                 "dad231#$#4");
-        applicationUserService.createNewUser(userRegistration);
+        userService.createNewUser(userRegistration);
         Login login = new Login(userRegistration.email(), userRegistration.password());
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
@@ -192,13 +192,13 @@ public class SecurityConfigurationTest {
                 "johnwick@mail.com",
                 "dad231#$#4",
                 "dad231#$#4");
-        applicationAdminUserService.createAdmin(userRegistration);
+        adminUserService.createAdmin(userRegistration);
 
-        User applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com").get();
+        User applicationUser = userRepository.findByEmail("johnwick@mail.com").get();
         applicationUser.enable();
         applicationUser.verify();
         applicationUser.changePassword(encoder.encode("dad231#$#4"));
-        applicationUserRepository.save(applicationUser);
+        userRepository.save(applicationUser);
 
         Login login = new Login(userRegistration.email(), userRegistration.password());
         LoginResponse loginResponse = authenticationService.signIn(login);

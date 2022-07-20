@@ -8,7 +8,7 @@ import com.trading.journal.authentication.userauthority.UserAuthority;
 
 import java.util.List;
 
-public interface ApplicationUserManagementService {
+public interface UserManagementService {
     PageResponse<UserInfo> getAll(PageableRequest pageRequest);
 
     UserInfo getUserById(Long id);

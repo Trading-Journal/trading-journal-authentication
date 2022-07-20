@@ -16,17 +16,17 @@ import org.springframework.stereotype.Component;
 @Conditional(AdminUserCondition.class)
 public class AdminUserFeedStartup implements ApplicationListener<ApplicationReadyEvent> {
 
-    private final ApplicationAdminUserService applicationAdminUserService;
+    private final AdminUserService adminUserService;
 
     private final AdminUserProperties adminUserProperties;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        if (applicationAdminUserService.thereIsAdmin()) {
+        if (adminUserService.thereIsAdmin()) {
             log.info("Admin has been already create previously");
         } else {
             UserRegistration userRegistration = new UserRegistration("Admin", "Administrator", "admin", adminUserProperties.email(), null, null);
-            applicationAdminUserService.createAdmin(userRegistration);
+            adminUserService.createAdmin(userRegistration);
             log.info("Admin user created during startup");
         }
     }

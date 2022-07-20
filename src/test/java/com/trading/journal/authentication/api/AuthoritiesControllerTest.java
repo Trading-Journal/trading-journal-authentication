@@ -8,7 +8,7 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.AuthorityRepository;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
@@ -45,14 +45,14 @@ class AuthoritiesControllerTest {
     UserAuthorityRepository userAuthorityRepository;
 
     @Autowired
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Autowired
     private WebTestClient webTestClient;
 
     @BeforeAll
     public static void setUp(
-            @Autowired ApplicationUserRepository applicationUserRepository,
+            @Autowired UserRepository userRepository,
             @Autowired PasswordEncoder encoder,
             @Autowired AuthenticationService authenticationService,
             @Autowired UserAuthorityService userAuthorityService
@@ -67,7 +67,7 @@ class AuthoritiesControllerTest {
                 .verified(true)
                 .createdAt(LocalDateTime.now())
                 .build();
-        User applicationUser = applicationUserRepository.save(user);
+        User applicationUser = userRepository.save(user);
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
 
         Login login = new Login("johnwick3@mail.com", "dad231#$#4");
@@ -269,7 +269,7 @@ class AuthoritiesControllerTest {
     @Test
     void delete() {
 
-        User applicationUser = applicationUserRepository.findByEmail("johnwick3@mail.com").orElse(null);
+        User applicationUser = userRepository.findByEmail("johnwick3@mail.com").orElse(null);
         assertThat(applicationUser).isNotNull();
         Authority anotherRole = authorityRepository.save(new Authority(AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"));
         UserAuthority anotherRoleUserAuthority = userAuthorityRepository.save(

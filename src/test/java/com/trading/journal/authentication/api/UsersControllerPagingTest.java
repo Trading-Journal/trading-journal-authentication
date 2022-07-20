@@ -8,7 +8,7 @@ import com.trading.journal.authentication.authentication.service.AuthenticationS
 import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
@@ -41,14 +41,14 @@ class UsersControllerPagingTest {
 
     @BeforeAll
     public static void setUp(
-            @Autowired ApplicationUserRepository applicationUserRepository,
+            @Autowired UserRepository userRepository,
             @Autowired UserAuthorityRepository userAuthorityRepository,
             @Autowired AuthorityService authorityService,
             @Autowired PasswordEncoder encoder,
             @Autowired AuthenticationService authenticationService,
             @Autowired UserAuthorityService userAuthorityService
     ) {
-        TestLoader.load50Users(applicationUserRepository, userAuthorityRepository, authorityService);
+        TestLoader.load50Users(userRepository, userAuthorityRepository, authorityService);
 
         User user = User.builder()
                 .userName("johnwick")
@@ -60,7 +60,7 @@ class UsersControllerPagingTest {
                 .verified(true)
                 .createdAt(LocalDateTime.now())
                 .build();
-        User applicationUser = applicationUserRepository.save(user);
+        User applicationUser = userRepository.save(user);
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
 
         Login login = new Login("johnwick@mail.com", "dad231#$#4");
