@@ -6,9 +6,8 @@ import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
-import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.ApplicationAdminUserService;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -138,7 +137,7 @@ public class SecurityConfigurationTest {
                 "dad231#$#4");
         applicationAdminUserService.createAdmin(userRegistration);
 
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com").get();
+        User applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com").get();
         applicationUser.enable();
         applicationUser.verify();
         applicationUser.changePassword(encoder.encode("dad231#$#4"));
@@ -195,7 +194,7 @@ public class SecurityConfigurationTest {
                 "dad231#$#4");
         applicationAdminUserService.createAdmin(userRegistration);
 
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com").get();
+        User applicationUser = applicationUserRepository.findByEmail("johnwick@mail.com").get();
         applicationUser.enable();
         applicationUser.verify();
         applicationUser.changePassword(encoder.encode("dad231#$#4"));

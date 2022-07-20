@@ -18,7 +18,7 @@ import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +47,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     }
 
     @Override
-    public TokenData generateAccessToken(ApplicationUser applicationUser) {
+    public TokenData generateAccessToken(User applicationUser) {
         List<String> authorities = Optional.ofNullable(applicationUser.getAuthorities())
                 .filter(list -> !list.isEmpty())
                 .orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "User has no authorities"))
@@ -74,7 +74,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     }
 
     @Override
-    public TokenData generateRefreshToken(ApplicationUser applicationUser) {
+    public TokenData generateRefreshToken(User applicationUser) {
         Date issuedAt = DateHelper.getUTCDatetimeAsDate();
         String refreshToken = Jwts.builder()
                 .signWith(this.privateKey, SignatureAlgorithm.RS256)

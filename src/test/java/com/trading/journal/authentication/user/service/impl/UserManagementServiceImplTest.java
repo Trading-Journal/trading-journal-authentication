@@ -5,7 +5,7 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-class ApplicationUserManagementServiceImplTest {
+class UserManagementServiceImplTest {
 
     @Mock
     ApplicationUserRepository applicationUserRepository;
@@ -51,7 +51,7 @@ class ApplicationUserManagementServiceImplTest {
         PageableRequest pageableRequest = new PageableRequest(0, 10, null, null);
 
         when(applicationUserRepository.findAll(null, pageableRequest.pageable())).thenReturn(new PageImpl<>(
-                singletonList(ApplicationUser.builder()
+                singletonList(User.builder()
                         .id(1L)
                         .userName("UserName")
                         .password("password_secret")
@@ -79,7 +79,7 @@ class ApplicationUserManagementServiceImplTest {
         PageableRequest pageableRequest = new PageableRequest(0, 10, null, "any string");
 
         when(applicationUserRepository.findAll(any(), eq(pageableRequest.pageable()))).thenReturn(new PageImpl<>(
-                singletonList(ApplicationUser.builder()
+                singletonList(User.builder()
                         .id(1L)
                         .userName("UserName")
                         .password("password_secret")
@@ -106,7 +106,7 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void getUserById() {
         Long userId = 10L;
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(ApplicationUser.builder()
+        when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -138,7 +138,7 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void disableUser() {
         Long userId = 10L;
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -173,7 +173,7 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void enableUser() {
         Long userId = 10L;
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -208,7 +208,7 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void deleteUser() {
         Long userId = 10L;
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -243,7 +243,7 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void changeUserAuthorities() {
         Long userId = 10L;
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -287,7 +287,7 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void removeUserAuthorities() {
         Long userId = 10L;
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")

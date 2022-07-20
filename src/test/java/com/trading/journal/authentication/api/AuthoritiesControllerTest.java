@@ -7,7 +7,7 @@ import com.trading.journal.authentication.authentication.service.AuthenticationS
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.AuthorityRepository;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
@@ -29,7 +29,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -58,7 +57,7 @@ class AuthoritiesControllerTest {
             @Autowired AuthenticationService authenticationService,
             @Autowired UserAuthorityService userAuthorityService
     ) {
-        ApplicationUser user = ApplicationUser.builder()
+        User user = User.builder()
                 .userName("johnwick3")
                 .password(encoder.encode("dad231#$#4"))
                 .firstName("John")
@@ -68,7 +67,7 @@ class AuthoritiesControllerTest {
                 .verified(true)
                 .createdAt(LocalDateTime.now())
                 .build();
-        ApplicationUser applicationUser = applicationUserRepository.save(user);
+        User applicationUser = applicationUserRepository.save(user);
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
 
         Login login = new Login("johnwick3@mail.com", "dad231#$#4");
@@ -270,7 +269,7 @@ class AuthoritiesControllerTest {
     @Test
     void delete() {
 
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("johnwick3@mail.com").orElse(null);
+        User applicationUser = applicationUserRepository.findByEmail("johnwick3@mail.com").orElse(null);
         assertThat(applicationUser).isNotNull();
         Authority anotherRole = authorityRepository.save(new Authority(AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"));
         UserAuthority anotherRoleUserAuthority = userAuthorityRepository.save(

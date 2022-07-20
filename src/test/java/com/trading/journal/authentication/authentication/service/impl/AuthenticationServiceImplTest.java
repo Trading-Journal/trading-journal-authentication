@@ -8,7 +8,7 @@ import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import org.junit.jupiter.api.DisplayName;
@@ -65,7 +65,7 @@ public class AuthenticationServiceImplTest {
         when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password())))
                 .thenReturn(authentication);
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("12345679")
@@ -120,7 +120,7 @@ public class AuthenticationServiceImplTest {
                 Collections.singletonList("ROLE_USER"), LocalDateTime.now());
         when(applicationUserService.getUserInfo("subject")).thenReturn(userInfo);
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("12345679")

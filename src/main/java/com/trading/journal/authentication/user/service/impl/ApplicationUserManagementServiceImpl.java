@@ -3,7 +3,7 @@ package com.trading.journal.authentication.user.service.impl;
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
@@ -31,14 +31,14 @@ public class ApplicationUserManagementServiceImpl implements ApplicationUserMana
 
     @Override
     public PageResponse<UserInfo> getAll(PageableRequest pageRequest) {
-        Specification<ApplicationUser> specification = null;
+        Specification<User> specification = null;
         if (pageRequest.hasFilter()) {
             specification = filterLike(Columns.USER_NAME, pageRequest.getFilter())
                     .or(filterLike(Columns.FIRST_NAME, pageRequest.getFilter()))
                     .or(filterLike(Columns.LAST_NAME, pageRequest.getFilter()))
                     .or(filterLike(Columns.EMAIL, pageRequest.getFilter()));
         }
-        Page<ApplicationUser> users = applicationUserRepository.findAll(specification, pageRequest.pageable());
+        Page<User> users = applicationUserRepository.findAll(specification, pageRequest.pageable());
         List<UserInfo> list = users.stream()
                 .map(UserInfo::new).collect(Collectors.toList());
         return new PageResponse<>(users.getTotalElements(), users.getTotalPages(), users.getNumber(), list);
@@ -95,7 +95,7 @@ public class ApplicationUserManagementServiceImpl implements ApplicationUserMana
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
     }
 
-    private Specification<ApplicationUser> filterLike(String column, String value) {
+    private Specification<User> filterLike(String column, String value) {
         return (root, query, criteriaBuilder)
                 -> criteriaBuilder.like(root.get(column), "%" + value.toLowerCase(Locale.getDefault()) + "%");
     }

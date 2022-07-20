@@ -1,7 +1,7 @@
 package com.trading.journal.authentication.verification.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
@@ -25,7 +25,7 @@ public class VerificationServiceImpl implements VerificationService {
     private final HashProvider hashProvider;
 
     @Override
-    public void send(VerificationType verificationType, ApplicationUser applicationUser) {
+    public void send(VerificationType verificationType, User applicationUser) {
         Verification verification = verificationRepository.getByTypeAndEmail(verificationType, applicationUser.getEmail())
                 .orElseGet(() -> Verification.builder().email(applicationUser.getEmail()).type(verificationType).build());
         verification = verification.renew(hashProvider.generateHash(verification.getEmail()));
@@ -43,7 +43,7 @@ public class VerificationServiceImpl implements VerificationService {
     @Override
     public void verify(Verification verification) {
         if (VerificationType.ADMIN_REGISTRATION.equals(verification.getType())) {
-            ApplicationUser applicationUser = applicationUserService.getUserByEmail(verification.getEmail());
+            User applicationUser = applicationUserService.getUserByEmail(verification.getEmail());
             this.send(VerificationType.CHANGE_PASSWORD, applicationUser);
         }
         verificationRepository.delete(verification);

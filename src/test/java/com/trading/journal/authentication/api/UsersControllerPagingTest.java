@@ -7,7 +7,7 @@ import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.pageable.PageResponse;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
@@ -26,7 +26,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
 
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -51,7 +50,7 @@ class UsersControllerPagingTest {
     ) {
         TestLoader.load50Users(applicationUserRepository, userAuthorityRepository, authorityService);
 
-        ApplicationUser user = ApplicationUser.builder()
+        User user = User.builder()
                 .userName("johnwick")
                 .password(encoder.encode("dad231#$#4"))
                 .firstName("John")
@@ -61,7 +60,7 @@ class UsersControllerPagingTest {
                 .verified(true)
                 .createdAt(LocalDateTime.now())
                 .build();
-        ApplicationUser applicationUser = applicationUserRepository.save(user);
+        User applicationUser = applicationUserRepository.save(user);
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
 
         Login login = new Login("johnwick@mail.com", "dad231#$#4");

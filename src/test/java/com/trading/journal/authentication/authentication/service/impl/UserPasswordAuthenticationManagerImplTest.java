@@ -5,7 +5,7 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.password.service.PasswordService;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import org.junit.jupiter.api.DisplayName;
@@ -44,7 +44,7 @@ class UserPasswordAuthenticationManagerImplTest {
     @Test
     void authenticated() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserAdm")
                 .password("encoded_password")
@@ -86,7 +86,7 @@ class UserPasswordAuthenticationManagerImplTest {
     void userDisabled() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("12345679")
@@ -112,7 +112,7 @@ class UserPasswordAuthenticationManagerImplTest {
     void userUnverified() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("12345679")
@@ -138,7 +138,7 @@ class UserPasswordAuthenticationManagerImplTest {
     void noMatchPassword() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
@@ -163,7 +163,7 @@ class UserPasswordAuthenticationManagerImplTest {
     void emptyAuthorities() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
@@ -188,7 +188,7 @@ class UserPasswordAuthenticationManagerImplTest {
     void nullAuthorities() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")

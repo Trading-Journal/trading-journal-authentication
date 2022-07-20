@@ -8,7 +8,7 @@ import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenParser;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -55,7 +55,7 @@ public class JwtIntegratedTest {
     @DisplayName("Generate and read access token")
     @Test
     void generateAndReadAccessToken() {
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
@@ -93,7 +93,7 @@ public class JwtIntegratedTest {
     @DisplayName("Generate and read refresh token")
     @Test
     void generateAndReadRefreshToken() {
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")

@@ -5,7 +5,7 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.verification.Verification;
@@ -54,7 +54,7 @@ public class RegistrationServiceImplTest {
                 "123456",
                 "123456");
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
@@ -87,7 +87,7 @@ public class RegistrationServiceImplTest {
                 "123456",
                 "123456");
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
@@ -146,7 +146,7 @@ public class RegistrationServiceImplTest {
     void newEmailVerification() {
         String email = "mail@mail.com";
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
@@ -187,7 +187,7 @@ public class RegistrationServiceImplTest {
     void newEmailVerificationUserEnabled() {
         String email = "mail@mail.com";
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")

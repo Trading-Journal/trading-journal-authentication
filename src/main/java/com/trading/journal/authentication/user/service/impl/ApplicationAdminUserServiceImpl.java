@@ -4,7 +4,7 @@ import com.trading.journal.authentication.authority.AuthoritiesHelper;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.service.ApplicationAdminUserService;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
@@ -38,13 +38,13 @@ public class ApplicationAdminUserServiceImpl implements ApplicationAdminUserServ
 
     @Override
     public void createAdmin(@Valid UserRegistration userRegistration) {
-        ApplicationUser applicationUser = applicationUserRepository.save(adminUser(userRegistration));
+        User applicationUser = applicationUserRepository.save(adminUser(userRegistration));
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
         verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
     }
 
-    private ApplicationUser adminUser(UserRegistration userRegistration) {
-        return ApplicationUser.builder()
+    private User adminUser(UserRegistration userRegistration) {
+        return User.builder()
                 .userName(userRegistration.userName())
                 .password(passwordService.randomPassword())
                 .firstName(userRegistration.firstName())

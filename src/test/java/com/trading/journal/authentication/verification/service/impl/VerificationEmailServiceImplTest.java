@@ -6,7 +6,7 @@ import com.trading.journal.authentication.configuration.properties.HostPropertie
 import com.trading.journal.authentication.email.EmailField;
 import com.trading.journal.authentication.email.EmailRequest;
 import com.trading.journal.authentication.email.service.EmailSender;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationStatus;
@@ -48,7 +48,7 @@ class VerificationEmailServiceImplTest {
         when(hostProperties.getVerificationPage()).thenReturn("auth/email-verified");
         Verification verification = new Verification(1L, "mail@mail.com", VerificationType.REGISTRATION, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -88,7 +88,7 @@ class VerificationEmailServiceImplTest {
         when(hostProperties.getChangePasswordPage()).thenReturn("auth/change-password");
         Verification verification = new Verification(1L, "mail@mail.com", VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -128,7 +128,7 @@ class VerificationEmailServiceImplTest {
         when(hostProperties.getVerificationPage()).thenReturn("auth/email-verified");
         Verification verification = new Verification(1L, "mail@mail.com", VerificationType.ADMIN_REGISTRATION, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")

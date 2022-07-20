@@ -3,7 +3,7 @@ package com.trading.journal.authentication.user.service.impl;
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.properties.AdminUserProperties;
 import com.trading.journal.authentication.user.service.ApplicationAdminUserService;
@@ -68,7 +68,7 @@ class ApplicationAdminUserServiceImplIntegratedTest {
         applicationAdminUserService.createAdmin(adminRegistration);
 
         Long userId;
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail(adminUserProperties.email()).get();
+        User applicationUser = applicationUserRepository.findByEmail(adminUserProperties.email()).get();
         assertThat(applicationUser.getEnabled()).isFalse();
         assertThat(applicationUser.getVerified()).isFalse();
         userId = applicationUser.getId();

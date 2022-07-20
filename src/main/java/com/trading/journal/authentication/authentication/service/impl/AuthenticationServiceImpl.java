@@ -10,7 +10,7 @@ import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public LoginResponse signIn(@Valid Login login) {
         Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password()));
         ContextUser principal = (ContextUser) authenticate.getPrincipal();
-        ApplicationUser applicationUser = applicationUserService.getUserByEmail(principal.email());
+        User applicationUser = applicationUserService.getUserByEmail(principal.email());
 
         TokenData accessToken = jwtTokenProvider.generateAccessToken(applicationUser);
         TokenData refreshToken = jwtTokenProvider.generateRefreshToken(applicationUser);
@@ -51,7 +51,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public LoginResponse refreshToken(String refreshToken) {
         String userName = validateRefreshTokenAndGetUserName(refreshToken);
         UserInfo userInfo = applicationUserService.getUserInfo(userName);
-        ApplicationUser applicationUser = applicationUserService.getUserByEmail(userInfo.getEmail());
+        User applicationUser = applicationUserService.getUserByEmail(userInfo.getEmail());
         TokenData accessToken = jwtTokenProvider.generateAccessToken(applicationUser);
         return new LoginResponse(
                 JwtConstants.TOKEN_TYPE,

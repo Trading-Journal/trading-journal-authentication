@@ -5,7 +5,7 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.userauthority.UserAuthority;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @ExtendWith(SpringExtension.class)
-public class ApplicationUserServiceImplTest {
+public class UserServiceImplTest {
 
     @Mock
     ApplicationUserRepository applicationUserRepository;
@@ -60,7 +60,7 @@ public class ApplicationUserServiceImplTest {
                 "123456",
                 "123456");
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -81,7 +81,7 @@ public class ApplicationUserServiceImplTest {
         when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(applicationUser));
         when(verificationProperties.isEnabled()).thenReturn(false);
 
-        ApplicationUser newUser = applicationUserServiceImpl.createNewUser(userRegistration);
+        User newUser = applicationUserServiceImpl.createNewUser(userRegistration);
         assertThat(newUser.getEnabled()).isTrue();
         assertThat(newUser.getVerified()).isTrue();
     }
@@ -97,7 +97,7 @@ public class ApplicationUserServiceImplTest {
                 "123456",
                 "123456");
 
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -118,7 +118,7 @@ public class ApplicationUserServiceImplTest {
         when(applicationUserRepository.findById(anyLong())).thenReturn(Optional.of(applicationUser));
         when(verificationProperties.isEnabled()).thenReturn(true);
 
-        ApplicationUser newUser = applicationUserServiceImpl.createNewUser(userRegistration);
+        User newUser = applicationUserServiceImpl.createNewUser(userRegistration);
         assertThat(newUser.getEnabled()).isFalse();
         assertThat(newUser.getVerified()).isFalse();
     }
@@ -126,7 +126,7 @@ public class ApplicationUserServiceImplTest {
     @Test
     @DisplayName("Enable and verify user")
     void enableAndVerify() {
-        ApplicationUser disabledUser = ApplicationUser.builder()
+        User disabledUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -139,7 +139,7 @@ public class ApplicationUserServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        ApplicationUser enabledUser =  ApplicationUser.builder()
+        User enabledUser =  User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -169,7 +169,7 @@ public class ApplicationUserServiceImplTest {
     @Test
     @DisplayName("Make user unverified by unproven it")
     void unprovenUser() {
-        ApplicationUser verifiedUser = ApplicationUser.builder()
+        User verifiedUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -182,7 +182,7 @@ public class ApplicationUserServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        ApplicationUser unprovenUser = ApplicationUser.builder()
+        User unprovenUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -326,7 +326,7 @@ public class ApplicationUserServiceImplTest {
     @Test
     @DisplayName("Change password")
     void changePassword() {
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -342,7 +342,7 @@ public class ApplicationUserServiceImplTest {
         when(applicationUserRepository.findByEmail(anyString())).thenReturn(Optional.of(applicationUser));
         when(passwordService.encodePassword("password")).thenReturn("new_password_encoded");
 
-        ApplicationUser applicationUserWithNewPassword = ApplicationUser.builder()
+        User userWithNewPassword = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("new_password_encoded")
@@ -354,7 +354,7 @@ public class ApplicationUserServiceImplTest {
                 .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
                 .authorities(emptyList())
                 .build();
-        when(applicationUserRepository.save(applicationUserWithNewPassword)).thenReturn(applicationUserWithNewPassword);
+        when(applicationUserRepository.save(userWithNewPassword)).thenReturn(userWithNewPassword);
 
         applicationUserServiceImpl.changePassword("mail@mail.com", "password");
     }
@@ -369,7 +369,7 @@ public class ApplicationUserServiceImplTest {
     @Test
     @DisplayName("Given an email load user info")
     void userInfo() {
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -380,8 +380,8 @@ public class ApplicationUserServiceImplTest {
                 .verified(true)
                 .createdAt(LocalDateTime.of(2022, 2, 1, 10, 30, 50))
                 .authorities(asList(
-                        new UserAuthority(new ApplicationUser(), new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
-                        new UserAuthority(new ApplicationUser(), new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
+                        new UserAuthority(new User(), new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
+                        new UserAuthority(new User(), new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
                 ))
                 .build();
 

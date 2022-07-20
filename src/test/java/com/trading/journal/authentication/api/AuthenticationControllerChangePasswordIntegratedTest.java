@@ -8,7 +8,7 @@ import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.password.ChangePassword;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.verification.Verification;
@@ -84,7 +84,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 "dad231#$#4");
 
         applicationUserService.createNewUser(user);
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
+        User applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
         assertThat(applicationUser).isNotNull();
         applicationUser.enable();
         applicationUser.verify();
@@ -268,7 +268,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 "dad231#$#4");
 
         applicationUserService.createNewUser(user);
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
+        User applicationUser = applicationUserRepository.findByEmail(email).orElse(null);
         assertThat(applicationUser).isNotNull();
         applicationUser.enable();
         applicationUser.unproven();

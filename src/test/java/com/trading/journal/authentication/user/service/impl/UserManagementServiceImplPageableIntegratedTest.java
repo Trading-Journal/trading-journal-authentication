@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
-class ApplicationUserManagementServiceImplPageableIntegratedTest {
+class UserManagementServiceImplPageableIntegratedTest {
 
     @Autowired
     ApplicationUserManagementService applicationUserManagementService;

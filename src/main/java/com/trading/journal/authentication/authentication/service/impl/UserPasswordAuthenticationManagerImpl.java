@@ -4,7 +4,7 @@ import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authentication.service.UserPasswordAuthenticationManager;
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.password.service.PasswordService;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,7 +29,7 @@ public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthen
     @Override
     public Authentication authenticate(Authentication authentication) {
         String email = (String) authentication.getPrincipal();
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail(email)
+        User applicationUser = applicationUserRepository.findByEmail(email)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "Bad Credentials"));
         if (!applicationUser.getEnabled() || !applicationUser.getVerified()) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Locked Credentials");
@@ -41,7 +41,7 @@ public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthen
         }
 
         List<SimpleGrantedAuthority> authorities = of(applicationUser)
-                .map(ApplicationUser::getAuthorities)
+                .map(User::getAuthorities)
                 .orElse(emptyList())
                 .stream()
                 .map(userAuthorities -> new SimpleGrantedAuthority(userAuthorities.getAuthority().getName())).toList();

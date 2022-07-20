@@ -3,7 +3,7 @@ package com.trading.journal.authentication.registration.service.impl;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.registration.service.RegistrationService;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.service.ApplicationUserService;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
@@ -26,7 +26,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public SignUpResponse signUp(@Valid UserRegistration userRegistration) {
-        ApplicationUser applicationUser = applicationUserService.createNewUser(userRegistration);
+        User applicationUser = applicationUserService.createNewUser(userRegistration);
         return sendVerification(applicationUser.getEmail());
     }
 
@@ -41,7 +41,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     public SignUpResponse sendVerification(String email) {
         SignUpResponse signUpResponse = new SignUpResponse(email, true);
         if (verificationProperties.isEnabled()) {
-            ApplicationUser applicationUser = applicationUserService.getUserByEmail(email);
+            User applicationUser = applicationUserService.getUserByEmail(email);
             if (!applicationUser.getEnabled()) {
                 verificationService.send(VerificationType.REGISTRATION, applicationUser);
                 signUpResponse = new SignUpResponse(email, false);

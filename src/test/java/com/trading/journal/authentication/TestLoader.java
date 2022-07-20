@@ -3,7 +3,7 @@ package com.trading.journal.authentication;
 import com.trading.journal.authentication.authority.AuthoritiesHelper;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.service.AuthorityService;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.ApplicationUserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
@@ -35,7 +35,7 @@ public class TestLoader {
                     String firstName = names[0];
                     String lastName = names[1];
 
-                    return ApplicationUser.builder()
+                    return User.builder()
                             .userName(userName)
                             .email(email)
                             .password(UUID.randomUUID().toString())

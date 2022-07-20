@@ -8,7 +8,7 @@ import com.trading.journal.authentication.jwt.data.ServiceType;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,7 +50,7 @@ public class JwtTokenProviderImplTest {
     @Test
     @DisplayName("Given user and its roles when generateAccessToken, return JWT token")
     void generateAccessToken() {
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
@@ -71,7 +71,7 @@ public class JwtTokenProviderImplTest {
     @Test
     @DisplayName("Given user and its roles when generateRefreshToken, return JWT token")
     void generateRefreshToken() {
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
@@ -102,7 +102,7 @@ public class JwtTokenProviderImplTest {
     @Test
     @DisplayName("Given user with null roles when generateAccessToken, return exception")
     void nullRoles() {
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
@@ -126,7 +126,7 @@ public class JwtTokenProviderImplTest {
     @Test
     @DisplayName("Given user with empty roles when generateAccessToken, return exception")
     void emptyRoles() throws IOException, NoSuchAlgorithmException {
-        ApplicationUser applicationUser = ApplicationUser.builder()
+        User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
