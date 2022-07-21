@@ -2,12 +2,6 @@
 
 ## Pending
 
-* Tenancy
-  * Create tenancy (Company) entity and registry it during signup
-    * Set the current signup user as company admin (for now just a property in company table)
-    * Add company name to registry as optional
-    * If it is not there create like the username
-  * During login return tenancy (company name) in JWT
 * Tenancy Management
   * Endpoints
   * Enable/Disable - Reflect this on long in
