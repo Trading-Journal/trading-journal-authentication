@@ -4,6 +4,7 @@ import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +33,9 @@ public class AuthenticationControllerSignUpIntegratedTest {
     UserRepository userRepository;
 
     @Autowired
+    TenancyRepository tenancyRepository;
+
+    @Autowired
     private WebTestClient webTestClient;
 
     @MockBean
@@ -40,6 +44,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
     @BeforeEach
     public void setUp() {
         userRepository.deleteAll();
+        tenancyRepository.deleteAll();
         doNothing().when(emailSender).send(any());
     }
 
