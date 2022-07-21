@@ -60,7 +60,7 @@ public class AuthenticationControllerSignInIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        userService.createNewUser(userRegistration);
+        userService.createNewUser(userRegistration, null);
 
         Login login = new Login("mail@mail.com", "dad231#$#4");
 
@@ -109,7 +109,7 @@ public class AuthenticationControllerSignInIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        userService.createNewUser(userRegistration);
+        userService.createNewUser(userRegistration, null);
 
         Login login = new Login("mail4@mail.com", "wrong_password");
 

@@ -1,6 +1,7 @@
 package com.trading.journal.authentication.user.service;
 
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ public interface UserService {
 
     User getUserByEmail(String email);
 
-    User createNewUser(@NotNull UserRegistration userRegistration);
+    User createNewUser(@NotNull UserRegistration userRegistration, Tenancy tenancy);
 
     Boolean validateNewUser(@NotNull String userName, String email);
 

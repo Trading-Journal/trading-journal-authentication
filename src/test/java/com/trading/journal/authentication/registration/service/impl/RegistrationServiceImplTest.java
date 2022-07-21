@@ -5,6 +5,8 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.tenancy.service.TenancyService;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
@@ -33,6 +35,9 @@ public class RegistrationServiceImplTest {
 
     @Mock
     UserService userService;
+
+    @Mock
+    TenancyService tenancyService;
 
     @Mock
     VerificationService verificationService;
@@ -68,7 +73,9 @@ public class RegistrationServiceImplTest {
                 .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(userService.createNewUser(userRegistration)).thenReturn(applicationUser);
+        Tenancy tenancy = Tenancy.builder().id(1L).name("tenancy1").build();
+        when(tenancyService.create(argThat(ten -> ten.getName().equals("UserName")))).thenReturn(tenancy);
+        when(userService.createNewUser(userRegistration, tenancy)).thenReturn(applicationUser);
         when(verificationProperties.isEnabled()).thenReturn(false);
 
         SignUpResponse signUpResponse = registrationService.signUp(userRegistration);
@@ -102,7 +109,9 @@ public class RegistrationServiceImplTest {
                 .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(userService.createNewUser(userRegistration)).thenReturn(applicationUser);
+        Tenancy tenancy = Tenancy.builder().id(1L).name("tenancy1").build();
+        when(tenancyService.create(argThat(ten -> ten.getName().equals("UserName")))).thenReturn(tenancy);
+        when(userService.createNewUser(userRegistration, tenancy)).thenReturn(applicationUser);
         when(userService.getUserByEmail("mail@mail.com")).thenReturn(applicationUser);
         when(verificationProperties.isEnabled()).thenReturn(true);
         doNothing().when(verificationService).send(VerificationType.REGISTRATION, applicationUser);

@@ -84,7 +84,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        userService.createNewUser(user);
+        userService.createNewUser(user, null);
         User applicationUser = userRepository.findByEmail(email).orElse(null);
         assertThat(applicationUser).isNotNull();
         applicationUser.enable();
@@ -269,7 +269,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        userService.createNewUser(user);
+        userService.createNewUser(user, null);
         User applicationUser = userRepository.findByEmail(email).orElse(null);
         assertThat(applicationUser).isNotNull();
         applicationUser.enable();

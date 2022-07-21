@@ -1,14 +1,14 @@
 package com.trading.journal.authentication.registration;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
 import com.trading.journal.authentication.password.validation.PasswordAndConfirmation;
 import com.trading.journal.authentication.password.validation.PasswordConfirmed;
 import com.trading.journal.authentication.password.validation.PasswordPolicy;
 import lombok.*;
 import org.springframework.util.StringUtils;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -48,11 +48,11 @@ public class UserRegistration implements PasswordAndConfirmation {
     private String confirmPassword;
 
     public String getCompanyName() {
-        if (StringUtils.hasText(companyName)) {
-            return companyName;
-        } else {
-            return userName;
+        String name = companyName;
+        if (!StringUtils.hasText(name)) {
+            name = userName;
         }
+        return name;
     }
 
     @Override

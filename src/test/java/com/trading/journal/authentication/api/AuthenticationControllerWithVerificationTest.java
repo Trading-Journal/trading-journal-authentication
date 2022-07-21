@@ -3,6 +3,7 @@ package com.trading.journal.authentication.api;
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.verification.Verification;
@@ -39,6 +40,9 @@ public class AuthenticationControllerWithVerificationTest {
     UserRepository userRepository;
 
     @Autowired
+    TenancyRepository tenancyRepository;
+
+    @Autowired
     VerificationRepository verificationRepository;
 
     @MockBean
@@ -51,6 +55,7 @@ public class AuthenticationControllerWithVerificationTest {
     public void setUp() {
         userRepository.deleteAll();
         verificationRepository.deleteAll();
+        tenancyRepository.deleteAll();
         doNothing().when(verificationEmailService).sendEmail(any(), any());
     }
 
@@ -83,7 +88,6 @@ public class AuthenticationControllerWithVerificationTest {
         Verification verification = verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, "mail2@mail.com").get();
         assertThat(verification.getHash()).isNotBlank();
         assertThat(verification.getStatus()).isEqualTo(VerificationStatus.PENDING);
-
 
         User applicationUser = userRepository.findByEmail("mail2@mail.com").get();
         assertThat(applicationUser.getEnabled()).isFalse();

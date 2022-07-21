@@ -6,8 +6,8 @@ import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.UserInfo;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
@@ -82,7 +82,7 @@ public class UserServiceImplTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(applicationUser));
         when(verificationProperties.isEnabled()).thenReturn(false);
 
-        User newUser = applicationUserServiceImpl.createNewUser(userRegistration);
+        User newUser = applicationUserServiceImpl.createNewUser(userRegistration, null);
         assertThat(newUser.getEnabled()).isTrue();
         assertThat(newUser.getVerified()).isTrue();
     }
@@ -120,7 +120,7 @@ public class UserServiceImplTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(applicationUser));
         when(verificationProperties.isEnabled()).thenReturn(true);
 
-        User newUser = applicationUserServiceImpl.createNewUser(userRegistration);
+        User newUser = applicationUserServiceImpl.createNewUser(userRegistration, null);
         assertThat(newUser.getEnabled()).isFalse();
         assertThat(newUser.getVerified()).isFalse();
     }
@@ -225,7 +225,7 @@ public class UserServiceImplTest {
         when(userRepository.existsByUserName(anyString())).thenReturn(true);
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration, null));
         assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("User name or email already exist");
 
@@ -247,7 +247,7 @@ public class UserServiceImplTest {
         when(userRepository.existsByUserName(anyString())).thenReturn(false);
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration, null));
         assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("User name or email already exist");
 
@@ -269,7 +269,7 @@ public class UserServiceImplTest {
         when(userRepository.existsByUserName(anyString())).thenReturn(true);
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration, null));
         assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("User name or email already exist");
 

@@ -51,7 +51,7 @@ public class MeControllerTest {
     @ParameterizedTest
     @MethodSource("feedUsers")
     void meEndpoint(UserRegistration user) {
-        userService.createNewUser(user);
+        userService.createNewUser(user, null);
 
         Login login = new Login(user.getEmail(), user.getPassword());
 

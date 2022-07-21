@@ -82,7 +82,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        userService.createNewUser(user);
+        userService.createNewUser(user, null);
 
         Login login = new Login(user.getEmail(), user.getPassword());
 
@@ -116,7 +116,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        userService.createNewUser(user);
+        userService.createNewUser(user, null);
 
         Login login = new Login(user.getEmail(), user.getPassword());
 

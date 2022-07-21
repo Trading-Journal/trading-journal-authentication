@@ -3,6 +3,7 @@ package com.trading.journal.authentication.user.service.impl;
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.UserInfo;
@@ -36,12 +37,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createNewUser(@NotNull UserRegistration userRegistration) {
+    public User createNewUser(@NotNull UserRegistration userRegistration, Tenancy tenancy) {
         Boolean validUser = validateNewUser(userRegistration.getUserName(), userRegistration.getEmail());
         if (validUser) {
-            User applicationUser = userRepository.save(user(userRegistration));
-            userAuthorityService.saveCommonUserAuthorities(applicationUser);
-            return applicationUser;
+            User user = userRepository.save(buildUser(userRegistration, tenancy));
+            userAuthorityService.saveCommonUserAuthorities(user);
+            return user;
         } else {
             throw new ApplicationException("User name or email already exist");
         }
@@ -93,9 +94,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(applicationUser);
     }
 
-    private User user(UserRegistration userRegistration) {
+    private User buildUser(UserRegistration userRegistration, Tenancy tenancy) {
         boolean enabledAndVerified = !verificationProperties.isEnabled();
         return User.builder()
+                .tenancy(tenancy)
                 .userName(userRegistration.getUserName())
                 .password(passwordService.encodePassword(userRegistration.getPassword()))
                 .firstName(userRegistration.getFirstName())

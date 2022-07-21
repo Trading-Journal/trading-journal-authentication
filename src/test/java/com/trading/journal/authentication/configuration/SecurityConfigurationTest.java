@@ -111,7 +111,7 @@ public class SecurityConfigurationTest {
                 "johnwick@mail.com",
                 "dad231#$#4",
                 "dad231#$#4");
-        userService.createNewUser(userRegistration);
+        userService.createNewUser(userRegistration, null);
         Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
@@ -170,7 +170,7 @@ public class SecurityConfigurationTest {
                 "johnwick@mail.com",
                 "dad231#$#4",
                 "dad231#$#4");
-        userService.createNewUser(userRegistration);
+        userService.createNewUser(userRegistration, null);
         Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();

@@ -3,6 +3,8 @@ package com.trading.journal.authentication.registration.service.impl;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.registration.service.RegistrationService;
+import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.tenancy.service.TenancyService;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.verification.Verification;
@@ -20,13 +22,16 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private final UserService userService;
 
+    private final TenancyService tenancyService;
+
     private final VerificationService verificationService;
 
     private final VerificationProperties verificationProperties;
 
     @Override
     public SignUpResponse signUp(@Valid UserRegistration userRegistration) {
-        User applicationUser = userService.createNewUser(userRegistration);
+        Tenancy tenancy = tenancyService.create(Tenancy.builder().name(userRegistration.getCompanyName()).build());
+        User applicationUser = userService.createNewUser(userRegistration, tenancy);
         return sendVerification(applicationUser.getEmail());
     }
 
