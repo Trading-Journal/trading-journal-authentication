@@ -5,8 +5,10 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.tenancy.service.TenancyService;
+import com.trading.journal.authentication.user.User;
+import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationStatus;
@@ -21,9 +23,9 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.UUID;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -32,7 +34,10 @@ import static org.mockito.Mockito.*;
 public class RegistrationServiceImplTest {
 
     @Mock
-    ApplicationUserService applicationUserService;
+    UserService userService;
+
+    @Mock
+    TenancyService tenancyService;
 
     @Mock
     VerificationService verificationService;
@@ -47,6 +52,7 @@ public class RegistrationServiceImplTest {
     @DisplayName("When registry a user and it is enabled, don not send verification email")
     void registryWithoutVerification() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName",
@@ -54,19 +60,22 @@ public class RegistrationServiceImplTest {
                 "123456",
                 "123456");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
-        when(applicationUserService.createNewUser(userRegistration)).thenReturn(applicationUser);
+        Tenancy tenancy = Tenancy.builder().id(1L).name("tenancy1").build();
+        when(tenancyService.create(argThat(ten -> ten.getName().equals("UserName")))).thenReturn(tenancy);
+        when(userService.createNewUser(userRegistration, tenancy)).thenReturn(applicationUser);
         when(verificationProperties.isEnabled()).thenReturn(false);
 
         SignUpResponse signUpResponse = registrationService.signUp(userRegistration);
@@ -79,6 +88,7 @@ public class RegistrationServiceImplTest {
     @DisplayName("When registry a user and it is not enabled, send verification email")
     void registryWithVerification() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName",
@@ -86,20 +96,23 @@ public class RegistrationServiceImplTest {
                 "123456",
                 "123456");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                false,
-                false,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
-        when(applicationUserService.createNewUser(userRegistration)).thenReturn(applicationUser);
-        when(applicationUserService.getUserByEmail("mail@mail.com")).thenReturn(applicationUser);
+        Tenancy tenancy = Tenancy.builder().id(1L).name("tenancy1").build();
+        when(tenancyService.create(argThat(ten -> ten.getName().equals("UserName")))).thenReturn(tenancy);
+        when(userService.createNewUser(userRegistration, tenancy)).thenReturn(applicationUser);
+        when(userService.getUserByEmail("mail@mail.com")).thenReturn(applicationUser);
         when(verificationProperties.isEnabled()).thenReturn(true);
         doNothing().when(verificationService).send(VerificationType.REGISTRATION, applicationUser);
 
@@ -122,7 +135,7 @@ public class RegistrationServiceImplTest {
                 LocalDateTime.now());
 
         when(verificationService.retrieve(hash)).thenReturn(verification);
-        doNothing().when(applicationUserService).verifyUser(verification.getEmail());
+        doNothing().when(userService).verifyUser(verification.getEmail());
         doNothing().when(verificationService).verify(verification);
 
         registrationService.verify(hash);
@@ -135,7 +148,7 @@ public class RegistrationServiceImplTest {
         when(verificationService.retrieve(hash)).thenThrow(new ApplicationException("any error message"));
 
         assertThrows(ApplicationException.class, () -> registrationService.verify(hash), "any error message");
-        verify(applicationUserService, never()).verifyUser(any());
+        verify(userService, never()).verifyUser(any());
         verify(verificationService, never()).verify(any());
     }
 
@@ -144,20 +157,21 @@ public class RegistrationServiceImplTest {
     void newEmailVerification() {
         String email = "mail@mail.com";
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                email,
-                false,
-                false,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(false)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(verificationProperties.isEnabled()).thenReturn(true);
-        when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
+        when(userService.getUserByEmail(email)).thenReturn(applicationUser);
         doNothing().when(verificationService).send(VerificationType.REGISTRATION, applicationUser);
 
         SignUpResponse signUpResponse = registrationService.sendVerification(email);
@@ -175,7 +189,7 @@ public class RegistrationServiceImplTest {
         assertThat(signUpResponse.email()).isEqualTo(email);
         assertThat(signUpResponse.enabled()).isTrue();
 
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(verificationService, never()).send(any(), any());
     }
 
@@ -184,20 +198,21 @@ public class RegistrationServiceImplTest {
     void newEmailVerificationUserEnabled() {
         String email = "mail@mail.com";
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "sdsa54ds56a4ds564d",
-                "firstName",
-                "lastName",
-                email,
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         when(verificationProperties.isEnabled()).thenReturn(true);
-        when(applicationUserService.getUserByEmail(email)).thenReturn(applicationUser);
+        when(userService.getUserByEmail(email)).thenReturn(applicationUser);
 
         SignUpResponse signUpResponse = registrationService.sendVerification(email);
         assertThat(signUpResponse.email()).isEqualTo(email);

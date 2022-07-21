@@ -3,10 +3,11 @@ package com.trading.journal.authentication.user.service.impl;
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.user.User;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,9 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class ApplicationUserServiceImpl implements ApplicationUserService {
+public class UserServiceImpl implements UserService {
 
-    private final ApplicationUserRepository applicationUserRepository;
+    private final UserRepository userRepository;
 
     private final UserAuthorityService userAuthorityService;
 
@@ -30,18 +31,18 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     private final PasswordService passwordService;
 
     @Override
-    public ApplicationUser getUserByEmail(@NotBlank String email) {
-        return applicationUserRepository.findByEmail(email)
+    public User getUserByEmail(@NotBlank String email) {
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s does not exist", email)));
     }
 
     @Override
-    public ApplicationUser createNewUser(@NotNull UserRegistration userRegistration) {
-        Boolean validUser = validateNewUser(userRegistration.userName(), userRegistration.email());
+    public User createNewUser(@NotNull UserRegistration userRegistration, Tenancy tenancy) {
+        Boolean validUser = validateNewUser(userRegistration.getUserName(), userRegistration.getEmail());
         if (validUser) {
-            ApplicationUser applicationUser = applicationUserRepository.save(user(userRegistration));
-            userAuthorityService.saveCommonUserAuthorities(applicationUser);
-            return applicationUser;
+            User user = userRepository.save(buildUser(userRegistration, tenancy));
+            userAuthorityService.saveCommonUserAuthorities(user);
+            return user;
         } else {
             throw new ApplicationException("User name or email already exist");
         }
@@ -56,51 +57,52 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
     @Override
     public Boolean userNameExists(@NotBlank String userName) {
-        return applicationUserRepository.existsByUserName(userName);
+        return userRepository.existsByUserName(userName);
     }
 
     @Override
     public Boolean emailExists(@NotBlank String email) {
-        return applicationUserRepository.existsByEmail(email);
+        return userRepository.existsByEmail(email);
     }
 
     @Override
     public UserInfo getUserInfo(@NotBlank String email) {
-        ApplicationUser applicationUser = this.getUserByEmail(email);
+        User applicationUser = this.getUserByEmail(email);
         return new UserInfo(applicationUser);
     }
 
     @Override
     public void verifyUser(@NotBlank String email) {
-        ApplicationUser applicationUser = this.getUserByEmail(email);
+        User applicationUser = this.getUserByEmail(email);
         applicationUser.enable();
         applicationUser.verify();
-        applicationUserRepository.save(applicationUser);
+        userRepository.save(applicationUser);
     }
 
     @Override
     public void unprovenUser(String email) {
-        ApplicationUser applicationUser = this.getUserByEmail(email);
+        User applicationUser = this.getUserByEmail(email);
         applicationUser.unproven();
-        applicationUserRepository.save(applicationUser);
+        userRepository.save(applicationUser);
     }
 
 
     @Override
-    public ApplicationUser changePassword(@NotBlank String email, @NotBlank String password) {
-        ApplicationUser applicationUser = this.getUserByEmail(email);
+    public User changePassword(@NotBlank String email, @NotBlank String password) {
+        User applicationUser = this.getUserByEmail(email);
         applicationUser.changePassword(passwordService.encodePassword(password));
-        return applicationUserRepository.save(applicationUser);
+        return userRepository.save(applicationUser);
     }
 
-    private ApplicationUser user(UserRegistration userRegistration) {
+    private User buildUser(UserRegistration userRegistration, Tenancy tenancy) {
         boolean enabledAndVerified = !verificationProperties.isEnabled();
-        return ApplicationUser.builder()
-                .userName(userRegistration.userName())
-                .password(passwordService.encodePassword(userRegistration.password()))
-                .firstName(userRegistration.firstName())
-                .lastName(userRegistration.lastName())
-                .email(userRegistration.email())
+        return User.builder()
+                .tenancy(tenancy)
+                .userName(userRegistration.getUserName())
+                .password(passwordService.encodePassword(userRegistration.getPassword()))
+                .firstName(userRegistration.getFirstName())
+                .lastName(userRegistration.getLastName())
+                .email(userRegistration.getEmail())
                 .enabled(enabledAndVerified)
                 .verified(enabledAndVerified)
                 .createdAt(LocalDateTime.now())

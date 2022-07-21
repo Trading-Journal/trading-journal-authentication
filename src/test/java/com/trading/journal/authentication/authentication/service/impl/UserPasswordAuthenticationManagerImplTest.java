@@ -5,8 +5,9 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.password.service.PasswordService;
-import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.user.User;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.*;
 class UserPasswordAuthenticationManagerImplTest {
 
     @Mock
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Mock
     PasswordService passwordService;
@@ -44,25 +45,26 @@ class UserPasswordAuthenticationManagerImplTest {
     @Test
     void authenticated() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
-
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                singletonList(new UserAuthority(null,  new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserAdm")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .tenancy(Tenancy.builder().name("UserAdm").build())
+                .build();
+        when(userRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
 
         Authentication authenticated = authenticationManager.authenticate(authenticationToken);
         ContextUser principal = (ContextUser) authenticated.getPrincipal();
         assertThat(principal.email()).isEqualTo("mail@mail.com");
-        assertThat(principal.tenancy()).isEqualTo("UserAdm");
+        assertThat(principal.tenancyName()).isEqualTo("UserAdm");
         assertThat(authenticated.getCredentials()).isNull();
         assertThat(authenticated.getAuthorities()).hasSize(1);
         assertThat(authenticated.getAuthorities()).extracting(GrantedAuthority::getAuthority).containsExactly("ROLE_USER");
@@ -72,7 +74,7 @@ class UserPasswordAuthenticationManagerImplTest {
     @Test
     void userNotFound() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("mail@mail.com")).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -86,18 +88,19 @@ class UserPasswordAuthenticationManagerImplTest {
     void userDisabled() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                false,
-                false,
-                emptyList(),
-                LocalDateTime.now());
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("12345679")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+        when(userRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -111,18 +114,19 @@ class UserPasswordAuthenticationManagerImplTest {
     void userUnverified() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                false,
-                emptyList(),
-                LocalDateTime.now());
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("12345679")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+        when(userRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -136,18 +140,19 @@ class UserPasswordAuthenticationManagerImplTest {
     void noMatchPassword() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now());
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+        when(userRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(false);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
@@ -160,18 +165,19 @@ class UserPasswordAuthenticationManagerImplTest {
     void emptyAuthorities() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now());
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+        when(userRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
@@ -184,18 +190,19 @@ class UserPasswordAuthenticationManagerImplTest {
     void nullAuthorities() {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                null,
-                LocalDateTime.now());
-        when(applicationUserRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(null)
+                .build();
+        when(userRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));

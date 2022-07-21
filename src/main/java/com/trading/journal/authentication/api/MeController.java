@@ -3,7 +3,7 @@ package com.trading.journal.authentication.api;
 import com.trading.journal.authentication.jwt.data.AccessToken;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +15,12 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequiredArgsConstructor
 public class MeController implements MeApi {
 
-    private final ApplicationUserService applicationUserService;
+    private final UserService userService;
 
     @Timed(value = "get_me_info", description = "Amount of time to retrieve user information")
     @Override
     public ResponseEntity<UserInfo> me(@AccessToken AccessTokenInfo accessTokenInfo) {
-        UserInfo userInfo = applicationUserService.getUserInfo(accessTokenInfo.subject());
+        UserInfo userInfo = userService.getUserInfo(accessTokenInfo.subject());
         return ok(userInfo);
     }
 

@@ -10,8 +10,8 @@ import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.UserRepository;
+import com.trading.journal.authentication.user.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.doNothing;
 public class AuthenticationControllerRefreshTokenIntegratedTest {
 
     @Autowired
-    private ApplicationUserService applicationUserService;
+    private UserService userService;
 
     @Autowired
     private AuthenticationService authenticationService;
@@ -56,7 +56,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
     private JwtProperties properties;
 
     @Autowired
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -66,7 +66,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
 
     @BeforeEach
     public void setUp() {
-        applicationUserRepository.deleteAll();
+        userRepository.deleteAll();
         doNothing().when(emailSender).send(any());
     }
 
@@ -74,6 +74,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
     @DisplayName("When refreshing token, return success and new token")
     void refreshToken() {
         UserRegistration user = new UserRegistration(
+                null,
                 "John",
                 "Travolta",
                 "johntravolta",
@@ -81,9 +82,9 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(user);
+        userService.createNewUser(user, null);
 
-        Login login = new Login(user.email(), user.password());
+        Login login = new Login(user.getEmail(), user.getPassword());
 
         LoginResponse loginResponse = authenticationService.signIn(login);
 
@@ -107,6 +108,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
     @DisplayName("When refreshing token with access token, return unauthorized exception")
     void refreshTokenUnauthorized() {
         UserRegistration user = new UserRegistration(
+                null,
                 "allan",
                 "weber",
                 "allanweber",
@@ -114,9 +116,9 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(user);
+        userService.createNewUser(user, null);
 
-        Login login = new Login(user.email(), user.password());
+        Login login = new Login(user.getEmail(), user.getPassword());
 
         LoginResponse loginResponse = authenticationService.signIn(login);
 

@@ -8,9 +8,9 @@ import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,7 +40,7 @@ import static org.mockito.Mockito.*;
 public class AuthenticationServiceImplTest {
 
     @Mock
-    ApplicationUserService applicationUserService;
+    UserService userService;
 
     @Mock
     AuthenticationManager authenticationManager;
@@ -59,23 +60,24 @@ public class AuthenticationServiceImplTest {
         Login login = new Login("mail@mail.com", "123456");
 
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
-        ContextUser principal = new ContextUser("mail@mail.com", "username");
+        ContextUser principal = new ContextUser("mail@mail.com", 1L, "username");
         Authentication authentication = new UsernamePasswordAuthenticationToken(principal, authorities);
         when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password())))
                 .thenReturn(authentication);
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.emptyList(),
-                LocalDateTime.now());
-        when(applicationUserService.getUserByEmail(login.email())).thenReturn(applicationUser);
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("12345679")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        when(userService.getUserByEmail(login.email())).thenReturn(applicationUser);
 
         TokenData accessToken = new TokenData("token", LocalDateTime.now());
         when(jwtTokenProvider.generateAccessToken(applicationUser)).thenReturn(accessToken);
@@ -99,7 +101,7 @@ public class AuthenticationServiceImplTest {
         assertThrows(AuthenticationServiceException.class, () -> authenticationService.signIn(login),
                 "Authentication failed");
 
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(jwtTokenProvider, never()).generateAccessToken(any());
     }
 
@@ -110,26 +112,26 @@ public class AuthenticationServiceImplTest {
 
         when(jwtTokenReader.isTokenValid(refreshToken)).thenReturn(true);
 
-        AccessTokenInfo tokenInfo = new AccessTokenInfo("subject", null,
-                Collections.singletonList("REFRESH_TOKEN"));
+        AccessTokenInfo tokenInfo = new AccessTokenInfo("subject", 1L, null, Collections.singletonList("REFRESH_TOKEN"));
         when(jwtTokenReader.getTokenInfo(refreshToken)).thenReturn(tokenInfo);
 
         UserInfo userInfo = new UserInfo(1L, "subject", "firstName", "lastName", "email@mail.com", true, true,
                 Collections.singletonList("ROLE_USER"), LocalDateTime.now());
-        when(applicationUserService.getUserInfo("subject")).thenReturn(userInfo);
+        when(userService.getUserInfo("subject")).thenReturn(userInfo);
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.emptyList(),
-                LocalDateTime.now());
-        when(applicationUserService.getUserByEmail("email@mail.com")).thenReturn(applicationUser);
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("12345679")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+        when(userService.getUserByEmail("email@mail.com")).thenReturn(applicationUser);
 
         TokenData tokenData = new TokenData("new_token", LocalDateTime.now());
         when(jwtTokenProvider.generateAccessToken(applicationUser)).thenReturn(tokenData);
@@ -151,8 +153,8 @@ public class AuthenticationServiceImplTest {
         assertThat(exception.getStatusText()).isEqualTo("Refresh token is expired");
 
         verify(jwtTokenReader, never()).getTokenInfo(anyString());
-        verify(applicationUserService, never()).getUserInfo(anyString());
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserInfo(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(jwtTokenProvider, never()).generateAccessToken(any());
     }
 
@@ -163,16 +165,15 @@ public class AuthenticationServiceImplTest {
 
         when(jwtTokenReader.isTokenValid(refreshToken)).thenReturn(true);
 
-        AccessTokenInfo tokenInfo = new AccessTokenInfo("subject", null,
-                Collections.singletonList("USER_ROLE"));
+        AccessTokenInfo tokenInfo = new AccessTokenInfo("subject", 1L, null, Collections.singletonList("USER_ROLE"));
         when(jwtTokenReader.getTokenInfo(refreshToken)).thenReturn(tokenInfo);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationService.refreshToken(refreshToken));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(exception.getStatusText()).isEqualTo("Refresh token is invalid or is not a refresh token");
 
-        verify(applicationUserService, never()).getUserInfo(anyString());
-        verify(applicationUserService, never()).getUserByEmail(anyString());
+        verify(userService, never()).getUserInfo(anyString());
+        verify(userService, never()).getUserByEmail(anyString());
         verify(jwtTokenProvider, never()).generateAccessToken(any());
     }
 }

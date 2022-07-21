@@ -3,10 +3,10 @@ package com.trading.journal.authentication.user.service.impl;
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.User;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.properties.AdminUserProperties;
-import com.trading.journal.authentication.user.service.ApplicationAdminUserService;
+import com.trading.journal.authentication.user.service.AdminUserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.verification.Verification;
@@ -30,10 +30,10 @@ import static org.mockito.Mockito.doNothing;
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 @TestPropertySource(properties = {"journal.authentication.admin-user.email=admin@email.com"})
-class ApplicationAdminUserServiceImplIntegratedTest {
+class AdminUserServiceImplIntegratedTest {
 
     @Autowired
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Autowired
     VerificationRepository verificationRepository;
@@ -45,14 +45,14 @@ class ApplicationAdminUserServiceImplIntegratedTest {
     AdminUserProperties adminUserProperties;
 
     @Autowired
-    ApplicationAdminUserService applicationAdminUserService;
+    AdminUserService adminUserService;
 
     @MockBean
     VerificationEmailService verificationEmailService;
 
     @BeforeEach
     public void setUp() {
-        applicationUserRepository.deleteAll();
+        userRepository.deleteAll();
         verificationRepository.deleteAll();
         userAuthorityRepository.deleteAll();
         doNothing().when(verificationEmailService).sendEmail(any(), any());
@@ -60,15 +60,15 @@ class ApplicationAdminUserServiceImplIntegratedTest {
 
     @Test
     void addAdmin() {
-        UserRegistration adminRegistration = new UserRegistration("Admin", "Administrator", "admin", adminUserProperties.email(), null, null);
+        UserRegistration adminRegistration = new UserRegistration(null,"Admin", "Administrator", "admin", adminUserProperties.email(), null, null);
 
-        Boolean thereIsAdmin = applicationAdminUserService.thereIsAdmin();
+        Boolean thereIsAdmin = adminUserService.thereIsAdmin();
         assertThat(thereIsAdmin).isFalse();
 
-        applicationAdminUserService.createAdmin(adminRegistration);
+        adminUserService.createAdmin(adminRegistration);
 
         Long userId;
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail(adminUserProperties.email()).get();
+        User applicationUser = userRepository.findByEmail(adminUserProperties.email()).get();
         assertThat(applicationUser.getEnabled()).isFalse();
         assertThat(applicationUser.getVerified()).isFalse();
         userId = applicationUser.getId();

@@ -1,5 +1,13 @@
+CREATE TABLE `Tenancy` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(254) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
+);
+
 CREATE TABLE `Users` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `tenancyId` int NULL,
   `userName` varchar(45) NOT NULL,
   `password` varchar(2000) NOT NULL,
   `firstName` varchar(45) NOT NULL,
@@ -8,8 +16,8 @@ CREATE TABLE `Users` (
   `enabled` tinyint(1) NOT NULL,
   `verified` tinyint(1) NOT NULL,
   `createdAt` datetime NOT NULL,
-  `authorities` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tenancyIdFk` FOREIGN KEY (`tenancyId`) REFERENCES `Tenancy` (`id`)
 );
 
 CREATE TABLE `Authorities` (

@@ -8,7 +8,7 @@ import com.trading.journal.authentication.jwt.data.ServiceType;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +26,7 @@ import java.security.PrivateKey;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -49,19 +50,19 @@ public class JwtTokenProviderImplTest {
     @Test
     @DisplayName("Given user and its roles when generateAccessToken, return JWT token")
     void generateAccessToken() {
-        ApplicationUser appUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
-
-        TokenData tokenData = tokenProvider.generateAccessToken(appUser);
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
+        TokenData tokenData = tokenProvider.generateAccessToken(applicationUser);
 
         assertThat(tokenData.token()).isNotEmpty();
         assertThat(tokenData.issuedAt()).isBefore(LocalDateTime.now());
@@ -70,19 +71,20 @@ public class JwtTokenProviderImplTest {
     @Test
     @DisplayName("Given user and its roles when generateRefreshToken, return JWT token")
     void generateRefreshToken() {
-        ApplicationUser appUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
-        TokenData tokenData = tokenProvider.generateRefreshToken(appUser);
+        TokenData tokenData = tokenProvider.generateRefreshToken(applicationUser);
 
         assertThat(tokenData.token()).isNotEmpty();
         assertThat(tokenData.issuedAt()).isBefore(LocalDateTime.now());
@@ -100,21 +102,22 @@ public class JwtTokenProviderImplTest {
     @Test
     @DisplayName("Given user with null roles when generateAccessToken, return exception")
     void nullRoles() {
-        ApplicationUser appUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                null,
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(null)
+                .build();
 
         ApplicationException exception = assertThrows(
                 ApplicationException.class,
-                () -> tokenProvider.generateAccessToken(appUser),
+                () -> tokenProvider.generateAccessToken(applicationUser),
                 "User has no authorities");
 
         assertThat(exception.getRawStatusCode()).isEqualTo(401);
@@ -123,23 +126,24 @@ public class JwtTokenProviderImplTest {
     @Test
     @DisplayName("Given user with empty roles when generateAccessToken, return exception")
     void emptyRoles() throws IOException, NoSuchAlgorithmException {
-        ApplicationUser appUser = new ApplicationUser(
-                1L,
-                "UserAdm",
-                "123456",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.emptyList(),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         when(privateKeyProvider.provide(new File("arg"))).thenReturn(mockPrivateKey());
 
         ApplicationException exception = assertThrows(
                 ApplicationException.class,
-                () -> tokenProvider.generateAccessToken(appUser),
+                () -> tokenProvider.generateAccessToken(applicationUser),
                 "User has no authorities");
 
         assertThat(exception.getRawStatusCode()).isEqualTo(401);

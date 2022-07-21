@@ -7,7 +7,7 @@ import com.trading.journal.authentication.authentication.service.AuthenticationS
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.doNothing;
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 public class MeControllerTest {
     @Autowired
-    private ApplicationUserService applicationUserService;
+    private UserService userService;
 
     @Autowired
     private AuthenticationService authenticationService;
@@ -51,9 +51,9 @@ public class MeControllerTest {
     @ParameterizedTest
     @MethodSource("feedUsers")
     void meEndpoint(UserRegistration user) {
-        applicationUserService.createNewUser(user);
+        userService.createNewUser(user, null);
 
-        Login login = new Login(user.email(), user.password());
+        Login login = new Login(user.getEmail(), user.getPassword());
 
         LoginResponse loginResponse = authenticationService.signIn(login);
 
@@ -68,17 +68,17 @@ public class MeControllerTest {
                 .isOk()
                 .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.getUserName()).isEqualTo(user.userName());
-                    assertThat(response.getFirstName()).isEqualTo(user.firstName());
-                    assertThat(response.getLastName()).isEqualTo(user.lastName());
-                    assertThat(response.getEmail()).isEqualTo(user.email());
+                    assertThat(response.getUserName()).isEqualTo(user.getUserName());
+                    assertThat(response.getFirstName()).isEqualTo(user.getFirstName());
+                    assertThat(response.getLastName()).isEqualTo(user.getLastName());
+                    assertThat(response.getEmail()).isEqualTo(user.getEmail());
                     assertThat(response.getAuthorities()).containsExactly("ROLE_USER");
                 });
     }
 
     private static Stream<UserRegistration> feedUsers() {
         return Stream.of(
-                new UserRegistration(
+                new UserRegistration(null,
                         "John",
                         "Wick",
                         "johnwick",
@@ -86,6 +86,7 @@ public class MeControllerTest {
                         "dad231#$#4",
                         "dad231#$#4"),
                 new UserRegistration(
+                        null,
                         "John",
                         "Rambo",
                         "johnrambo",
@@ -93,6 +94,7 @@ public class MeControllerTest {
                         "dad231#$#4",
                         "dad231#$#4"),
                 new UserRegistration(
+                        null,
                         "Han",
                         "Solo ",
                         "hansolo",

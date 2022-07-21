@@ -5,8 +5,8 @@ import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.UserRepository;
+import com.trading.journal.authentication.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,10 +31,10 @@ import static org.mockito.Mockito.doNothing;
 public class AuthenticationControllerSignInIntegratedTest {
 
     @Autowired
-    private ApplicationUserService applicationUserService;
+    private UserService userService;
 
     @Autowired
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -44,7 +44,7 @@ public class AuthenticationControllerSignInIntegratedTest {
 
     @BeforeEach
     public void setUp() {
-        applicationUserRepository.deleteAll();
+        userRepository.deleteAll();
         doNothing().when(emailSender).send(any());
     }
 
@@ -52,6 +52,7 @@ public class AuthenticationControllerSignInIntegratedTest {
     @DisplayName("When signIn user return success and token")
     void signIn() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName",
@@ -59,7 +60,7 @@ public class AuthenticationControllerSignInIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(userRegistration);
+        userService.createNewUser(userRegistration, null);
 
         Login login = new Login("mail@mail.com", "dad231#$#4");
 
@@ -100,6 +101,7 @@ public class AuthenticationControllerSignInIntegratedTest {
     @DisplayName("When signIn with wrong password, return 401")
     void signInFailsPassword() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName4",
@@ -107,7 +109,7 @@ public class AuthenticationControllerSignInIntegratedTest {
                 "dad231#$#4",
                 "dad231#$#4");
 
-        applicationUserService.createNewUser(userRegistration);
+        userService.createNewUser(userRegistration, null);
 
         Login login = new Login("mail4@mail.com", "wrong_password");
 

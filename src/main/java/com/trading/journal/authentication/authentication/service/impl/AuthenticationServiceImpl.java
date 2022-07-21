@@ -10,9 +10,9 @@ import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.service.ApplicationUserService;
+import com.trading.journal.authentication.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,7 +26,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private final ApplicationUserService applicationUserService;
+    private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtTokenReader jwtTokenReader;
@@ -35,7 +35,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public LoginResponse signIn(@Valid Login login) {
         Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password()));
         ContextUser principal = (ContextUser) authenticate.getPrincipal();
-        ApplicationUser applicationUser = applicationUserService.getUserByEmail(principal.email());
+        User applicationUser = userService.getUserByEmail(principal.email());
 
         TokenData accessToken = jwtTokenProvider.generateAccessToken(applicationUser);
         TokenData refreshToken = jwtTokenProvider.generateRefreshToken(applicationUser);
@@ -50,8 +50,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public LoginResponse refreshToken(String refreshToken) {
         String userName = validateRefreshTokenAndGetUserName(refreshToken);
-        UserInfo userInfo = applicationUserService.getUserInfo(userName);
-        ApplicationUser applicationUser = applicationUserService.getUserByEmail(userInfo.getEmail());
+        UserInfo userInfo = userService.getUserInfo(userName);
+        User applicationUser = userService.getUserByEmail(userInfo.getEmail());
         TokenData accessToken = jwtTokenProvider.generateAccessToken(applicationUser);
         return new LoginResponse(
                 JwtConstants.TOKEN_TYPE,

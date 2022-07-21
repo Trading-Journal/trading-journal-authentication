@@ -55,6 +55,7 @@ public class AccessTokenResolverTest {
         when(tokenReader.getAccessTokenInfo(token)).thenReturn(
                 new AccessTokenInfo(
                         "UserAdm",
+                        1L,
                         "tenancy_1",
                         singletonList("USER")));
 
@@ -63,7 +64,7 @@ public class AccessTokenResolverTest {
 
         assert tokenInfo != null;
         assertThat(tokenInfo.subject()).isEqualTo("UserAdm");
-        assertThat(tokenInfo.tenancy()).isEqualTo("tenancy_1");
+        assertThat(tokenInfo.tenancyName()).isEqualTo("tenancy_1");
         assertThat(tokenInfo.scopes()).containsExactly("USER");
     }
 

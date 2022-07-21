@@ -7,8 +7,8 @@ import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.pageable.PageResponse;
-import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.User;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
@@ -26,7 +26,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
 
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -42,26 +41,26 @@ class UsersControllerPagingTest {
 
     @BeforeAll
     public static void setUp(
-            @Autowired ApplicationUserRepository applicationUserRepository,
+            @Autowired UserRepository userRepository,
             @Autowired UserAuthorityRepository userAuthorityRepository,
             @Autowired AuthorityService authorityService,
             @Autowired PasswordEncoder encoder,
             @Autowired AuthenticationService authenticationService,
             @Autowired UserAuthorityService userAuthorityService
     ) {
-        TestLoader.load50Users(applicationUserRepository, userAuthorityRepository, authorityService);
+        TestLoader.load50Users(userRepository, userAuthorityRepository, authorityService);
 
-        ApplicationUser applicationUser = applicationUserRepository.save(new ApplicationUser(
-                null,
-                "johnwick",
-                encoder.encode("dad231#$#4"),
-                "John",
-                "Wick",
-                "johnwick@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now()));
+        User user = User.builder()
+                .userName("johnwick")
+                .password(encoder.encode("dad231#$#4"))
+                .firstName("John")
+                .lastName("Wick")
+                .email("johnwick@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+        User applicationUser = userRepository.save(user);
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
 
         Login login = new Login("johnwick@mail.com", "dad231#$#4");

@@ -4,6 +4,7 @@ import java.util.List;
 
 public record AccessTokenInfo(
         String subject,
-        String tenancy,
+        Long tenancyId,
+        String tenancyName,
         List<String> scopes) {
 }

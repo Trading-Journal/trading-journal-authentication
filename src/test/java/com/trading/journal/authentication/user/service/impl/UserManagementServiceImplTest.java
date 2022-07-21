@@ -5,8 +5,8 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
-import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.User;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.userauthority.UserAuthority;
@@ -34,34 +34,35 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-class ApplicationUserManagementServiceImplTest {
+class UserManagementServiceImplTest {
 
     @Mock
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Mock
     UserAuthorityService userAuthorityService;
 
     @InjectMocks
-    ApplicationUserManagementServiceImpl applicationUserManagementService;
+    UserManagementServiceImpl applicationUserManagementService;
 
     @DisplayName("Given page request page users query without filter")
     @Test
     void pageWithoutFilter() {
         PageableRequest pageableRequest = new PageableRequest(0, 10, null, null);
 
-        when(applicationUserRepository.findAll(null, pageableRequest.pageable())).thenReturn(new PageImpl<>(
-                singletonList(new ApplicationUser(
-                        1L,
-                        "UserAdm",
-                        "encoded_password",
-                        "user",
-                        "admin",
-                        "mail@mail.com",
-                        true,
-                        true,
-                        singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                        LocalDateTime.now())),
+        when(userRepository.findAll(null, pageableRequest.pageable())).thenReturn(new PageImpl<>(
+                singletonList(User.builder()
+                        .id(1L)
+                        .userName("UserName")
+                        .password("password_secret")
+                        .firstName("lastName")
+                        .lastName("Wick")
+                        .email("mail@mail.com")
+                        .enabled(true)
+                        .verified(true)
+                        .createdAt(LocalDateTime.now())
+                        .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                        .build()),
                 pageableRequest.pageable(),
                 2
         ));
@@ -77,18 +78,19 @@ class ApplicationUserManagementServiceImplTest {
     void pageWithFilter() {
         PageableRequest pageableRequest = new PageableRequest(0, 10, null, "any string");
 
-        when(applicationUserRepository.findAll(any(), eq(pageableRequest.pageable()))).thenReturn(new PageImpl<>(
-                singletonList(new ApplicationUser(
-                        1L,
-                        "UserAdm",
-                        "encoded_password",
-                        "user",
-                        "admin",
-                        "mail@mail.com",
-                        true,
-                        true,
-                        singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                        LocalDateTime.now())),
+        when(userRepository.findAll(any(), eq(pageableRequest.pageable()))).thenReturn(new PageImpl<>(
+                singletonList(User.builder()
+                        .id(1L)
+                        .userName("UserName")
+                        .password("password_secret")
+                        .firstName("lastName")
+                        .lastName("Wick")
+                        .email("mail@mail.com")
+                        .enabled(true)
+                        .verified(true)
+                        .createdAt(LocalDateTime.now())
+                        .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                        .build()),
                 pageableRequest.pageable(),
                 2
         ));
@@ -104,17 +106,18 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void getUserById() {
         Long userId = 10L;
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now())));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build()));
 
         UserInfo userInfo = applicationUserManagementService.getUserById(userId);
         assertThat(userInfo).isNotNull();
@@ -124,7 +127,7 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void getUserByIdNotFound() {
         Long userId = 10L;
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.getUserById(userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -135,21 +138,22 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void disableUser() {
         Long userId = 10L;
-        ApplicationUser applicationUser = new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 
-        when(applicationUserRepository.save(argThat(user -> user.getEnabled().equals(false)))).thenReturn(applicationUser);
+        when(userRepository.save(argThat(user -> user.getEnabled().equals(false)))).thenReturn(applicationUser);
 
         applicationUserManagementService.disableUserById(userId);
     }
@@ -158,7 +162,7 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void disableUserNotFound() {
         Long userId = 10L;
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.disableUserById(userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -169,21 +173,22 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void enableUser() {
         Long userId = 10L;
-        ApplicationUser applicationUser = new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                false,
-                true,
-                emptyList(),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 
-        when(applicationUserRepository.save(argThat(user -> user.getEnabled().equals(true)))).thenReturn(applicationUser);
+        when(userRepository.save(argThat(user -> user.getEnabled().equals(true)))).thenReturn(applicationUser);
 
         applicationUserManagementService.enableUserById(userId);
     }
@@ -192,7 +197,7 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void enableUserNotFound() {
         Long userId = 10L;
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.enableUserById(userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -203,30 +208,31 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void deleteUser() {
         Long userId = 10L;
-        ApplicationUser applicationUser = new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                false,
-                true,
-                emptyList(),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 
         applicationUserManagementService.deleteUserById(userId);
 
-        verify(applicationUserRepository).delete(applicationUser);
+        verify(userRepository).delete(applicationUser);
     }
 
     @DisplayName("Delete user that does not exists return not found exception")
     @Test
     void deleteUserNotFound() {
         Long userId = 10L;
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.deleteUserById(userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -237,19 +243,20 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void changeUserAuthorities() {
         Long userId = 10L;
-        ApplicationUser applicationUser = new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                false,
-                true,
-                emptyList(),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 
         List<UserAuthority> userAuthorities = Arrays.asList(
                 new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
@@ -267,7 +274,7 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void changeUserAuthoritiesNotFound() {
         Long userId = 10L;
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class,
                 () -> applicationUserManagementService.addAuthorities(userId, new AuthoritiesChange(singletonList("USER_ROLE")))
@@ -280,22 +287,23 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void removeUserAuthorities() {
         Long userId = 10L;
-        ApplicationUser applicationUser = new ApplicationUser(
-                userId,
-                "UserAdm",
-                "encoded_password",
-                "user",
-                "admin",
-                "mail@mail.com",
-                false,
-                true,
-                Arrays.asList(
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password_secret")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(Arrays.asList(
                         new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
                         new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
-                ),
-                LocalDateTime.now());
+                ))
+                .build();
 
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
 
         List<UserAuthority> userAuthorities = singletonList(
                 new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
@@ -312,7 +320,7 @@ class ApplicationUserManagementServiceImplTest {
     @Test
     void removeUserAuthoritiesNotFound() {
         Long userId = 10L;
-        when(applicationUserRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class,
                 () -> applicationUserManagementService.deleteAuthorities(userId, new AuthoritiesChange(singletonList("USER_ROLE")))

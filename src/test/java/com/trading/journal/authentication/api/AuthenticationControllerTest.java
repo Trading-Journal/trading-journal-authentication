@@ -3,7 +3,7 @@ package com.trading.journal.authentication.api;
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,14 +35,14 @@ public class AuthenticationControllerTest {
     private WebTestClient webTestClient;
 
     @Autowired
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @MockBean
     EmailSender emailSender;
 
     @BeforeEach
     public void setUp() {
-        applicationUserRepository.deleteAll();
+        userRepository.deleteAll();
         doNothing().when(emailSender).send(any());
     }
 
@@ -50,6 +50,7 @@ public class AuthenticationControllerTest {
     @DisplayName("When signUp as new user return success and the UserAuthority entity has an id to Authority entity")
     void signUp() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName5",

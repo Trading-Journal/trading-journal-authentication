@@ -40,7 +40,7 @@ public class UserInfo {
     @JsonFormat(pattern = DateHelper.DATE_TIME_FORMAT)
     private LocalDateTime createdAt;
 
-    public UserInfo(ApplicationUser applicationUser) {
+    public UserInfo(User applicationUser) {
         this.id = applicationUser.getId();
         this.userName = applicationUser.getUserName();
         this.firstName = applicationUser.getFirstName();

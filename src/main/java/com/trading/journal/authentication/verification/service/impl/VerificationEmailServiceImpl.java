@@ -4,7 +4,7 @@ import com.trading.journal.authentication.configuration.properties.HostPropertie
 import com.trading.journal.authentication.email.EmailField;
 import com.trading.journal.authentication.email.EmailRequest;
 import com.trading.journal.authentication.email.service.EmailSender;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationFields;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
@@ -27,12 +27,12 @@ public class VerificationEmailServiceImpl implements VerificationEmailService {
     private final HostProperties hostProperties;
 
     @Override
-    public void sendEmail(Verification verification, ApplicationUser applicationUser) {
+    public void sendEmail(Verification verification, User applicationUser) {
         EmailRequest emailRequest = buildEmailRequest(verification, applicationUser);
         emailSender.send(emailRequest);
     }
 
-    private EmailRequest buildEmailRequest(Verification verification, ApplicationUser applicationUser) {
+    private EmailRequest buildEmailRequest(Verification verification, User applicationUser) {
         String name = applicationUser.getFirstName().concat(" ").concat(applicationUser.getLastName());
         return switch (verification.getType()) {
             case REGISTRATION -> new EmailRequest(

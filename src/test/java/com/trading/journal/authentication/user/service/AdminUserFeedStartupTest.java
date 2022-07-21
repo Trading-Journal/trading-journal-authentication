@@ -14,28 +14,28 @@ import static org.mockito.Mockito.*;
 class AdminUserFeedStartupTest {
 
     @Mock
-    ApplicationAdminUserService applicationAdminUserService;
+    AdminUserService adminUserService;
 
     @DisplayName("Execute creation of a admin user")
     @Test
     void createAdmin() {
         AdminUserProperties properties = new AdminUserProperties("mail@mail.com");
-        AdminUserFeedStartup adminUserFeedStartup = new AdminUserFeedStartup(applicationAdminUserService, properties);
+        AdminUserFeedStartup adminUserFeedStartup = new AdminUserFeedStartup(adminUserService, properties);
 
-        when(applicationAdminUserService.thereIsAdmin()).thenReturn(false);
+        when(adminUserService.thereIsAdmin()).thenReturn(false);
 
         adminUserFeedStartup.onApplicationEvent(null);
 
-        UserRegistration userRegistration = new UserRegistration("Admin", "Administrator", "admin", "mail@mail.com", null, null);
-        verify(applicationAdminUserService).createAdmin(userRegistration);
+        UserRegistration userRegistration = new UserRegistration(null,"Admin", "Administrator", "admin", "mail@mail.com", null, null);
+        verify(adminUserService).createAdmin(userRegistration);
     }
 
     @DisplayName("Do not creation a admin user")
     @Test
     void notCreateAdmin() {
-        AdminUserFeedStartup adminUserFeedStartup = new AdminUserFeedStartup(applicationAdminUserService, null);
-        when(applicationAdminUserService.thereIsAdmin()).thenReturn(true);
+        AdminUserFeedStartup adminUserFeedStartup = new AdminUserFeedStartup(adminUserService, null);
+        when(adminUserService.thereIsAdmin()).thenReturn(true);
         adminUserFeedStartup.onApplicationEvent(null);
-        verify(applicationAdminUserService, never()).createAdmin(any());
+        verify(adminUserService, never()).createAdmin(any());
     }
 }

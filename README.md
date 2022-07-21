@@ -2,8 +2,20 @@
 
 ## Pending
 
+* Tenancy Management
+  * Endpoints
+  * Enable/Disable - Reflect this on long in
+  * Set user limits on creation
+  * Endpoint to retrieve tenancy usage and available
+* Role tenancy (Company) Administrator
+  * Can load and change user for the same tenancy (Company)
+  * Can manage users - based on tenancy limits
 * Delete account
-* Set and document environment variables
+  * Delete common user
+  * Delete tenancy (Company) admin user:
+    * Set another user as admin
+    * Or remove the whole tenancy (Company)
+* Set and document environment variables and properties
 * Test Container/Kubernetes deploy with adding keys files
 * Postman Test run
 * One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
@@ -33,17 +45,6 @@ Or just [http://localhost:8080](http://localhost:8080)
 docker run -d -e MYSQL_USER=trade-journal -e MYSQL_PASSWORD=trade-journal -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=trade-journal -p 3306:3306 mysql:latest
 ```
 
-#### SMTP Server
-
-```bash
-docker run -d -p 587:587 --name mail \
-    -e RELAY_HOST=smtp.example.com \
-    -e RELAY_PORT=587 \
-    -e RELAY_USERNAME=alice@example.com \
-    -e RELAY_PASSWORD=secretpassword \
-    -d bytemark/smtp
-```
-
 ### Keys Dependencies
 
 ```bash
@@ -58,8 +59,16 @@ openssl rsa -in secret_key.pem -pubout -outform PEM -out public_key.pem
 ### Database Schema
 
 ```
+CREATE TABLE `Tenancy` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(254) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
+);
+
 CREATE TABLE `Users` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `tenancyId` int NULL,
   `userName` varchar(45) NOT NULL,
   `password` varchar(2000) NOT NULL,
   `firstName` varchar(45) NOT NULL,
@@ -68,8 +77,8 @@ CREATE TABLE `Users` (
   `enabled` tinyint(1) NOT NULL,
   `verified` tinyint(1) NOT NULL,
   `createdAt` datetime NOT NULL,
-  `authorities` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tenancyIdFk` FOREIGN KEY (`tenancyId`) REFERENCES `Tenancy` (`id`)
 );
 
 CREATE TABLE `Authorities` (

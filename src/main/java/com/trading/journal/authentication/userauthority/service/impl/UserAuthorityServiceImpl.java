@@ -3,7 +3,7 @@ package com.trading.journal.authentication.userauthority.service.impl;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.service.AuthorityService;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
@@ -26,7 +26,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     private final AuthorityService authorityService;
 
     @Override
-    public List<UserAuthority> saveCommonUserAuthorities(ApplicationUser applicationUser) {
+    public List<UserAuthority> saveCommonUserAuthorities(User applicationUser) {
         return authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)
                 .stream()
                 .map(authority -> new UserAuthority(applicationUser, authority))
@@ -35,7 +35,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     }
 
     @Override
-    public List<UserAuthority> saveAdminUserAuthorities(ApplicationUser applicationUser) {
+    public List<UserAuthority> saveAdminUserAuthorities(User applicationUser) {
         return authorityService.getAll()
                 .stream()
                 .map(authority -> new UserAuthority(applicationUser, authority))
@@ -44,7 +44,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     }
 
     @Override
-    public List<UserAuthority> addAuthorities(ApplicationUser applicationUser, AuthoritiesChange authoritiesChange) {
+    public List<UserAuthority> addAuthorities(User applicationUser, AuthoritiesChange authoritiesChange) {
         List<Authority> authorities = authoritiesChange.authorities().stream()
                 .map(authorityService::getByName)
                 .filter(Optional::isPresent)
@@ -61,7 +61,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     }
 
     @Override
-    public List<UserAuthority> deleteAuthorities(ApplicationUser applicationUser, AuthoritiesChange authoritiesChange) {
+    public List<UserAuthority> deleteAuthorities(User applicationUser, AuthoritiesChange authoritiesChange) {
         List<Authority> authorities = authoritiesChange.authorities().stream()
                 .map(authorityService::getByName)
                 .filter(Optional::isPresent)
@@ -75,7 +75,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
         return userAuthoritiesToRemove;
     }
 
-    private Predicate<Authority> filterOutEqualAuthorities(ApplicationUser applicationUser) {
+    private Predicate<Authority> filterOutEqualAuthorities(User applicationUser) {
         return authority -> applicationUser
                 .getAuthorities()
                 .stream()

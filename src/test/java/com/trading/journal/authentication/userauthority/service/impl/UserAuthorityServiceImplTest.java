@@ -3,7 +3,7 @@ package com.trading.journal.authentication.userauthority.service.impl;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.service.AuthorityService;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
@@ -16,10 +16,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,17 +40,18 @@ class UserAuthorityServiceImplTest {
     @DisplayName("Given application user for ONE authority when saving common authorities, save user authorities")
     @Test
     void saveOneCommonAuthority() {
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.emptyList(),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         Authority authority = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
         when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(singletonList(authority));
@@ -66,17 +67,18 @@ class UserAuthorityServiceImplTest {
     @DisplayName("Given application user for TWO authority when saving common authorities, save user authorities")
     @Test
     void saveTwoCommonAuthority() {
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.emptyList(),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         Authority authority1 = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
         Authority authority2 = Authority.builder().id(2L).category(AuthorityCategory.COMMON_USER).name("ADMIN").build();
@@ -96,17 +98,18 @@ class UserAuthorityServiceImplTest {
     @DisplayName("Given application user for admin authority when saving admin authorities, save user authorities")
     @Test
     void saveOneAdminAuthority() {
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                Collections.emptyList(),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
 
         Authority authorityAdmin = Authority.builder().id(1L).category(AuthorityCategory.ADMINISTRATOR).name("ADMIN").build();
         Authority authorityUser = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
@@ -130,17 +133,18 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
 
@@ -154,20 +158,20 @@ class UserAuthorityServiceImplTest {
 
         when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
-
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                List.of(
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(
                         new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
-                ),
-                LocalDateTime.now());
+                ))
+                .build();
 
         userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
 
@@ -183,17 +187,18 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
         when(authorityService.getByName("ANOTHER_ROLE")).thenReturn(Optional.of(new Authority(3L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE")));
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
 
@@ -208,19 +213,20 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                List.of(
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(
                         new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
-                        new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))),
-                LocalDateTime.now());
+                        new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))))
+                .build();
 
         userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
 
@@ -235,17 +241,18 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))),
-                LocalDateTime.now());
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
 
         userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
 
@@ -261,20 +268,21 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
         when(authorityService.getByName("ANOTHER_ROLE")).thenReturn(Optional.of(new Authority(5L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE")));
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                List.of(
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(
                         new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
                         new UserAuthority(null, new Authority(3L, AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"))
-                ),
-                LocalDateTime.now());
+                ))
+                .build();
 
         userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
 
@@ -289,19 +297,20 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
         when(authorityService.getByName("ANOTHER_ROLE")).thenReturn(Optional.of(new Authority(3L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE")));
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
                         , new UserAuthority(null, new Authority(2L, AuthorityCategory.COMMON_USER, "ROLE_ADMIN"))
-                        , new UserAuthority(null, new Authority(3L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE"))),
-                LocalDateTime.now());
+                        , new UserAuthority(null, new Authority(3L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE"))))
+                .build();
 
         userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
 
@@ -316,20 +325,21 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ANOTHER_ROLE_USER")).thenReturn(Optional.empty());
         when(authorityService.getByName("ANOTHER_ROLE_ADMIN")).thenReturn(Optional.empty());
 
-        ApplicationUser applicationUser = new ApplicationUser(
-                1L,
-                "UserName",
-                "12345679",
-                "firstName",
-                "lastName",
-                "mail@mail.com",
-                true,
-                true,
-                List.of(
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(
                         new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
                         , new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
-                ),
-                LocalDateTime.now());
+                ))
+                .build();
 
         userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
 

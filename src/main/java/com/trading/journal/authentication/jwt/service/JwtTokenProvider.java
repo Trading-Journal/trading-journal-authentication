@@ -1,13 +1,13 @@
 package com.trading.journal.authentication.jwt.service;
 
 import com.trading.journal.authentication.jwt.data.TokenData;
-import com.trading.journal.authentication.user.ApplicationUser;
+import com.trading.journal.authentication.user.User;
 
 public interface JwtTokenProvider {
 
-    TokenData generateAccessToken(ApplicationUser applicationUser);
+    TokenData generateAccessToken(User applicationUser);
 
-    TokenData generateRefreshToken(ApplicationUser applicationUser);
+    TokenData generateRefreshToken(User applicationUser);
 
     TokenData generateTemporaryToken(String email);
 }

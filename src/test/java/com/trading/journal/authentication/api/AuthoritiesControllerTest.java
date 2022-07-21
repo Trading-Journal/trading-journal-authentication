@@ -7,8 +7,8 @@ import com.trading.journal.authentication.authentication.service.AuthenticationS
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.AuthorityRepository;
-import com.trading.journal.authentication.user.ApplicationUser;
-import com.trading.journal.authentication.user.ApplicationUserRepository;
+import com.trading.journal.authentication.user.User;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
@@ -29,7 +29,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -46,29 +45,29 @@ class AuthoritiesControllerTest {
     UserAuthorityRepository userAuthorityRepository;
 
     @Autowired
-    ApplicationUserRepository applicationUserRepository;
+    UserRepository userRepository;
 
     @Autowired
     private WebTestClient webTestClient;
 
     @BeforeAll
     public static void setUp(
-            @Autowired ApplicationUserRepository applicationUserRepository,
+            @Autowired UserRepository userRepository,
             @Autowired PasswordEncoder encoder,
             @Autowired AuthenticationService authenticationService,
             @Autowired UserAuthorityService userAuthorityService
     ) {
-        ApplicationUser applicationUser = applicationUserRepository.save(new ApplicationUser(
-                null,
-                "johnwick3",
-                encoder.encode("dad231#$#4"),
-                "John",
-                "Wick",
-                "johnwick3@mail.com",
-                true,
-                true,
-                emptyList(),
-                LocalDateTime.now()));
+        User user = User.builder()
+                .userName("johnwick3")
+                .password(encoder.encode("dad231#$#4"))
+                .firstName("John")
+                .lastName("Wick")
+                .email("johnwick3@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+        User applicationUser = userRepository.save(user);
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
 
         Login login = new Login("johnwick3@mail.com", "dad231#$#4");
@@ -270,7 +269,7 @@ class AuthoritiesControllerTest {
     @Test
     void delete() {
 
-        ApplicationUser applicationUser = applicationUserRepository.findByEmail("johnwick3@mail.com").orElse(null);
+        User applicationUser = userRepository.findByEmail("johnwick3@mail.com").orElse(null);
         assertThat(applicationUser).isNotNull();
         Authority anotherRole = authorityRepository.save(new Authority(AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"));
         UserAuthority anotherRoleUserAuthority = userAuthorityRepository.save(

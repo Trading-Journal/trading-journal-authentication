@@ -22,7 +22,6 @@ import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.data.ServiceType;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 
-import com.trading.journal.authentication.jwt.service.impl.JwtTokenParserImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,7 +55,7 @@ public class JwtTokenParserImplTest {
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
                 .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
-                .claim(JwtConstants.TENANCY, "tenancy_1")
+                .claim(JwtConstants.TENANCY_ID, "tenancy_1")
                 .compact();
 
         JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L, "issuer", "audience");
@@ -67,7 +66,7 @@ public class JwtTokenParserImplTest {
 
         assertThat(claims.getBody().getSubject()).isEqualTo("user_name");
         assertThat(claims.getBody().get(JwtConstants.SCOPES)).isEqualTo(Collections.singletonList("ROLE_USER"));
-        assertThat(claims.getBody().get(JwtConstants.TENANCY)).isEqualTo("tenancy_1");
+        assertThat(claims.getBody().get(JwtConstants.TENANCY_ID)).isEqualTo("tenancy_1");
     }
 
     @Test
@@ -86,7 +85,7 @@ public class JwtTokenParserImplTest {
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
                 .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
-                .claim(JwtConstants.TENANCY, "tenancy_1")
+                .claim(JwtConstants.TENANCY_ID, "tenancy_1")
                 .compact();
 
         JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L, "issuer", "audience");
@@ -117,7 +116,7 @@ public class JwtTokenParserImplTest {
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
                 .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
-                .claim(JwtConstants.TENANCY, "tenancy_1")
+                .claim(JwtConstants.TENANCY_ID, "tenancy_1")
                 .compact();
 
         JwtProperties properties = new JwtProperties(ServiceType.PROVIDER, new File("arg"), new File("arg"), 10L, 10L, "issuer", "audience");
