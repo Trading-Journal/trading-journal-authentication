@@ -76,6 +76,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
         String email = "mail@mail.com";
 
         UserRegistration user = new UserRegistration(
+                null,
                 "allan",
                 "weber",
                 "allanweber",
@@ -260,6 +261,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
     void changePassword() {
         String email = "mail@email.com";
         UserRegistration user = new UserRegistration(
+                null,
                 "allan",
                 "weber",
                 "allanweber",

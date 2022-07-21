@@ -104,6 +104,7 @@ public class SecurityConfigurationTest {
     @Test
     void invalidAdminAccess() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "John",
                 "Wick",
                 "johnwick",
@@ -111,7 +112,7 @@ public class SecurityConfigurationTest {
                 "dad231#$#4",
                 "dad231#$#4");
         userService.createNewUser(userRegistration);
-        Login login = new Login(userRegistration.email(), userRegistration.password());
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
 
@@ -129,6 +130,7 @@ public class SecurityConfigurationTest {
     @Test
     void adminAccess() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "John",
                 "Wick",
                 "johnwick",
@@ -143,7 +145,7 @@ public class SecurityConfigurationTest {
         applicationUser.changePassword(encoder.encode("dad231#$#4"));
         userRepository.save(applicationUser);
 
-        Login login = new Login(userRegistration.email(), userRegistration.password());
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
 
@@ -161,6 +163,7 @@ public class SecurityConfigurationTest {
     @Test
     void invalidAdminAccessAuthorities() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "John",
                 "Wick",
                 "johnwick",
@@ -168,7 +171,7 @@ public class SecurityConfigurationTest {
                 "dad231#$#4",
                 "dad231#$#4");
         userService.createNewUser(userRegistration);
-        Login login = new Login(userRegistration.email(), userRegistration.password());
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
 
@@ -184,8 +187,9 @@ public class SecurityConfigurationTest {
 
     @DisplayName("Access authorities admin path with Admin user is granted")
     @Test
-    void adminAccessauthorities() {
+    void adminAccessAuthorities() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "John",
                 "Wick",
                 "johnwick",
@@ -200,7 +204,7 @@ public class SecurityConfigurationTest {
         applicationUser.changePassword(encoder.encode("dad231#$#4"));
         userRepository.save(applicationUser);
 
-        Login login = new Login(userRegistration.email(), userRegistration.password());
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
 

@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createNewUser(@NotNull UserRegistration userRegistration) {
-        Boolean validUser = validateNewUser(userRegistration.userName(), userRegistration.email());
+        Boolean validUser = validateNewUser(userRegistration.getUserName(), userRegistration.getEmail());
         if (validUser) {
             User applicationUser = userRepository.save(user(userRegistration));
             userAuthorityService.saveCommonUserAuthorities(applicationUser);
@@ -96,11 +96,11 @@ public class UserServiceImpl implements UserService {
     private User user(UserRegistration userRegistration) {
         boolean enabledAndVerified = !verificationProperties.isEnabled();
         return User.builder()
-                .userName(userRegistration.userName())
-                .password(passwordService.encodePassword(userRegistration.password()))
-                .firstName(userRegistration.firstName())
-                .lastName(userRegistration.lastName())
-                .email(userRegistration.email())
+                .userName(userRegistration.getUserName())
+                .password(passwordService.encodePassword(userRegistration.getPassword()))
+                .firstName(userRegistration.getFirstName())
+                .lastName(userRegistration.getLastName())
+                .email(userRegistration.getEmail())
                 .enabled(enabledAndVerified)
                 .verified(enabledAndVerified)
                 .createdAt(LocalDateTime.now())

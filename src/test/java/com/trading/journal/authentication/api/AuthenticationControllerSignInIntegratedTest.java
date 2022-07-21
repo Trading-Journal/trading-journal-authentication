@@ -52,6 +52,7 @@ public class AuthenticationControllerSignInIntegratedTest {
     @DisplayName("When signIn user return success and token")
     void signIn() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName",
@@ -100,6 +101,7 @@ public class AuthenticationControllerSignInIntegratedTest {
     @DisplayName("When signIn with wrong password, return 401")
     void signInFailsPassword() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName4",

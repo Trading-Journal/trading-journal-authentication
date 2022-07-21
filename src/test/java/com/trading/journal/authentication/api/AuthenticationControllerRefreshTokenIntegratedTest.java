@@ -74,6 +74,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
     @DisplayName("When refreshing token, return success and new token")
     void refreshToken() {
         UserRegistration user = new UserRegistration(
+                null,
                 "John",
                 "Travolta",
                 "johntravolta",
@@ -83,7 +84,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
 
         userService.createNewUser(user);
 
-        Login login = new Login(user.email(), user.password());
+        Login login = new Login(user.getEmail(), user.getPassword());
 
         LoginResponse loginResponse = authenticationService.signIn(login);
 
@@ -107,6 +108,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
     @DisplayName("When refreshing token with access token, return unauthorized exception")
     void refreshTokenUnauthorized() {
         UserRegistration user = new UserRegistration(
+                null,
                 "allan",
                 "weber",
                 "allanweber",
@@ -116,7 +118,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
 
         userService.createNewUser(user);
 
-        Login login = new Login(user.email(), user.password());
+        Login login = new Login(user.getEmail(), user.getPassword());
 
         LoginResponse loginResponse = authenticationService.signIn(login);
 

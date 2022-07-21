@@ -47,6 +47,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
     @DisplayName("When signUp as new user return success and the UserAuthority entity has AuthorityId because the authorities are static")
     void signUp() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName2",
@@ -78,6 +79,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 null,
                 null,
                 null,
+                null,
                 null);
 
         webTestClient
@@ -104,6 +106,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
     @DisplayName("When signUp as new user with invalid email return error for the invalid input")
     void signUpInvalidEmail() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName2",
@@ -130,6 +133,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
     @DisplayName("When signUp as new user with password and confirmation different return error for the invalid input")
     void signUpInvalidPasswords() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName2",

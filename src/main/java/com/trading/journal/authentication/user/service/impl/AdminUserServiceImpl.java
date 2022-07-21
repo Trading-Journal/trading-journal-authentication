@@ -45,11 +45,11 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     private User adminUser(UserRegistration userRegistration) {
         return User.builder()
-                .userName(userRegistration.userName())
+                .userName(userRegistration.getUserName())
                 .password(passwordService.randomPassword())
-                .firstName(userRegistration.firstName())
-                .lastName(userRegistration.lastName())
-                .email(userRegistration.email())
+                .firstName(userRegistration.getFirstName())
+                .lastName(userRegistration.getLastName())
+                .email(userRegistration.getEmail())
                 .enabled(false)
                 .verified(false)
                 .createdAt(LocalDateTime.now())

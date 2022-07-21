@@ -53,7 +53,7 @@ public class MeControllerTest {
     void meEndpoint(UserRegistration user) {
         userService.createNewUser(user);
 
-        Login login = new Login(user.email(), user.password());
+        Login login = new Login(user.getEmail(), user.getPassword());
 
         LoginResponse loginResponse = authenticationService.signIn(login);
 
@@ -68,17 +68,17 @@ public class MeControllerTest {
                 .isOk()
                 .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.getUserName()).isEqualTo(user.userName());
-                    assertThat(response.getFirstName()).isEqualTo(user.firstName());
-                    assertThat(response.getLastName()).isEqualTo(user.lastName());
-                    assertThat(response.getEmail()).isEqualTo(user.email());
+                    assertThat(response.getUserName()).isEqualTo(user.getUserName());
+                    assertThat(response.getFirstName()).isEqualTo(user.getFirstName());
+                    assertThat(response.getLastName()).isEqualTo(user.getLastName());
+                    assertThat(response.getEmail()).isEqualTo(user.getEmail());
                     assertThat(response.getAuthorities()).containsExactly("ROLE_USER");
                 });
     }
 
     private static Stream<UserRegistration> feedUsers() {
         return Stream.of(
-                new UserRegistration(
+                new UserRegistration(null,
                         "John",
                         "Wick",
                         "johnwick",
@@ -86,6 +86,7 @@ public class MeControllerTest {
                         "dad231#$#4",
                         "dad231#$#4"),
                 new UserRegistration(
+                        null,
                         "John",
                         "Rambo",
                         "johnrambo",
@@ -93,6 +94,7 @@ public class MeControllerTest {
                         "dad231#$#4",
                         "dad231#$#4"),
                 new UserRegistration(
+                        null,
                         "Han",
                         "Solo ",
                         "hansolo",

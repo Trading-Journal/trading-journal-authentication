@@ -50,6 +50,7 @@ public class AuthenticationControllerTest {
     @DisplayName("When signUp as new user return success and the UserAuthority entity has an id to Authority entity")
     void signUp() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName5",

@@ -58,6 +58,7 @@ public class AuthenticationControllerWithVerificationTest {
     @DisplayName("When signUp as new user with verification enabled user must be created disabled")
     void signUp() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName2",
@@ -93,6 +94,7 @@ public class AuthenticationControllerWithVerificationTest {
     @DisplayName("Receive the verification URL and verify the user")
     void verifyUser() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName2",
@@ -138,6 +140,7 @@ public class AuthenticationControllerWithVerificationTest {
     @DisplayName("Receive the verification URL, request another verification code and verify the user")
     void verifyUserWithSecondVerification() throws InterruptedException {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName2",

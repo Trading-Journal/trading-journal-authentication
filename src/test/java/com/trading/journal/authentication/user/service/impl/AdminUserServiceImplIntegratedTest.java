@@ -60,7 +60,7 @@ class AdminUserServiceImplIntegratedTest {
 
     @Test
     void addAdmin() {
-        UserRegistration adminRegistration = new UserRegistration("Admin", "Administrator", "admin", adminUserProperties.email(), null, null);
+        UserRegistration adminRegistration = new UserRegistration(null,"Admin", "Administrator", "admin", adminUserProperties.email(), null, null);
 
         Boolean thereIsAdmin = adminUserService.thereIsAdmin();
         assertThat(thereIsAdmin).isFalse();

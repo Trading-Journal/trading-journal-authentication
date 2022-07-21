@@ -53,6 +53,7 @@ public class UserServiceImplTest {
     @DisplayName("When create user and the verification is disabled return user response enabled and verified")
     void createUser() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName",
@@ -90,6 +91,7 @@ public class UserServiceImplTest {
     @DisplayName("When create user and the verification is enabled return user response disabled and not verified")
     void createUserDisabled() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName",
@@ -212,6 +214,7 @@ public class UserServiceImplTest {
     @DisplayName("When create user and user name already exist return exception")
     void userNameAlreadyExist() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName",
@@ -233,6 +236,7 @@ public class UserServiceImplTest {
     @DisplayName("When create user and email already exist return exception")
     void emailAlreadyExist() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName",
@@ -254,6 +258,7 @@ public class UserServiceImplTest {
     @DisplayName("When create user and user name and email already exist return exception")
     void userNameAndEmailAlreadyExist() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName",

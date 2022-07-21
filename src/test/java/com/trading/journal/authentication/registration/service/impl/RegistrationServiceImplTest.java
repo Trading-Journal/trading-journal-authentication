@@ -47,6 +47,7 @@ public class RegistrationServiceImplTest {
     @DisplayName("When registry a user and it is enabled, don not send verification email")
     void registryWithoutVerification() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName",
@@ -80,6 +81,7 @@ public class RegistrationServiceImplTest {
     @DisplayName("When registry a user and it is not enabled, send verification email")
     void registryWithVerification() {
         UserRegistration userRegistration = new UserRegistration(
+                null,
                 "firstName",
                 "lastName",
                 "UserName",
