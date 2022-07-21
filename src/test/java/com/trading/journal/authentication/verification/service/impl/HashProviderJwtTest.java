@@ -48,7 +48,7 @@ class HashProviderJwtTest {
     void readHash() {
         String hash = "123";
         when(jwtTokenReader.isTokenValid(hash)).thenReturn(true);
-        when(jwtTokenReader.getTokenInfo(hash)).thenReturn(new AccessTokenInfo("subject", "tenancy", singletonList("TEMPORARY_TOKEN")));
+        when(jwtTokenReader.getTokenInfo(hash)).thenReturn(new AccessTokenInfo("subject", 1L, "tenancy", singletonList("TEMPORARY_TOKEN")));
         String value = hashProvider.readHashValue(hash);
         assertThat(value).isEqualTo("subject");
     }
@@ -72,7 +72,7 @@ class HashProviderJwtTest {
         String hash = "123";
         when(jwtTokenReader.isTokenValid(hash)).thenReturn(true);
         when(jwtTokenReader.getTokenInfo(hash)).thenReturn(
-                new AccessTokenInfo("subject", "tenancy", asList("TEMPORARY_TOKEN", "ANOTHER"))
+                new AccessTokenInfo("subject", 1L, "tenancy", asList("TEMPORARY_TOKEN", "ANOTHER"))
         );
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> hashProvider.readHashValue(hash));
@@ -86,7 +86,7 @@ class HashProviderJwtTest {
         String hash = "123";
         when(jwtTokenReader.isTokenValid(hash)).thenReturn(true);
         when(jwtTokenReader.getTokenInfo(hash)).thenReturn(
-                new AccessTokenInfo("subject", "tenancy", singletonList("ANOTHER"))
+                new AccessTokenInfo("subject", 1L, "tenancy", singletonList("ANOTHER"))
         );
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> hashProvider.readHashValue(hash));
@@ -112,7 +112,7 @@ class HashProviderJwtTest {
         String hash = "123";
         when(jwtTokenReader.isTokenValid(hash)).thenReturn(true);
         when(jwtTokenReader.getTokenInfo(hash)).thenReturn(
-                new AccessTokenInfo("subject", "tenancy", emptyList())
+                new AccessTokenInfo("subject", 1L, "tenancy", emptyList())
         );
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> hashProvider.readHashValue(hash));
@@ -126,7 +126,7 @@ class HashProviderJwtTest {
         String hash = "123";
         when(jwtTokenReader.isTokenValid(hash)).thenReturn(true);
         when(jwtTokenReader.getTokenInfo(hash)).thenReturn(
-                new AccessTokenInfo("subject", "tenancy", null)
+                new AccessTokenInfo("subject", 1L, "tenancy", null)
         );
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> hashProvider.readHashValue(hash));
@@ -140,7 +140,7 @@ class HashProviderJwtTest {
         String hash = "123";
         when(jwtTokenReader.isTokenValid(hash)).thenReturn(true);
         when(jwtTokenReader.getTokenInfo(hash)).thenReturn(
-                new AccessTokenInfo(null, "tenancy", singletonList("TEMPORARY_TOKEN"))
+                new AccessTokenInfo(null, 1L, "tenancy", singletonList("TEMPORARY_TOKEN"))
         );
         ApplicationException exception = assertThrows(ApplicationException.class, () -> hashProvider.readHashValue(hash));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);

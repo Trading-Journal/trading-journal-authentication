@@ -1,9 +1,6 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
-import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
-import com.trading.journal.authentication.jwt.data.ContextUser;
-import com.trading.journal.authentication.jwt.data.JwtProperties;
-import com.trading.journal.authentication.jwt.data.ServiceType;
+import com.trading.journal.authentication.jwt.data.*;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenParser;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
@@ -54,7 +51,7 @@ public class JwtTokenReaderImplTest {
     }
 
     @Test
-    @DisplayName("Given access token return Authentication")
+    @DisplayName("Given access token return Authentication with tenancy")
     void authentication() {
         KeyPair keyPair = mockKeyPair();
         assert keyPair != null;
@@ -70,7 +67,8 @@ public class JwtTokenReaderImplTest {
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
                 .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
-                .claim(JwtConstants.TENANCY, "tenancy_1")
+                .claim(JwtConstants.TENANCY_ID, 1L)
+                .claim(JwtConstants.TENANCY_NAME, "tenancy_1")
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
@@ -79,13 +77,15 @@ public class JwtTokenReaderImplTest {
         Authentication authentication = jwtTokenReader.getAuthentication(token);
         assertThat(authentication).isInstanceOf(UsernamePasswordAuthenticationToken.class);
         assertThat(authentication.getCredentials()).isEqualTo(token);
+        assertThat(((ContextUser)authentication.getPrincipal()).tenancyName()).isEqualTo("tenancy_1");
+        assertThat(((ContextUser)authentication.getPrincipal()).tenancyId()).isEqualTo(1L);
         assertThat(((UsernamePasswordAuthenticationToken) authentication).getAuthorities()).hasSize(1);
         assertThat(authentication.getPrincipal())
                 .isInstanceOf(ContextUser.class);
     }
 
     @Test
-    @DisplayName("Given access token without tenancy when getting Authentication return exception")
+    @DisplayName("Given access token without tenancy return Authentication without tenancy")
     void authenticationException() {
         KeyPair keyPair = mockKeyPair();
         assert keyPair != null;
@@ -106,9 +106,14 @@ public class JwtTokenReaderImplTest {
         JwtTokenParser mockParser = mockParser(keyPair);
         JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
-        AuthenticationServiceException exception = assertThrows(AuthenticationServiceException.class,
-                () -> jwtTokenReader.getAuthentication(token));
-        assertThat(exception.getMessage()).contains("User tenancy not found inside the token");
+        Authentication authentication = jwtTokenReader.getAuthentication(token);
+        assertThat(authentication).isInstanceOf(UsernamePasswordAuthenticationToken.class);
+        assertThat(authentication.getCredentials()).isEqualTo(token);
+        assertThat(((ContextUser)authentication.getPrincipal()).tenancyName()).isNull();
+        assertThat(((ContextUser)authentication.getPrincipal()).tenancyId()).isNull();
+        assertThat(((UsernamePasswordAuthenticationToken) authentication).getAuthorities()).hasSize(1);
+        assertThat(authentication.getPrincipal())
+                .isInstanceOf(ContextUser.class);
     }
 
     @Test
@@ -128,7 +133,8 @@ public class JwtTokenReaderImplTest {
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
                 .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
-                .claim(JwtConstants.TENANCY, "tenancy_1")
+                .claim(JwtConstants.TENANCY_ID, 1L)
+                .claim(JwtConstants.TENANCY_NAME, "tenancy_1")
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
@@ -136,7 +142,8 @@ public class JwtTokenReaderImplTest {
 
         AccessTokenInfo accessTokenInfo = jwtTokenReader.getAccessTokenInfo(token);
         assertThat(accessTokenInfo.subject()).isEqualTo("user_name");
-        assertThat(accessTokenInfo.tenancy()).isEqualTo("tenancy_1");
+        assertThat(accessTokenInfo.tenancyName()).isEqualTo("tenancy_1");
+        assertThat(accessTokenInfo.tenancyId()).isEqualTo(1L);
         assertThat(accessTokenInfo.scopes()).containsExactly("ROLE_USER");
     }
 
@@ -168,7 +175,7 @@ public class JwtTokenReaderImplTest {
     }
 
     @Test
-    @DisplayName("Given access token without tenancy when getting Token Info return exception")
+    @DisplayName("Given access token without tenancy when getting Token Info without tenancy")
     void accessTokenInfoException() {
         KeyPair keyPair = mockKeyPair();
         assert keyPair != null;
@@ -189,9 +196,11 @@ public class JwtTokenReaderImplTest {
         JwtTokenParser mockParser = mockParser(keyPair);
         JwtTokenReader jwtTokenReader = new JwtTokenReaderImpl(mockParser, properties);
 
-        AuthenticationServiceException exception = assertThrows(AuthenticationServiceException.class,
-                () -> jwtTokenReader.getAccessTokenInfo(token));
-        assertThat(exception.getMessage()).contains("User tenancy not found inside the token");
+        AccessTokenInfo accessTokenInfo = jwtTokenReader.getAccessTokenInfo(token);
+        assertThat(accessTokenInfo.subject()).isEqualTo("user_name");
+        assertThat(accessTokenInfo.tenancyName()).isNull();
+        assertThat(accessTokenInfo.tenancyId()).isNull();
+        assertThat(accessTokenInfo.scopes()).containsExactly("ROLE_USER");
     }
 
     @Test
@@ -211,7 +220,7 @@ public class JwtTokenReaderImplTest {
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
                 .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
-                .claim(JwtConstants.TENANCY, "tenancy_1")
+                .claim(JwtConstants.TENANCY_ID, "tenancy_1")
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
@@ -238,7 +247,7 @@ public class JwtTokenReaderImplTest {
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
                 .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
-                .claim(JwtConstants.TENANCY, "tenancy_1")
+                .claim(JwtConstants.TENANCY_ID, "tenancy_1")
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
@@ -265,7 +274,7 @@ public class JwtTokenReaderImplTest {
                         .atZone(ZoneId.systemDefault())
                         .toInstant()))
                 .claim(JwtConstants.SCOPES, Collections.singleton("ROLE_USER"))
-                .claim(JwtConstants.TENANCY, "tenancy_1")
+                .claim(JwtConstants.TENANCY_ID, "tenancy_1")
                 .compact();
 
         JwtTokenParser mockParser = mockParser(keyPair);
@@ -299,7 +308,7 @@ public class JwtTokenReaderImplTest {
 
         AccessTokenInfo accessTokenInfo = jwtTokenReader.getTokenInfo(token);
         assertThat(accessTokenInfo.subject()).isEqualTo("user_name");
-        assertThat(accessTokenInfo.tenancy()).isNull();
+        assertThat(accessTokenInfo.tenancyName()).isNull();
         assertThat(accessTokenInfo.scopes()).containsExactly("REFRESH_TOKEN");
     }
 

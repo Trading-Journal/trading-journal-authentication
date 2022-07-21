@@ -60,7 +60,7 @@ public class AuthenticationServiceImplTest {
         Login login = new Login("mail@mail.com", "123456");
 
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
-        ContextUser principal = new ContextUser("mail@mail.com", "username");
+        ContextUser principal = new ContextUser("mail@mail.com", 1L, "username");
         Authentication authentication = new UsernamePasswordAuthenticationToken(principal, authorities);
         when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password())))
                 .thenReturn(authentication);
@@ -112,8 +112,7 @@ public class AuthenticationServiceImplTest {
 
         when(jwtTokenReader.isTokenValid(refreshToken)).thenReturn(true);
 
-        AccessTokenInfo tokenInfo = new AccessTokenInfo("subject", null,
-                Collections.singletonList("REFRESH_TOKEN"));
+        AccessTokenInfo tokenInfo = new AccessTokenInfo("subject", 1L, null, Collections.singletonList("REFRESH_TOKEN"));
         when(jwtTokenReader.getTokenInfo(refreshToken)).thenReturn(tokenInfo);
 
         UserInfo userInfo = new UserInfo(1L, "subject", "firstName", "lastName", "email@mail.com", true, true,
@@ -166,8 +165,7 @@ public class AuthenticationServiceImplTest {
 
         when(jwtTokenReader.isTokenValid(refreshToken)).thenReturn(true);
 
-        AccessTokenInfo tokenInfo = new AccessTokenInfo("subject", null,
-                Collections.singletonList("USER_ROLE"));
+        AccessTokenInfo tokenInfo = new AccessTokenInfo("subject", 1L, null, Collections.singletonList("USER_ROLE"));
         when(jwtTokenReader.getTokenInfo(refreshToken)).thenReturn(tokenInfo);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationService.refreshToken(refreshToken));

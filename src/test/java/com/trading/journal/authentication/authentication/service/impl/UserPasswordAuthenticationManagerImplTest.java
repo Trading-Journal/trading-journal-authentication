@@ -5,6 +5,7 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.password.service.PasswordService;
+import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
@@ -55,6 +56,7 @@ class UserPasswordAuthenticationManagerImplTest {
                 .verified(true)
                 .createdAt(LocalDateTime.now())
                 .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .tenancy(Tenancy.builder().name("UserAdm").build())
                 .build();
         when(userRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
         when(passwordService.matches("raw_password", "encoded_password")).thenReturn(true);
@@ -62,7 +64,7 @@ class UserPasswordAuthenticationManagerImplTest {
         Authentication authenticated = authenticationManager.authenticate(authenticationToken);
         ContextUser principal = (ContextUser) authenticated.getPrincipal();
         assertThat(principal.email()).isEqualTo("mail@mail.com");
-        assertThat(principal.tenancy()).isEqualTo("UserAdm");
+        assertThat(principal.tenancyName()).isEqualTo("UserAdm");
         assertThat(authenticated.getCredentials()).isNull();
         assertThat(authenticated.getAuthorities()).hasSize(1);
         assertThat(authenticated.getAuthorities()).extracting(GrantedAuthority::getAuthority).containsExactly("ROLE_USER");

@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
@@ -8,6 +9,7 @@ import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenParser;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
+import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import io.jsonwebtoken.Claims;
@@ -54,7 +56,7 @@ public class JwtIntegratedTest {
 
     @DisplayName("Generate and read access token")
     @Test
-    void generateAndReadAccessToken() {
+    void generateAndReadAccessToken() throws JsonProcessingException {
         User applicationUser = User.builder()
                 .id(1L)
                 .userName("UserName")
@@ -69,6 +71,7 @@ public class JwtIntegratedTest {
                         new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
                         new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
                 ))
+                .tenancy(Tenancy.builder().name("UserName").build())
                 .build();
 
         TokenData accessToken = jwtTokenProvider.generateAccessToken(applicationUser);
@@ -76,7 +79,8 @@ public class JwtIntegratedTest {
         assertThat(accessToken.token()).isNotBlank();
         Jws<Claims> accessTokenClaims = jwtTokenParser.parseToken(accessToken.token());
         assertThat(accessTokenClaims.getBody().getSubject()).isEqualTo(applicationUser.getEmail());
-        assertThat(accessTokenClaims.getBody().get(JwtConstants.TENANCY)).isEqualTo(applicationUser.getUserName());
+
+        assertThat(accessTokenClaims.getBody().get(JwtConstants.TENANCY_NAME).toString()).isEqualTo(applicationUser.getUserName());
         assertThat(accessTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
         assertThat(accessTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
         Date start = Date.from(LocalDateTime.now().plusSeconds(3500L).atZone(ZoneId.systemDefault()).toInstant());
@@ -113,7 +117,7 @@ public class JwtIntegratedTest {
         assertThat(refreshToken.token()).isNotBlank();
         Jws<Claims> refreshTokenClaims = jwtTokenParser.parseToken(refreshToken.token());
         assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo(applicationUser.getEmail());
-        assertThat(refreshTokenClaims.getBody().get(JwtConstants.TENANCY)).isNull();
+        assertThat(refreshTokenClaims.getBody().get(JwtConstants.TENANCY_ID)).isNull();
         assertThat(refreshTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
         assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
         assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
@@ -135,7 +139,7 @@ public class JwtIntegratedTest {
         assertThat(refreshToken.token()).isNotBlank();
         Jws<Claims> refreshTokenClaims = jwtTokenParser.parseToken(refreshToken.token());
         assertThat(refreshTokenClaims.getBody().getSubject()).isEqualTo("mail@mail.com");
-        assertThat(refreshTokenClaims.getBody().get(JwtConstants.TENANCY)).isNull();
+        assertThat(refreshTokenClaims.getBody().get(JwtConstants.TENANCY_ID)).isNull();
         assertThat(refreshTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
         assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
         assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");

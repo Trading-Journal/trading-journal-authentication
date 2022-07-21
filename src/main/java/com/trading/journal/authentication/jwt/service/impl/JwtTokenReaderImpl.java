@@ -11,7 +11,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -36,8 +35,7 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
     public Authentication getAuthentication(String token) {
         Jws<Claims> jwsClaims = tokenParser.parseToken(token);
         Collection<? extends GrantedAuthority> authorities = getAuthorities(jwsClaims);
-        String tenancy = getTenancy(jwsClaims);
-        ContextUser principal = new ContextUser(jwsClaims.getBody().getSubject(), tenancy);
+        ContextUser principal = new ContextUser(jwsClaims.getBody().getSubject(), getTenancyId(jwsClaims), getTenancyName(jwsClaims));
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
@@ -46,8 +44,7 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
         Jws<Claims> jwsClaims = tokenParser.parseToken(token);
         List<String> authorities = getAuthorities(jwsClaims).stream().map(SimpleGrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-        String tenancy = getTenancy(jwsClaims);
-        return new AccessTokenInfo(jwsClaims.getBody().getSubject(), tenancy, authorities);
+        return new AccessTokenInfo(jwsClaims.getBody().getSubject(), getTenancyId(jwsClaims), getTenancyName(jwsClaims), authorities);
     }
 
     @Override
@@ -55,7 +52,7 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
         Jws<Claims> jwsClaims = tokenParser.parseToken(token);
         List<String> authorities = getAuthorities(jwsClaims).stream().map(SimpleGrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-        return new AccessTokenInfo(jwsClaims.getBody().getSubject(), null, authorities);
+        return new AccessTokenInfo(jwsClaims.getBody().getSubject(), null, null, authorities);
     }
 
     @Override
@@ -80,9 +77,16 @@ public class JwtTokenReaderImpl implements JwtTokenReader {
                 .collect(Collectors.toList());
     }
 
-    private String getTenancy(Jws<Claims> token) {
-        return Optional.ofNullable(token.getBody().get(JwtConstants.TENANCY)).map(Object::toString)
-                .orElseThrow(() -> new AuthenticationServiceException(
-                        String.format("User tenancy not found inside the token %s", token)));
+    private Long getTenancyId(Jws<Claims> token) {
+        return Optional.ofNullable(token.getBody().get(JwtConstants.TENANCY_ID))
+                .map(Object::toString)
+                .map(Long::parseLong)
+                .orElse(null);
+    }
+
+    private String getTenancyName(Jws<Claims> token) {
+        return Optional.ofNullable(token.getBody().get(JwtConstants.TENANCY_NAME))
+                .map(Object::toString)
+                .orElse(null);
     }
 }

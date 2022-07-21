@@ -7,7 +7,6 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.trading.journal.authentication.ApplicationException;
@@ -18,6 +17,7 @@ import com.trading.journal.authentication.jwt.data.JwtProperties;
 import com.trading.journal.authentication.jwt.data.TokenData;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
+import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 
@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 @Slf4j
@@ -47,8 +49,8 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     }
 
     @Override
-    public TokenData generateAccessToken(User applicationUser) {
-        List<String> authorities = Optional.ofNullable(applicationUser.getAuthorities())
+    public TokenData generateAccessToken(User user) {
+        List<String> authorities = ofNullable(user.getAuthorities())
                 .filter(list -> !list.isEmpty())
                 .orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "User has no authorities"))
                 .stream()
@@ -62,11 +64,12 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
                 .setIssuer(properties.getIssuer())
                 .setAudience(properties.getAudience())
-                .setSubject(applicationUser.getEmail())
+                .setSubject(user.getEmail())
                 .setIssuedAt(issuedAt)
                 .setExpiration(getExpirationDate(properties.getAccessTokenExpiration()))
                 .claim(JwtConstants.SCOPES, authorities)
-                .claim(JwtConstants.TENANCY, applicationUser.getUserName())
+                .claim(JwtConstants.TENANCY_ID, ofNullable(user.getTenancy()).map(Tenancy::getId).orElse(null))
+                .claim(JwtConstants.TENANCY_NAME, ofNullable(user.getTenancy()).map(Tenancy::getName).orElse(null))
                 .compact();
 
         return new TokenData(accessToken,
@@ -74,14 +77,14 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     }
 
     @Override
-    public TokenData generateRefreshToken(User applicationUser) {
+    public TokenData generateRefreshToken(User user) {
         Date issuedAt = DateHelper.getUTCDatetimeAsDate();
         String refreshToken = Jwts.builder()
                 .signWith(this.privateKey, SignatureAlgorithm.RS256)
                 .setHeaderParam(JwtConstants.HEADER_TYP, JwtConstants.TOKEN_TYPE)
                 .setIssuer(properties.getIssuer())
                 .setAudience(properties.getAudience())
-                .setSubject(applicationUser.getEmail())
+                .setSubject(user.getEmail())
                 .setIssuedAt(issuedAt)
                 .setExpiration(getExpirationDate(properties.getRefreshTokenExpiration()))
                 .claim(JwtConstants.SCOPES, Collections.singletonList(JwtConstants.REFRESH_TOKEN))

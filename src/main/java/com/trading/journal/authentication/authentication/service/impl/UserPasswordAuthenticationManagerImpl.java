@@ -4,6 +4,7 @@ import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authentication.service.UserPasswordAuthenticationManager;
 import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.password.service.PasswordService;
+import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 
 @Service
 @RequiredArgsConstructor
@@ -29,28 +31,25 @@ public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthen
     @Override
     public Authentication authenticate(Authentication authentication) {
         String email = (String) authentication.getPrincipal();
-        User applicationUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "Bad Credentials"));
-        if (!applicationUser.getEnabled() || !applicationUser.getVerified()) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ApplicationException(HttpStatus.UNAUTHORIZED, "Bad Credentials"));
+        if (!user.getEnabled() || !user.getVerified()) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Locked Credentials");
         }
 
         String password = (String) authentication.getCredentials();
-        if (!passwordService.matches(password, applicationUser.getPassword())) {
+        if (!passwordService.matches(password, user.getPassword())) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Bad Credentials");
         }
 
-        List<SimpleGrantedAuthority> authorities = of(applicationUser)
-                .map(User::getAuthorities)
-                .orElse(emptyList())
-                .stream()
-                .map(userAuthorities -> new SimpleGrantedAuthority(userAuthorities.getAuthority().getName())).toList();
+        List<SimpleGrantedAuthority> authorities = of(user).map(User::getAuthorities)
+                .orElse(emptyList()).stream().map(userAuthorities -> new SimpleGrantedAuthority(userAuthorities.getAuthority().getName())).toList();
 
         if (authorities.isEmpty()) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "No Authorities");
         }
 
-        ContextUser principal = new ContextUser(email, applicationUser.getUserName());
+        Tenancy tenancy = ofNullable(user.getTenancy()).map(ten -> new Tenancy(ten.getId(), ten.getName())).orElse(Tenancy.builder().build());
+        ContextUser principal = new ContextUser(email, tenancy.getId(), tenancy.getName());
         return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }
 }
