@@ -3,6 +3,8 @@ package com.trading.journal.authentication;
 import com.trading.journal.authentication.authority.AuthoritiesHelper;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.service.AuthorityService;
+import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
@@ -49,5 +51,18 @@ public class TestLoader {
                 .map(applicationUser -> new UserAuthority(applicationUser, authority))
                 .forEach(userAuthorityRepository::save);
 
+    }
+
+    public static void load50Tenancies(TenancyRepository tenancyRepository) {
+        tenancyRepository.deleteAll();
+        Stream<String> tenacies = Stream.of(
+                "andyjohnson", "angelduncan", "angelowells", "arthurlawrence", "bernardmyers", "bethguzman", "blakecoleman", "brianmann", "cameronfleming", "carltonsantos",
+                "carrietate", "catherinejones", "cecilperkins", "colinward", "conradhernandez", "doloreswilliamson", "dorisparker", "earlnorris", "eddiemassey", "elenaboyd",
+                "elisavargas", "ermablack", "ernestinesteele", "ernestokim", "fanniehines", "gabrieldixon", "garylogan", "gerardwebb", "idagarza", "isaacjames",
+                "jeromepratt", "joeldunn", "juliecarson", "kathyoliver", "katrinahawkins", "larryrobbins", "laurieadams", "lorettastanley", "luketyler", "melindafields",
+                "natasharivera", "norawaters", "pedrosullivan", "phyllisterry", "rochellegraves", "sabrinagarcia", "sadiedavis", "veralamb", "vernawilkins", "victorialuna"
+        );
+        tenacies.map(tenancy -> Tenancy.builder().name(tenancy).build())
+                .forEach(tenancyRepository::save);
     }
 }

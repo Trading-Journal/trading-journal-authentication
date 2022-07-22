@@ -5,12 +5,11 @@ import com.trading.journal.authentication.TestLoader;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
-import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.pageable.PageResponse;
+import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
-import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -31,9 +30,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
-class UsersControllerPagingTest {
+class TenanciesControllerPagingTest {
 
-    public static final String PATH = "/admin/users";
+    public static final String PATH = "/admin/tenancies";
     private static String token;
 
     @Autowired
@@ -42,14 +41,13 @@ class UsersControllerPagingTest {
     @BeforeAll
     public static void setUp(
             @Autowired UserRepository userRepository,
-            @Autowired UserAuthorityRepository userAuthorityRepository,
-            @Autowired AuthorityService authorityService,
             @Autowired PasswordEncoder encoder,
             @Autowired AuthenticationService authenticationService,
-            @Autowired UserAuthorityService userAuthorityService
+            @Autowired UserAuthorityService userAuthorityService,
+            @Autowired TenancyRepository tenancyRepository
     ) {
-        TestLoader.load50Users(userRepository, userAuthorityRepository, authorityService);
-
+        userRepository.deleteAll();
+        TestLoader.load50Tenancies(tenancyRepository);
         User user = User.builder()
                 .userName("johnwick")
                 .password(encoder.encode("dad231#$#4"))
@@ -69,7 +67,7 @@ class UsersControllerPagingTest {
         token = loginResponse.accessToken();
     }
 
-    @DisplayName("Get first page of all users without any arguments")
+    @DisplayName("Get first page of all tenancies without any arguments")
     @Test
     void plainPageable() {
         webTestClient
@@ -82,15 +80,15 @@ class UsersControllerPagingTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Tenancy>>() {
                 })
                 .value(response -> {
                     assertThat(response.items()).hasSize(10);
                     assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Andy Johnson", "Angel Duncan", "Angelo Wells", "Arthur Lawrence", "Bernard Myers", "Beth Guzman", "Blake Coleman", "Brian Mann", "Cameron Fleming", "Carlton Santos");
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
+                    assertThat(response.items()).extracting(Tenancy::getName)
+                            .containsExactly("andyjohnson", "angelduncan", "angelowells", "arthurlawrence", "bernardmyers", "bethguzman", "blakecoleman", "brianmann", "cameronfleming", "carltonsantos");
                 });
     }
 
@@ -109,15 +107,15 @@ class UsersControllerPagingTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Tenancy>>() {
                 })
                 .value(response -> {
                     assertThat(response.items()).hasSize(10);
                     assertThat(response.currentPage()).isEqualTo(3);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Jerome Pratt", "Joel Dunn", "Julie Carson", "Kathy Oliver", "Katrina Hawkins", "Larry Robbins", "Laurie Adams", "Loretta Stanley", "Luke Tyler", "Melinda Fields");
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
+                    assertThat(response.items()).extracting(Tenancy::getName)
+                            .containsExactly("jeromepratt", "joeldunn", "juliecarson", "kathyoliver", "katrinahawkins", "larryrobbins", "laurieadams", "lorettastanley", "luketyler", "melindafields");
                 });
     }
 
@@ -128,7 +126,7 @@ class UsersControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path(PATH)
-                        .queryParam("page", "6")
+                        .queryParam("page", "5")
                         .queryParam("size", "10")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
@@ -136,13 +134,13 @@ class UsersControllerPagingTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Tenancy>>() {
                 })
                 .value(response -> {
                     assertThat(response.items()).hasSize(0);
-                    assertThat(response.currentPage()).isEqualTo(6);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.currentPage()).isEqualTo(5);
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
                 });
     }
 
@@ -153,52 +151,26 @@ class UsersControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path(PATH)
-                        .queryParam("sort", "firstName", "desc")
+                        .queryParam("sort", "name", "desc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Tenancy>>() {
                 })
                 .value(response -> {
                     assertThat(response.items()).hasSize(10);
                     assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Victoria Luna", "Verna Wilkins", "Vera Lamb", "Sadie Davis", "Sabrina Garcia", "Rochelle Graves", "Phyllis Terry", "Pedro Sullivan", "Nora Waters", "Natasha Rivera");
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
+                    assertThat(response.items()).extracting(Tenancy::getName)
+                            .containsExactly("victorialuna", "vernawilkins", "veralamb", "sadiedavis", "sabrinagarcia", "rochellegraves", "phyllisterry", "pedrosullivan", "norawaters", "natasharivera");
                 });
     }
 
-    @DisplayName("Sort for two columns")
-    @Test
-    void sortTwoColumns() {
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(PATH)
-                        .queryParam("sort", "firstName", "desc", "lastName", "asc")
-                        .build())
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
-                .value(response -> {
-                    assertThat(response.items()).hasSize(10);
-                    assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Victoria Luna", "Verna Wilkins", "Vera Lamb", "Sadie Davis", "Sabrina Garcia", "Rochelle Graves", "Phyllis Terry", "Pedro Sullivan", "Nora Waters", "Natasha Rivera");
-                });
-    }
-
-    @DisplayName("Filter users returning only one page")
+    @DisplayName("Filter tenancy returning only one page")
     @Test
     void filterFirstPage() {
         webTestClient
@@ -212,19 +184,19 @@ class UsersControllerPagingTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Tenancy>>() {
                 })
                 .value(response -> {
                     assertThat(response.items()).hasSize(3);
                     assertThat(response.currentPage()).isEqualTo(0);
                     assertThat(response.totalPages()).isEqualTo(1);
                     assertThat(response.totalItems()).isEqualTo(3L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Andy Johnson", "Dolores Williamson", "Julie Carson");
+                    assertThat(response.items()).extracting(Tenancy::getName)
+                            .containsExactly("andyjohnson","doloreswilliamson","juliecarson");
                 });
     }
 
-    @DisplayName("Filter users returning two pages page")
+    @DisplayName("Filter tenancy returning two pages page")
     @Test
     void filterTwoPages() {
         webTestClient
@@ -240,15 +212,15 @@ class UsersControllerPagingTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Tenancy>>() {
                 })
                 .value(response -> {
                     assertThat(response.items()).hasSize(4);
                     assertThat(response.currentPage()).isEqualTo(0);
                     assertThat(response.totalPages()).isEqualTo(2);
                     assertThat(response.totalItems()).isEqualTo(6L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Arthur Lawrence", "Blake Coleman", "Erma Black", "Larry Robbins");
+                    assertThat(response.items()).extracting(Tenancy::getName)
+                            .containsExactly("arthurlawrence","blakecoleman","ermablack","larryrobbins");
                 });
 
         webTestClient
@@ -264,19 +236,19 @@ class UsersControllerPagingTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Tenancy>>() {
                 })
                 .value(response -> {
                     assertThat(response.items()).hasSize(2);
                     assertThat(response.currentPage()).isEqualTo(1);
                     assertThat(response.totalPages()).isEqualTo(2);
                     assertThat(response.totalItems()).isEqualTo(6L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Laurie Adams", "Vera Lamb");
+                    assertThat(response.items()).extracting(Tenancy::getName)
+                            .containsExactly("laurieadams","veralamb");
                 });
     }
 
-    @DisplayName("Filter users returning no results")
+    @DisplayName("Filter tenancy returning no results")
     @Test
     void filterEmpty() {
         webTestClient
@@ -290,7 +262,7 @@ class UsersControllerPagingTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Tenancy>>() {
                 })
                 .value(response -> {
                     assertThat(response.items()).hasSize(0);
@@ -300,7 +272,7 @@ class UsersControllerPagingTest {
                 });
     }
 
-    @DisplayName("Filter users returning two pages page but sorting by last name")
+    @DisplayName("Filter tenancy returning two pages page but sorting by name")
     @Test
     void filterAndSort() {
         webTestClient
@@ -310,22 +282,22 @@ class UsersControllerPagingTest {
                         .queryParam("page", "0")
                         .queryParam("size", "4")
                         .queryParam("filter", "la")
-                        .queryParam("sort", "lastName", "desc")
+                        .queryParam("sort", "name", "desc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Tenancy>>() {
                 })
                 .value(response -> {
                     assertThat(response.items()).hasSize(4);
                     assertThat(response.currentPage()).isEqualTo(0);
                     assertThat(response.totalPages()).isEqualTo(2);
                     assertThat(response.totalItems()).isEqualTo(6L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Larry Robbins", "Arthur Lawrence", "Vera Lamb", "Blake Coleman");
+                    assertThat(response.items()).extracting(Tenancy::getName)
+                            .containsExactly("veralamb","laurieadams","larryrobbins","ermablack");
                 });
 
         webTestClient
@@ -335,22 +307,22 @@ class UsersControllerPagingTest {
                         .queryParam("page", "1")
                         .queryParam("size", "4")
                         .queryParam("filter", "la")
-                        .queryParam("sort", "lastName", "desc")
+                        .queryParam("sort", "name", "desc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Tenancy>>() {
                 })
                 .value(response -> {
                     assertThat(response.items()).hasSize(2);
                     assertThat(response.currentPage()).isEqualTo(1);
                     assertThat(response.totalPages()).isEqualTo(2);
                     assertThat(response.totalItems()).isEqualTo(6L);
-                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
-                            .containsExactly("Erma Black", "Laurie Adams");
+                    assertThat(response.items()).extracting(Tenancy::getName)
+                            .containsExactly("blakecoleman","arthurlawrence");
                 });
     }
 }

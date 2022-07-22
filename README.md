@@ -2,11 +2,6 @@
 
 ## Pending
 
-* Tenancy Management
-  * Endpoints
-  * Enable/Disable - Reflect this on long in
-  * Set user limits on creation
-  * Endpoint to retrieve tenancy usage and available
 * Role tenancy (Company) Administrator
   * Can load and change user for the same tenancy (Company)
   * Can manage users - based on tenancy limits
@@ -62,6 +57,9 @@ openssl rsa -in secret_key.pem -pubout -outform PEM -out public_key.pem
 CREATE TABLE `Tenancy` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(254) NOT NULL,
+  `userLimit` int NOT NULL DEFAULT 1,
+  `userUsage` int NOT NULL DEFAULT 0,
+  `enabled` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
 );

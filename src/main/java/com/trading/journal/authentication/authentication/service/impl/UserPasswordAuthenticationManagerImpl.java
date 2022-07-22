@@ -36,6 +36,10 @@ public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthen
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Locked Credentials");
         }
 
+        ofNullable(user.getTenancy())
+                .filter(tenancy -> tenancy.getEnabled().equals(false))
+                .ifPresent(unused -> {throw new ApplicationException(HttpStatus.FORBIDDEN, "Your tenancy is disabled by the system admin");});
+
         String password = (String) authentication.getCredentials();
         if (!passwordService.matches(password, user.getPassword())) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Bad Credentials");
@@ -48,7 +52,7 @@ public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthen
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "No Authorities");
         }
 
-        Tenancy tenancy = ofNullable(user.getTenancy()).map(ten -> new Tenancy(ten.getId(), ten.getName())).orElse(Tenancy.builder().build());
+        Tenancy tenancy = ofNullable(user.getTenancy()).orElse(Tenancy.builder().build());
         ContextUser principal = new ContextUser(email, tenancy.getId(), tenancy.getName());
         return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }

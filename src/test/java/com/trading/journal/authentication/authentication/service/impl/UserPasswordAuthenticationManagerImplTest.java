@@ -209,4 +209,30 @@ class UserPasswordAuthenticationManagerImplTest {
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(exception.getStatusText()).isEqualTo("No Authorities");
     }
+
+    @DisplayName("If tenancy is not enabled then return exception")
+    @Test
+    void tenancyNotEnable() {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserAdm")
+                .password("encoded_password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .tenancy(Tenancy.builder().name("UserAdm").enabled(false).build())
+                .build();
+        when(userRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> authenticationManager.authenticate(authenticationToken));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(exception.getStatusText()).isEqualTo("Your tenancy is disabled by the system admin");
+
+        verify(passwordService, never()).matches(anyString(), anyString());
+    }
 }
