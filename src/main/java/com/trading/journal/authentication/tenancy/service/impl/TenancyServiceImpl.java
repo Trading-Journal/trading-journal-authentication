@@ -17,10 +17,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class TenancyServiceImpl implements TenancyService {
 
-    private static final String MESSAGE = "Tenancy id not found";
-
-    private static final String MESSAGE_NAME = "Tenancy name '%s' already exist";
-
     private final TenancyRepository tenancyRepository;
 
     @Override
@@ -36,14 +32,38 @@ public class TenancyServiceImpl implements TenancyService {
     @Override
     public Tenancy getById(Long id) {
         return tenancyRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
+                .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Tenancy id not found"));
     }
 
     @Override
     public Tenancy create(Tenancy tenancy) {
         if (tenancyRepository.findByName(tenancy.getName()).isPresent()) {
-            throw new ApplicationException(HttpStatus.CONFLICT, String.format(MESSAGE_NAME, tenancy.getName()));
+            throw new ApplicationException(HttpStatus.CONFLICT, String.format("Tenancy name '%s' already exist", tenancy.getName()));
         }
+        return tenancyRepository.save(tenancy);
+    }
+
+    @Override
+    public void disable(Long id) {
+        Tenancy tenancy = getById(id);
+        tenancy.disable();
+        tenancyRepository.save(tenancy);
+    }
+
+    @Override
+    public void enable(Long id) {
+        Tenancy tenancy = getById(id);
+        tenancy.enable();
+        tenancyRepository.save(tenancy);
+    }
+
+    @Override
+    public Tenancy newLimit(Long id, Integer limit) {
+        Tenancy tenancy = getById(id);
+        if(tenancy.getUserUsage() > limit) {
+            throw new ApplicationException(HttpStatus.BAD_REQUEST, "New tenancy limit is lower than the current usage");
+        }
+        tenancy.newLimit(limit);
         return tenancyRepository.save(tenancy);
     }
 

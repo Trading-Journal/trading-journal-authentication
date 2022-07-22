@@ -30,7 +30,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public SignUpResponse signUp(@Valid UserRegistration userRegistration) {
-        Tenancy tenancy = tenancyService.create(Tenancy.builder().name(userRegistration.getCompanyName()).build());
+        Tenancy tenancy = tenancyService.create(Tenancy.builder().name(userRegistration.getCompanyName()).userUsage(1).build());
         User applicationUser = userService.createNewUser(userRegistration, tenancy);
         return sendVerification(applicationUser.getEmail());
     }

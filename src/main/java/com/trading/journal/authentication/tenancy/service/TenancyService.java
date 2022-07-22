@@ -10,4 +10,10 @@ public interface TenancyService {
     Tenancy getById(Long id);
 
     Tenancy create(Tenancy tenancy);
+
+    void disable(Long id);
+
+    void enable(Long id);
+
+    Tenancy newLimit(Long id, Integer limit);
 }

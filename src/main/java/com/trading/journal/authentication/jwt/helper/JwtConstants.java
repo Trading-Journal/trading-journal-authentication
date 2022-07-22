@@ -11,7 +11,7 @@ public final class JwtConstants {
     public static final String SCOPES = "scopes";
     public static final String TENANCY_ID = "tenancy";
 
-    public static final String TENANCY_NAME = "cia";
+    public static final String TENANCY_NAME = "org";
     public static final String HEADER_TYP = "typ";
     public static final String REFRESH_TOKEN = "REFRESH_TOKEN";
 

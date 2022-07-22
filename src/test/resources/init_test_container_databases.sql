@@ -1,10 +1,12 @@
 CREATE TABLE `Tenancy` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(254) NOT NULL,
+  `userLimit` int NOT NULL DEFAULT 1,
+  `userUsage` int NOT NULL DEFAULT 0,
+  `enabled` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
 );
-
 CREATE TABLE `Users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `tenancyId` int NULL,

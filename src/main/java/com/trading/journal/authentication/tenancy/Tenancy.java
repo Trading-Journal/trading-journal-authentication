@@ -24,4 +24,25 @@ public class Tenancy {
 
     @NotBlank
     private String name;
+
+    @Builder.Default
+    private Integer userLimit = 1;
+
+    @Builder.Default
+    private Integer userUsage = 0;
+
+    @Builder.Default
+    private Boolean enabled = true;
+
+    public void disable() {
+        this.enabled = false;
+    }
+
+    public void enable() {
+        this.enabled = true;
+    }
+
+    public void newLimit(Integer limit) {
+        this.userLimit = limit;
+    }
 }

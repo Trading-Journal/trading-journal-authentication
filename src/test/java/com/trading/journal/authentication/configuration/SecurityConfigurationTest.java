@@ -218,6 +218,65 @@ public class SecurityConfigurationTest {
                 .isOk();
     }
 
+    @DisplayName("Access tenancies path with Admin user is granted")
+    @Test
+    void adminAccessTenancy() {
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        adminUserService.createAdmin(userRegistration);
+
+        User applicationUser = userRepository.findByEmail("johnwick@mail.com").get();
+        applicationUser.enable();
+        applicationUser.verify();
+        applicationUser.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(applicationUser);
+
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        webTestClient
+                .get()
+                .uri("/admin/tenancies")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    @DisplayName("Access tenancies path with common user token fails")
+    @Test
+    void invalidAccessTenancy() {
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        userService.createNewUser(userRegistration, null);
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        webTestClient
+                .get()
+                .uri("/admin/tenancies")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+
     private static Stream<String> invalidTokens() {
         return Stream.of(
                 "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJ0cmFkZS1qb3VybmFsIiwiYXVkIjoiaHR0cHM6Ly90cmFkZWpvdXJuYWwuYml6Iiwic3ViIjoiYWxsYW53ZWJlciIsImlhdCI6MTY1Mjg2NjkyNCwiZXhwIjoxNjUyODc0MTI5LCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwidGVuYW5jeSI6ImFsbGFud2ViZXIifQ.DbSUHKMuPPUpUYYuRHFsdHTsTKgMPHU1AYGC5eQPrPgZPFN0j71JOlhLTWnpqiod3Hq_Y4kmExL-MS4jUlgVRsWkbigjNgdhmy2XaBhbGJpJkC8-v1U-tlh8bBTT7zHrfLsR44FBlNVUqDcCoAAIMshMth2mTLkgHufdVS4IxuLOrWq9mwX6YuZZBYRSxdUEK0S8ut5Sk6pJWtViB-eMXByVPqUhBOj6rfypgBSFqrOq4hNZ7rbm9T5AwIctNvzAqGtQ0j9dj5KeJdZuEoaI_Lrcdi8PHTrPx15hh7XMivUgqBk4kQcbXDqTUNOP2-sZV1SPDmJhVzvV9WV0KNDMOw",
