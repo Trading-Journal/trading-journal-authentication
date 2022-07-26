@@ -12,6 +12,8 @@ public interface UserAuthorityService {
 
     List<UserAuthority> saveAdminUserAuthorities(User applicationUser);
 
+    List<UserAuthority> saveOrganisationAdminUserAuthorities(User applicationUser);
+
     List<UserAuthority> addAuthorities(User applicationUser, AuthoritiesChange authorities);
 
     List<UserAuthority> deleteAuthorities(User applicationUser, AuthoritiesChange authorities);

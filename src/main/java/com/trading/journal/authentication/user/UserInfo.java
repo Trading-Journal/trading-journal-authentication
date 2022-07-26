@@ -5,10 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.userauthority.UserAuthority;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +15,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Getter
 @Builder
+@ToString
 public class UserInfo {
 
     @JsonIgnore

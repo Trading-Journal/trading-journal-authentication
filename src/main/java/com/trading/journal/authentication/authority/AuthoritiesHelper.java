@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 public enum AuthoritiesHelper {
 
     ROLE_USER("ROLE_USER", AuthorityCategory.COMMON_USER),
+    TENANCY_ADMIN("TENANCY_ADMIN", AuthorityCategory.ORGANISATION),
     ROLE_ADMIN("ROLE_ADMIN", AuthorityCategory.ADMINISTRATOR);
 
     private final String label;

@@ -4,12 +4,18 @@ import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
+import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.User;
+import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.service.AdminUserService;
 import com.trading.journal.authentication.user.service.UserService;
+import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +32,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.stream.Stream;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -46,6 +53,12 @@ public class SecurityConfigurationTest {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    AuthorityService authorityService;
+
+    @Autowired
+    UserAuthorityService userAuthorityService;
 
     @Autowired
     PasswordEncoder encoder;
@@ -112,6 +125,12 @@ public class SecurityConfigurationTest {
                 "dad231#$#4",
                 "dad231#$#4");
         userService.createNewUser(userRegistration, null);
+        User user = userRepository.findByEmail("johnwick@mail.com").get();
+        user.enable();
+        user.verify();
+        user.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(user);
+
         Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
@@ -154,6 +173,7 @@ public class SecurityConfigurationTest {
                 .uri("/admin/users")
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .header("tenancy", "1")
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -171,6 +191,12 @@ public class SecurityConfigurationTest {
                 "dad231#$#4",
                 "dad231#$#4");
         userService.createNewUser(userRegistration, null);
+        User user = userRepository.findByEmail("johnwick@mail.com").get();
+        user.enable();
+        user.verify();
+        user.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(user);
+
         Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
@@ -263,6 +289,113 @@ public class SecurityConfigurationTest {
                 "dad231#$#4",
                 "dad231#$#4");
         userService.createNewUser(userRegistration, null);
+        User user = userRepository.findByEmail("johnwick@mail.com").get();
+        user.enable();
+        user.verify();
+        user.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(user);
+
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        webTestClient
+                .get()
+                .uri("/admin/tenancies")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+
+    @DisplayName("Access Organisation users path with common user token fails")
+    @Test
+    void invalidAccessOrganisationUsers() {
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        userService.createNewUser(userRegistration, null);
+        User user = userRepository.findByEmail("johnwick@mail.com").get();
+        user.enable();
+        user.verify();
+        user.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(user);
+
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        webTestClient
+                .get()
+                .uri("/organisation/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+
+    @DisplayName("Access Organisation users path with Organisation Admin user is granted")
+    @Test
+    void orgAdminAccessOrganisation() {
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        userService.createNewUser(userRegistration, null);
+        User user = userRepository.findByEmail("johnwick@mail.com").get();
+        user.enable();
+        user.verify();
+        user.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(user);
+        Authority authority = authorityService.getAuthoritiesByCategory(AuthorityCategory.ORGANISATION).get(0);
+        userAuthorityService.addAuthorities(user, new AuthoritiesChange(singletonList(authority.getName())));
+
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        webTestClient
+                .get()
+                .uri("/organisation/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    @DisplayName("Access tenancies path with organisation admin user token fails")
+    @Test
+    void invalidAccessTenancyOrgAdmin() {
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        userService.createNewUser(userRegistration, null);
+        User user = userRepository.findByEmail("johnwick@mail.com").get();
+        user.enable();
+        user.verify();
+        user.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(user);
+
+        Authority authority = authorityService.getAuthoritiesByCategory(AuthorityCategory.ORGANISATION).get(0);
+        userAuthorityService.addAuthorities(user, new AuthoritiesChange(singletonList(authority.getName())));
+
         Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();

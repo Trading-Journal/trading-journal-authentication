@@ -53,3 +53,4 @@ CREATE TABLE `Verifications` (
 
 INSERT INTO Authorities (category, name) VALUES ('COMMON_USER','ROLE_USER');
 INSERT INTO Authorities (category, name) VALUES ('ADMINISTRATOR','ROLE_ADMIN');
+INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN');

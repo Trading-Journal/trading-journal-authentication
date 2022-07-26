@@ -16,9 +16,10 @@ import java.util.stream.Stream;
 
 public class TestLoader {
 
-    public static void load50Users(UserRepository userRepository, UserAuthorityRepository userAuthorityRepository, AuthorityService authorityService) {
+    public static void load50Users(UserRepository userRepository, UserAuthorityRepository userAuthorityRepository, AuthorityService authorityService, TenancyRepository tenancyRepository) {
         userRepository.deleteAll();
         userAuthorityRepository.deleteAll();
+        tenancyRepository.deleteAll();
 
         Stream<String> users = Stream.of(
                 "Andy Johnson", "Angel Duncan", "Angelo Wells", "Arthur Lawrence", "Bernard Myers", "Beth Guzman", "Blake Coleman", "Brian Mann", "Cameron Fleming", "Carlton Santos",
@@ -29,6 +30,8 @@ public class TestLoader {
         );
 
         Authority authority = authorityService.getByName(AuthoritiesHelper.ROLE_USER.getLabel()).get();
+
+        Tenancy tenancy = tenancyRepository.save(Tenancy.builder().userUsage(1).userLimit(100).enabled(true).name("test").build());
 
         users.map(user -> {
                     String userName = user.replace(" ", "").toLowerCase();
@@ -46,6 +49,7 @@ public class TestLoader {
                             .enabled(true)
                             .verified(true)
                             .createdAt(LocalDateTime.now())
+                            .tenancy(tenancy)
                             .build();
                 }).map(userRepository::save)
                 .map(applicationUser -> new UserAuthority(applicationUser, authority))

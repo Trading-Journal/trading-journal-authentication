@@ -6,11 +6,13 @@ import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.authority.service.AuthorityService;
+import com.trading.journal.authentication.pageable.PageResponse;
+import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
-import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.AuthoritiesChange;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,21 +39,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
-class UsersControllerTest {
+class OrganisationUsersControllerTest {
 
-    public static final String USER_PATH = "/admin/users/{userId}";
-    public static final String USERS_AUTHORITIES_PATH = "/admin/users/{userId}/authorities";
-    public static final String USERS_ENABLE_PATH = "/admin/users/{userId}/enable";
-    public static final String USERS_DISABLE_PATH = "/admin/users/{userId}/disable";
+    public static final String PATH = "/organisation/users";
+
+    public static final String PATH_BY_ID = "/organisation/users/{id}";
     private static String token;
 
     private static String tenancy;
 
     @Autowired
-    UserRepository userRepository;
+    private WebTestClient webTestClient;
 
     @Autowired
-    private WebTestClient webTestClient;
+    UserRepository userRepository;
 
     @BeforeAll
     public static void setUp(
@@ -64,9 +65,8 @@ class UsersControllerTest {
             @Autowired TenancyRepository tenancyRepository
     ) {
         TestLoader.load50Users(userRepository, userAuthorityRepository, authorityService, tenancyRepository);
-
-        tenancy = tenancyRepository.findByName("test").get().getId().toString();
-
+        Tenancy tenancy1 = tenancyRepository.findByName("test").get();
+        tenancy = tenancy1.getId().toString();
         User user = User.builder()
                 .userName("johnwick")
                 .password(encoder.encode("dad231#$#4"))
@@ -76,14 +76,102 @@ class UsersControllerTest {
                 .enabled(true)
                 .verified(true)
                 .createdAt(LocalDateTime.now())
+                .tenancy(tenancy1)
                 .build();
         User applicationUser = userRepository.save(user);
-        userAuthorityService.saveAdminUserAuthorities(applicationUser);
+        userAuthorityService.saveCommonUserAuthorities(applicationUser);
+        userAuthorityService.saveOrganisationAdminUserAuthorities(applicationUser);
 
         Login login = new Login("johnwick@mail.com", "dad231#$#4");
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
         token = loginResponse.accessToken();
+    }
+
+    @DisplayName("Page organisation users")
+    @Test
+    void page() {
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                })
+                .value(response -> {
+                    assertThat(response.items()).hasSize(10);
+                    assertThat(response.currentPage()).isEqualTo(0);
+                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
+                            .containsExactly("Andy Johnson", "Angel Duncan", "Angelo Wells", "Arthur Lawrence", "Bernard Myers", "Beth Guzman", "Blake Coleman", "Brian Mann", "Cameron Fleming", "Carlton Santos");
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH)
+                        .queryParam("page", "3")
+                        .queryParam("size", "10")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                })
+                .value(response -> {
+                    assertThat(response.items()).hasSize(10);
+                    assertThat(response.currentPage()).isEqualTo(3);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH)
+                        .queryParam("page", "0")
+                        .queryParam("size", "4")
+                        .queryParam("filter", "la")
+                        .queryParam("sort", "lastName", "desc")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                })
+                .value(response -> {
+                    assertThat(response.items()).hasSize(4);
+                    assertThat(response.currentPage()).isEqualTo(0);
+                    assertThat(response.totalPages()).isEqualTo(2);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH)
+                        .queryParam("page", "1")
+                        .queryParam("size", "4")
+                        .queryParam("filter", "la")
+                        .queryParam("sort", "lastName", "desc")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
+                })
+                .value(response -> {
+                    assertThat(response.items()).hasSize(1);
+                    assertThat(response.currentPage()).isEqualTo(1);
+                    assertThat(response.totalPages()).isEqualTo(2);
+                });
     }
 
     @DisplayName("Get user by id")
@@ -94,11 +182,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -120,11 +207,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -143,11 +229,11 @@ class UsersControllerTest {
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_DISABLE_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("disable")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -155,11 +241,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -181,11 +266,11 @@ class UsersControllerTest {
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_DISABLE_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("disable")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -210,11 +295,11 @@ class UsersControllerTest {
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_ENABLE_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("enable")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -222,11 +307,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -248,11 +332,11 @@ class UsersControllerTest {
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_ENABLE_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("enable")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -273,11 +357,10 @@ class UsersControllerTest {
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -293,11 +376,10 @@ class UsersControllerTest {
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -318,11 +400,10 @@ class UsersControllerTest {
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -333,11 +414,10 @@ class UsersControllerTest {
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -358,11 +438,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -376,12 +455,12 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_AUTHORITIES_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -389,11 +468,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -414,11 +492,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -432,12 +509,12 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_AUTHORITIES_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -445,11 +522,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -471,12 +547,12 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_AUTHORITIES_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -484,11 +560,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -507,12 +582,12 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_AUTHORITIES_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -534,12 +609,12 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_AUTHORITIES_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -547,11 +622,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -565,12 +639,12 @@ class UsersControllerTest {
         webTestClient
                 .method(HttpMethod.DELETE)
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_AUTHORITIES_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -578,11 +652,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -603,11 +676,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -621,12 +693,12 @@ class UsersControllerTest {
         webTestClient
                 .method(HttpMethod.DELETE)
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_AUTHORITIES_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -634,11 +706,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -659,11 +730,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -677,12 +747,12 @@ class UsersControllerTest {
         webTestClient
                 .method(HttpMethod.DELETE)
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_AUTHORITIES_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -690,11 +760,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -714,12 +783,12 @@ class UsersControllerTest {
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_AUTHORITIES_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -727,11 +796,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -745,12 +813,12 @@ class UsersControllerTest {
         webTestClient
                 .method(HttpMethod.DELETE)
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_AUTHORITIES_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -758,11 +826,10 @@ class UsersControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(USER_PATH)
+                        .path(PATH_BY_ID)
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -780,12 +847,12 @@ class UsersControllerTest {
         webTestClient
                 .method(HttpMethod.DELETE)
                 .uri(uriBuilder -> uriBuilder
-                        .path(USERS_AUTHORITIES_PATH)
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
                         .build(userId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(authoritiesChange)
                 .header("Authorization", "Bearer " + token)
-                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isNotFound()

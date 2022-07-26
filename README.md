@@ -4,7 +4,14 @@
 
 * Role tenancy (Company) Administrator
   * Can load and change user for the same tenancy (Company)
-  * Can manage users - based on tenancy limits
+  * Can add or remove users - based on tenancy limits
+  * Endpoint to retrieve tenancy limits for the organisation access
+  * Add the MockSecurity again
+* Change me endpoint to update user data
+* Authorities endpoints
+  * Enable access to  ORGANISATION user
+  * Do not manage system admin when category when it is an ORGANISATION user
+  * Manage all when logged user id ADMINISTRATOR
 * Delete account
   * Delete common user
   * Delete tenancy (Company) admin user:
@@ -114,6 +121,7 @@ CREATE TABLE `Verifications` (
 ```
 INSERT INTO Authorities (category, name) VALUES ('COMMON_USER','ROLE_USER');
 INSERT INTO Authorities (category, name) VALUES ('ADMINISTRATOR','ROLE_ADMIN');
+INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN');
 ```
 
 ## Configurations

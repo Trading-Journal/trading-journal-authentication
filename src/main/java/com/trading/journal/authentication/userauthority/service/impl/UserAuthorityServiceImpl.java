@@ -26,33 +26,42 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     private final AuthorityService authorityService;
 
     @Override
-    public List<UserAuthority> saveCommonUserAuthorities(User applicationUser) {
+    public List<UserAuthority> saveCommonUserAuthorities(User user) {
         return authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)
                 .stream()
-                .map(authority -> new UserAuthority(applicationUser, authority))
+                .map(authority -> new UserAuthority(user, authority))
                 .map(userAuthorityRepository::save)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<UserAuthority> saveAdminUserAuthorities(User applicationUser) {
+    public List<UserAuthority> saveAdminUserAuthorities(User user) {
         return authorityService.getAll()
                 .stream()
-                .map(authority -> new UserAuthority(applicationUser, authority))
+                .map(authority -> new UserAuthority(user, authority))
                 .map(userAuthorityRepository::save)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<UserAuthority> addAuthorities(User applicationUser, AuthoritiesChange authoritiesChange) {
+    public List<UserAuthority> saveOrganisationAdminUserAuthorities(User user) {
+        return authorityService.getAuthoritiesByCategory(AuthorityCategory.ORGANISATION)
+                .stream()
+                .map(authority -> new UserAuthority(user, authority))
+                .map(userAuthorityRepository::save)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserAuthority> addAuthorities(User user, AuthoritiesChange authoritiesChange) {
         List<Authority> authorities = authoritiesChange.authorities().stream()
                 .map(authorityService::getByName)
                 .filter(Optional::isPresent)
                 .map(Optional::get).toList();
 
         List<UserAuthority> userAuthoritiesToAdd = authorities.stream()
-                .filter(filterOutEqualAuthorities(applicationUser))
-                .map(authority -> new UserAuthority(applicationUser, authority))
+                .filter(filterOutEqualAuthorities(user))
+                .map(authority -> new UserAuthority(user, authority))
                 .toList();
 
         return userAuthoritiesToAdd.stream()
@@ -61,13 +70,13 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     }
 
     @Override
-    public List<UserAuthority> deleteAuthorities(User applicationUser, AuthoritiesChange authoritiesChange) {
+    public List<UserAuthority> deleteAuthorities(User user, AuthoritiesChange authoritiesChange) {
         List<Authority> authorities = authoritiesChange.authorities().stream()
                 .map(authorityService::getByName)
                 .filter(Optional::isPresent)
                 .map(Optional::get).toList();
 
-        List<UserAuthority> userAuthoritiesToRemove = applicationUser.getAuthorities()
+        List<UserAuthority> userAuthoritiesToRemove = user.getAuthorities()
                 .stream()
                 .filter(filterUserRolesToRemove(authorities)).toList();
 
@@ -75,8 +84,8 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
         return userAuthoritiesToRemove;
     }
 
-    private Predicate<Authority> filterOutEqualAuthorities(User applicationUser) {
-        return authority -> applicationUser
+    private Predicate<Authority> filterOutEqualAuthorities(User user) {
+        return authority -> user
                 .getAuthorities()
                 .stream()
                 .noneMatch(userAuthority -> userAuthority.getAuthority().getName().equals(authority.getName())

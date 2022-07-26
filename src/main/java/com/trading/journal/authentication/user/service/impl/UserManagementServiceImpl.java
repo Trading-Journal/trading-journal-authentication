@@ -4,10 +4,11 @@ import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.pageable.specifications.FilterLike;
+import com.trading.journal.authentication.pageable.specifications.FilterTenancy;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.UserRepository;
+import com.trading.journal.authentication.user.UserManagementRepository;
 import com.trading.journal.authentication.user.service.UserManagementService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
@@ -25,76 +26,69 @@ import java.util.stream.Collectors;
 public class UserManagementServiceImpl implements UserManagementService {
 
     public static final String MESSAGE = "User id not found";
-    private final UserRepository userRepository;
+    private final UserManagementRepository userManagementRepository;
 
     private final UserAuthorityService userAuthorityService;
 
     @Override
-    public PageResponse<UserInfo> getAll(PageableRequest pageRequest) {
-        Specification<User> specification = null;
+    public PageResponse<UserInfo> getAll(Long tenancyId, PageableRequest pageRequest) {
+        Specification<User> specification = new FilterTenancy<User>(tenancyId).apply();
         if (pageRequest.hasFilter()) {
-            specification = new FilterLike<User>(pageRequest.getFilter()).apply(Columns.USER_NAME)
+            Specification<User> filter = new FilterLike<User>(pageRequest.getFilter()).apply(Columns.USER_NAME)
                     .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.USER_NAME))
                     .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.FIRST_NAME))
                     .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.LAST_NAME))
                     .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.EMAIL));
+            specification = specification.and(filter);
         }
-        Page<User> users = userRepository.findAll(specification, pageRequest.pageable());
-        List<UserInfo> list = users.stream()
-                .map(UserInfo::new).collect(Collectors.toList());
+        Page<User> users = userManagementRepository.findAll(specification, pageRequest.pageable());
+        List<UserInfo> list = users.stream().map(UserInfo::new).collect(Collectors.toList());
         return new PageResponse<>(users.getTotalElements(), users.getTotalPages(), users.getNumber(), list);
     }
 
     @Override
-    public UserInfo getUserById(Long id) {
-        return userRepository.findById(id)
-                .map(UserInfo::new)
-                .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
+    public UserInfo getUserById(Long tenancyId, Long id) {
+        User user = getUser(tenancyId, id);
+        return new UserInfo(user);
     }
 
     @Override
-    public void disableUserById(Long id) {
-        userRepository.findById(id)
-                .map(applicationUser -> {
-                    applicationUser.disable();
-                    return applicationUser;
-                })
-                .map(userRepository::save)
-                .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
+    public void disableUserById(Long tenancyId, Long id) {
+        User user = getUser(tenancyId, id);
+        user.disable();
+        userManagementRepository.save(user);
     }
 
     @Override
-    public void enableUserById(Long id) {
-        userRepository.findById(id)
-                .map(applicationUser -> {
-                    applicationUser.enable();
-                    return applicationUser;
-                })
-                .map(userRepository::save)
-                .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
+    public void enableUserById(Long tenancyId, Long id) {
+        User user = getUser(tenancyId, id);
+        user.enable();
+        userManagementRepository.save(user);
     }
 
     @Override
-    public void deleteUserById(Long id) {
-        userRepository.findById(id)
-                .ifPresentOrElse(userRepository::delete, () -> {
-                    throw new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE);
-                });
+    public void deleteUserById(Long tenancyId, Long id) {
+        User user = getUser(tenancyId, id);
+        userManagementRepository.delete(user);
     }
 
     @Override
-    public List<UserAuthority> addAuthorities(Long id, AuthoritiesChange authorities) {
-        return userRepository.findById(id)
-                .map(applicationUser -> userAuthorityService.addAuthorities(applicationUser, authorities))
-                .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
+    public List<UserAuthority> addAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities) {
+        User user = getUser(tenancyId, id);
+        return userAuthorityService.addAuthorities(user, authorities);
     }
 
     @Override
-    public List<UserAuthority> deleteAuthorities(Long id, AuthoritiesChange authorities) {
-        return userRepository.findById(id)
-                .map(applicationUser -> userAuthorityService.deleteAuthorities(applicationUser, authorities))
+    public List<UserAuthority> deleteAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities) {
+        User user = getUser(tenancyId, id);
+        return userAuthorityService.deleteAuthorities(user, authorities);
+    }
+
+    private User getUser(Long tenancyId, Long id) {
+        return userManagementRepository.findByTenancyIdAndId(tenancyId, id)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
     }
+
 
     private static class Columns {
         public static final String USER_NAME = "userName";

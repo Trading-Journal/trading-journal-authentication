@@ -5,6 +5,7 @@ import com.trading.journal.authentication.TestLoader;
 import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
+import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.UserManagementService;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 class UserManagementServiceImplPageableIntegratedTest {
 
+    private static Long tenancy;
     @Autowired
     UserManagementService userManagementService;
 
@@ -31,16 +33,18 @@ class UserManagementServiceImplPageableIntegratedTest {
     public static void setUp(
             @Autowired UserRepository userRepository,
             @Autowired UserAuthorityRepository userAuthorityRepository,
-            @Autowired AuthorityService authorityService
+            @Autowired AuthorityService authorityService,
+            @Autowired TenancyRepository tenancyRepository
     ) {
-        TestLoader.load50Users(userRepository, userAuthorityRepository, authorityService);
+        TestLoader.load50Users(userRepository, userAuthorityRepository, authorityService, tenancyRepository);
+        tenancy = tenancyRepository.findByName("test").get().getId();
     }
 
     @DisplayName("Given default PageableRequest return first 10 items")
     @Test
     void plainPageable() {
         PageableRequest pageableRequest = new PageableRequest(0, 10, null, null);
-        PageResponse<UserInfo> usersPage = userManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> usersPage = userManagementService.getAll(tenancy, pageableRequest);
         assertThat(usersPage.items()).hasSize(10);
         assertThat(usersPage.currentPage()).isEqualTo(0);
         assertThat(usersPage.totalPages()).isEqualTo(5);
@@ -53,7 +57,7 @@ class UserManagementServiceImplPageableIntegratedTest {
     @Test
     void middlePage() {
         PageableRequest pageableRequest = new PageableRequest(3, 10, null, null);
-        PageResponse<UserInfo> usersPage = userManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> usersPage = userManagementService.getAll(tenancy, pageableRequest);
         assertThat(usersPage.items()).hasSize(10);
         assertThat(usersPage.currentPage()).isEqualTo(3);
         assertThat(usersPage.totalPages()).isEqualTo(5);
@@ -67,7 +71,7 @@ class UserManagementServiceImplPageableIntegratedTest {
     @Test
     void outOfRange() {
         PageableRequest pageableRequest = new PageableRequest(5, 10, null, null);
-        PageResponse<UserInfo> usersPage = userManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> usersPage = userManagementService.getAll(tenancy, pageableRequest);
         assertThat(usersPage.items()).hasSize(0);
         assertThat(usersPage.currentPage()).isEqualTo(5);
         assertThat(usersPage.totalPages()).isEqualTo(5);
@@ -80,7 +84,7 @@ class UserManagementServiceImplPageableIntegratedTest {
     void plainSort() {
         String[] sort = new String[]{"firstName", "desc"};
         PageableRequest pageableRequest = new PageableRequest(0, 10, sort, null);
-        PageResponse<UserInfo> usersPage = userManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> usersPage = userManagementService.getAll(tenancy, pageableRequest);
         assertThat(usersPage.items()).hasSize(10);
         assertThat(usersPage.currentPage()).isEqualTo(0);
         assertThat(usersPage.totalPages()).isEqualTo(5);
@@ -95,7 +99,7 @@ class UserManagementServiceImplPageableIntegratedTest {
     void sortTwoColumns() {
         String[] sort = new String[]{"firstName", "desc", "lastName", "asc"};
         PageableRequest pageableRequest = new PageableRequest(0, 10, sort, null);
-        PageResponse<UserInfo> usersPage = userManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> usersPage = userManagementService.getAll(tenancy, pageableRequest);
         assertThat(usersPage.items()).hasSize(10);
         assertThat(usersPage.currentPage()).isEqualTo(0);
         assertThat(usersPage.totalPages()).isEqualTo(5);
@@ -109,7 +113,7 @@ class UserManagementServiceImplPageableIntegratedTest {
     void filterFirstPage() {
         String filter = "son";
         PageableRequest pageableRequest = new PageableRequest(0, 10, null, filter);
-        PageResponse<UserInfo> usersPage = userManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> usersPage = userManagementService.getAll(tenancy, pageableRequest);
         assertThat(usersPage.items()).hasSize(3);
         assertThat(usersPage.currentPage()).isEqualTo(0);
         assertThat(usersPage.totalPages()).isEqualTo(1);
@@ -123,7 +127,7 @@ class UserManagementServiceImplPageableIntegratedTest {
     void filterTwoPages() {
         String filter = "la";
         PageableRequest pageableRequest = new PageableRequest(0, 4, null, filter);
-        PageResponse<UserInfo> usersPage = userManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> usersPage = userManagementService.getAll(tenancy, pageableRequest);
         assertThat(usersPage.items()).hasSize(4);
         assertThat(usersPage.currentPage()).isEqualTo(0);
         assertThat(usersPage.totalPages()).isEqualTo(2);
@@ -132,7 +136,7 @@ class UserManagementServiceImplPageableIntegratedTest {
                 .containsExactly("Arthur Lawrence", "Blake Coleman", "Erma Black", "Larry Robbins");
 
         pageableRequest = new PageableRequest(1, 4, null, filter);
-        usersPage = userManagementService.getAll(pageableRequest);
+        usersPage = userManagementService.getAll(tenancy, pageableRequest);
         assertThat(usersPage.items()).hasSize(2);
         assertThat(usersPage.currentPage()).isEqualTo(1);
         assertThat(usersPage.totalPages()).isEqualTo(2);
@@ -146,7 +150,7 @@ class UserManagementServiceImplPageableIntegratedTest {
     void filterEmpty() {
         String filter = "www";
         PageableRequest pageableRequest = new PageableRequest(0, 4, null, filter);
-        PageResponse<UserInfo> usersPage = userManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> usersPage = userManagementService.getAll(tenancy, pageableRequest);
         assertThat(usersPage.items()).hasSize(0);
         assertThat(usersPage.currentPage()).isEqualTo(0);
         assertThat(usersPage.totalPages()).isEqualTo(0);
@@ -160,7 +164,7 @@ class UserManagementServiceImplPageableIntegratedTest {
         String filter = "la";
         String[] sort = new String[]{"lastName", "desc"};
         PageableRequest pageableRequest = new PageableRequest(0, 4, sort, filter);
-        PageResponse<UserInfo> usersPage = userManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> usersPage = userManagementService.getAll(tenancy, pageableRequest);
         assertThat(usersPage.items()).hasSize(4);
         assertThat(usersPage.currentPage()).isEqualTo(0);
         assertThat(usersPage.totalPages()).isEqualTo(2);
@@ -169,7 +173,7 @@ class UserManagementServiceImplPageableIntegratedTest {
                 .containsExactly("Larry Robbins", "Arthur Lawrence", "Vera Lamb", "Blake Coleman");
 
         pageableRequest = new PageableRequest(1, 4, sort, filter);
-        usersPage = userManagementService.getAll(pageableRequest);
+        usersPage = userManagementService.getAll(tenancy, pageableRequest);
         assertThat(usersPage.items()).hasSize(2);
         assertThat(usersPage.currentPage()).isEqualTo(1);
         assertThat(usersPage.totalPages()).isEqualTo(2);

@@ -5,10 +5,10 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
-import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.AuthoritiesChange;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
+import com.trading.journal.authentication.user.UserManagementRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import org.junit.jupiter.api.DisplayName;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 class UserManagementServiceImplTest {
 
     @Mock
-    UserRepository userRepository;
+    UserManagementRepository userManagementRepository;
 
     @Mock
     UserAuthorityService userAuthorityService;
@@ -50,7 +50,7 @@ class UserManagementServiceImplTest {
     void pageWithoutFilter() {
         PageableRequest pageableRequest = new PageableRequest(0, 10, null, null);
 
-        when(userRepository.findAll(null, pageableRequest.pageable())).thenReturn(new PageImpl<>(
+        when(userManagementRepository.findAll(any(), eq(pageableRequest.pageable()))).thenReturn(new PageImpl<>(
                 singletonList(User.builder()
                         .id(1L)
                         .userName("UserName")
@@ -66,7 +66,7 @@ class UserManagementServiceImplTest {
                 pageableRequest.pageable(),
                 2
         ));
-        PageResponse<UserInfo> response = applicationUserManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> response = applicationUserManagementService.getAll(10L, pageableRequest);
         assertThat(response.items()).hasSize(1);
         assertThat(response.totalPages()).isEqualTo(1);
         assertThat(response.totalItems()).isEqualTo(1L);
@@ -78,7 +78,7 @@ class UserManagementServiceImplTest {
     void pageWithFilter() {
         PageableRequest pageableRequest = new PageableRequest(0, 10, null, "any string");
 
-        when(userRepository.findAll(any(), eq(pageableRequest.pageable()))).thenReturn(new PageImpl<>(
+        when(userManagementRepository.findAll(any(), eq(pageableRequest.pageable()))).thenReturn(new PageImpl<>(
                 singletonList(User.builder()
                         .id(1L)
                         .userName("UserName")
@@ -95,7 +95,7 @@ class UserManagementServiceImplTest {
                 2
         ));
 
-        PageResponse<UserInfo> response = applicationUserManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> response = applicationUserManagementService.getAll(1L, pageableRequest);
         assertThat(response.items()).hasSize(1);
         assertThat(response.totalPages()).isEqualTo(1);
         assertThat(response.totalItems()).isEqualTo(1L);
@@ -106,7 +106,7 @@ class UserManagementServiceImplTest {
     @Test
     void getUserById() {
         Long userId = 10L;
-        when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder()
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.of(User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -119,7 +119,7 @@ class UserManagementServiceImplTest {
                 .authorities(emptyList())
                 .build()));
 
-        UserInfo userInfo = applicationUserManagementService.getUserById(userId);
+        UserInfo userInfo = applicationUserManagementService.getUserById(10L, userId);
         assertThat(userInfo).isNotNull();
     }
 
@@ -127,9 +127,9 @@ class UserManagementServiceImplTest {
     @Test
     void getUserByIdNotFound() {
         Long userId = 10L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.getUserById(userId));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.getUserById(10L, userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("User id not found");
     }
@@ -151,20 +151,20 @@ class UserManagementServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.of(applicationUser));
 
-        when(userRepository.save(argThat(user -> user.getEnabled().equals(false)))).thenReturn(applicationUser);
+        when(userManagementRepository.save(argThat(user -> user.getEnabled().equals(false)))).thenReturn(applicationUser);
 
-        applicationUserManagementService.disableUserById(userId);
+        applicationUserManagementService.disableUserById(10L, userId);
     }
 
     @DisplayName("Disable user that does not exists return not found exception")
     @Test
     void disableUserNotFound() {
         Long userId = 10L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.disableUserById(userId));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.disableUserById(10L, userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("User id not found");
     }
@@ -186,20 +186,20 @@ class UserManagementServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.of(applicationUser));
 
-        when(userRepository.save(argThat(user -> user.getEnabled().equals(true)))).thenReturn(applicationUser);
+        when(userManagementRepository.save(argThat(user -> user.getEnabled().equals(true)))).thenReturn(applicationUser);
 
-        applicationUserManagementService.enableUserById(userId);
+        applicationUserManagementService.enableUserById(10L, userId);
     }
 
     @DisplayName("Enable user that does not exists return not found exception")
     @Test
     void enableUserNotFound() {
         Long userId = 10L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.enableUserById(userId));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.enableUserById(10L, userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("User id not found");
     }
@@ -221,20 +221,20 @@ class UserManagementServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.of(applicationUser));
 
-        applicationUserManagementService.deleteUserById(userId);
+        applicationUserManagementService.deleteUserById(10L, userId);
 
-        verify(userRepository).delete(applicationUser);
+        verify(userManagementRepository).delete(applicationUser);
     }
 
     @DisplayName("Delete user that does not exists return not found exception")
     @Test
     void deleteUserNotFound() {
         Long userId = 10L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.deleteUserById(userId));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.deleteUserById(10L, userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("User id not found");
     }
@@ -256,7 +256,7 @@ class UserManagementServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.of(applicationUser));
 
         List<UserAuthority> userAuthorities = Arrays.asList(
                 new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
@@ -266,7 +266,7 @@ class UserManagementServiceImplTest {
         when(userAuthorityService.addAuthorities(applicationUser, change))
                 .thenReturn(userAuthorities);
 
-        List<UserAuthority> actualAuthorities = applicationUserManagementService.addAuthorities(userId, change);
+        List<UserAuthority> actualAuthorities = applicationUserManagementService.addAuthorities(10L, userId, change);
         assertThat(actualAuthorities).hasSize(2);
     }
 
@@ -274,10 +274,10 @@ class UserManagementServiceImplTest {
     @Test
     void changeUserAuthoritiesNotFound() {
         Long userId = 10L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class,
-                () -> applicationUserManagementService.addAuthorities(userId, new AuthoritiesChange(singletonList("USER_ROLE")))
+                () -> applicationUserManagementService.addAuthorities(10L, userId, new AuthoritiesChange(singletonList("USER_ROLE")))
         );
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("User id not found");
@@ -303,7 +303,7 @@ class UserManagementServiceImplTest {
                 ))
                 .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(applicationUser));
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.of(applicationUser));
 
         List<UserAuthority> userAuthorities = singletonList(
                 new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))
@@ -312,7 +312,7 @@ class UserManagementServiceImplTest {
         when(userAuthorityService.deleteAuthorities(applicationUser, change))
                 .thenReturn(userAuthorities);
 
-        List<UserAuthority> actualAuthorities = applicationUserManagementService.deleteAuthorities(userId, change);
+        List<UserAuthority> actualAuthorities = applicationUserManagementService.deleteAuthorities(10L, userId, change);
         assertThat(actualAuthorities).hasSize(1);
     }
 
@@ -320,10 +320,10 @@ class UserManagementServiceImplTest {
     @Test
     void removeUserAuthoritiesNotFound() {
         Long userId = 10L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class,
-                () -> applicationUserManagementService.deleteAuthorities(userId, new AuthoritiesChange(singletonList("USER_ROLE")))
+                () -> applicationUserManagementService.deleteAuthorities(10L, userId, new AuthoritiesChange(singletonList("USER_ROLE")))
         );
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("User id not found");

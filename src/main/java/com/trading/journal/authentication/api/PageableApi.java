@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.api;
 
+import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.pageable.PageResponse;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -19,6 +20,7 @@ public interface PageableApi<T> {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<PageResponse<T>> getAll(
+            AccessTokenInfo accessTokenInfo,
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
             @RequestParam(value = "size", defaultValue = "10", required = false) Integer size,
             @ApiParam(name = "sort", value = "A array with property and direction such as \"id,asc\", \"name,desc\"") @RequestParam(value = "sort", required = false) String[] sort,
@@ -28,5 +30,5 @@ public interface PageableApi<T> {
     @ApiResponses(@ApiResponse(code = 200, message = "Record retrieved"))
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<T> getById(@PathVariable Long id);
+    ResponseEntity<T> getById(AccessTokenInfo accessTokenInfo, @PathVariable Long id);
 }

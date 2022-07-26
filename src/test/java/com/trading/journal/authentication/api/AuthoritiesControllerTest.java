@@ -28,6 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -90,9 +91,9 @@ class AuthoritiesControllerTest {
                 .expectBody(new ParameterizedTypeReference<List<Authority>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(2);
-                    assertThat(response).extracting(Authority::getName).containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
-                    assertThat(response).extracting(Authority::getCategory).containsExactlyInAnyOrder(AuthorityCategory.COMMON_USER, AuthorityCategory.ADMINISTRATOR);
+                    assertThat(response).hasSize(3);
+                    assertThat(response).extracting(Authority::getName).containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN", "TENANCY_ADMIN");
+                    assertThat(response).extracting(Authority::getCategory).containsExactlyInAnyOrder(AuthorityCategory.COMMON_USER, AuthorityCategory.ADMINISTRATOR, AuthorityCategory.ORGANISATION);
                 });
     }
 
@@ -110,19 +111,22 @@ class AuthoritiesControllerTest {
                 .expectBody(new ParameterizedTypeReference<List<AuthorityCategory>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(2);
-                    assertThat(response).containsExactlyInAnyOrder(AuthorityCategory.COMMON_USER, AuthorityCategory.ADMINISTRATOR);
+                    assertThat(response).hasSize(3);
+                    assertThat(response).containsExactlyInAnyOrder(AuthorityCategory.COMMON_USER, AuthorityCategory.ADMINISTRATOR, AuthorityCategory.ORGANISATION);
                 });
     }
 
     @DisplayName("Get authority by id")
     @Test
     void byId() {
+        Optional<Authority> roleUser = authorityRepository.getByName("ROLE_USER");
+        assertThat(roleUser).isNotEmpty();
+
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(1L))
+                        .build(roleUser.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
@@ -134,11 +138,14 @@ class AuthoritiesControllerTest {
                     assertThat(response.getName()).isEqualTo("ROLE_USER");
                 });
 
+        Optional<Authority> roleAdmin = authorityRepository.getByName("ROLE_ADMIN");
+        assertThat(roleAdmin).isNotEmpty();
+
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(2L))
+                        .build(roleAdmin.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
@@ -154,7 +161,7 @@ class AuthoritiesControllerTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(3L))
+                        .build(100L))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .exchange()
@@ -202,17 +209,22 @@ class AuthoritiesControllerTest {
                         assertThat(response.get("error")).isEqualTo("Authority name already exists")
                 );
 
-        authorityRepository.deleteById(3L);
+        Optional<Authority> another_role = authorityRepository.getByName("ANOTHER_ROLE");
+        assertThat(another_role).isNotEmpty();
+        authorityRepository.deleteById(another_role.get().getId());
     }
 
     @DisplayName("Update a authority")
     @Test
     void update() {
+        Optional<Authority> roleUser = authorityRepository.getByName("ROLE_USER");
+        assertThat(roleUser).isNotEmpty();
+
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(1L))
+                        .build(roleUser.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_USER_UPDATED"))
                 .header("Authorization", "Bearer " + token)
@@ -226,13 +238,13 @@ class AuthoritiesControllerTest {
                 });
 
         List<Authority> authorities = authorityRepository.findAll();
-        assertThat(authorities).extracting(Authority::getName).containsExactlyInAnyOrder("ROLE_USER_UPDATED", "ROLE_ADMIN");
+        assertThat(authorities).extracting(Authority::getName).containsExactlyInAnyOrder("ROLE_USER_UPDATED", "ROLE_ADMIN", "TENANCY_ADMIN");
 
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(1L))
+                        .build(roleUser.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_ADMIN"))
                 .header("Authorization", "Bearer " + token)
@@ -249,7 +261,7 @@ class AuthoritiesControllerTest {
                 .put()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(3L))
+                        .build(100L))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_ADMIN"))
                 .header("Authorization", "Bearer " + token)
@@ -268,7 +280,6 @@ class AuthoritiesControllerTest {
     @DisplayName("Delete a authority")
     @Test
     void delete() {
-
         User applicationUser = userRepository.findByEmail("johnwick3@mail.com").orElse(null);
         assertThat(applicationUser).isNotNull();
         Authority anotherRole = authorityRepository.save(new Authority(AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"));

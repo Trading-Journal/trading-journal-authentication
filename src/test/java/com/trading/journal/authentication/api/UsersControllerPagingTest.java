@@ -7,9 +7,10 @@ import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.pageable.PageResponse;
+import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.UserInfo;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,6 +37,8 @@ class UsersControllerPagingTest {
     public static final String PATH = "/admin/users";
     private static String token;
 
+    private static String tenancy ;
+
     @Autowired
     private WebTestClient webTestClient;
 
@@ -46,9 +49,12 @@ class UsersControllerPagingTest {
             @Autowired AuthorityService authorityService,
             @Autowired PasswordEncoder encoder,
             @Autowired AuthenticationService authenticationService,
-            @Autowired UserAuthorityService userAuthorityService
+            @Autowired UserAuthorityService userAuthorityService,
+            @Autowired TenancyRepository tenancyRepository
     ) {
-        TestLoader.load50Users(userRepository, userAuthorityRepository, authorityService);
+        TestLoader.load50Users(userRepository, userAuthorityRepository, authorityService, tenancyRepository);
+
+        tenancy = tenancyRepository.findByName("test").get().getId().toString();
 
         User user = User.builder()
                 .userName("johnwick")
@@ -79,6 +85,7 @@ class UsersControllerPagingTest {
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -87,8 +94,8 @@ class UsersControllerPagingTest {
                 .value(response -> {
                     assertThat(response.items()).hasSize(10);
                     assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
                     assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
                             .containsExactly("Andy Johnson", "Angel Duncan", "Angelo Wells", "Arthur Lawrence", "Bernard Myers", "Beth Guzman", "Blake Coleman", "Brian Mann", "Cameron Fleming", "Carlton Santos");
                 });
@@ -106,6 +113,7 @@ class UsersControllerPagingTest {
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -114,8 +122,8 @@ class UsersControllerPagingTest {
                 .value(response -> {
                     assertThat(response.items()).hasSize(10);
                     assertThat(response.currentPage()).isEqualTo(3);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
                     assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
                             .containsExactly("Jerome Pratt", "Joel Dunn", "Julie Carson", "Kathy Oliver", "Katrina Hawkins", "Larry Robbins", "Laurie Adams", "Loretta Stanley", "Luke Tyler", "Melinda Fields");
                 });
@@ -133,6 +141,7 @@ class UsersControllerPagingTest {
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -141,8 +150,8 @@ class UsersControllerPagingTest {
                 .value(response -> {
                     assertThat(response.items()).hasSize(0);
                     assertThat(response.currentPage()).isEqualTo(6);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
                 });
     }
 
@@ -157,6 +166,7 @@ class UsersControllerPagingTest {
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -165,8 +175,8 @@ class UsersControllerPagingTest {
                 .value(response -> {
                     assertThat(response.items()).hasSize(10);
                     assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
                     assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
                             .containsExactly("Victoria Luna", "Verna Wilkins", "Vera Lamb", "Sadie Davis", "Sabrina Garcia", "Rochelle Graves", "Phyllis Terry", "Pedro Sullivan", "Nora Waters", "Natasha Rivera");
                 });
@@ -183,6 +193,7 @@ class UsersControllerPagingTest {
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -191,8 +202,8 @@ class UsersControllerPagingTest {
                 .value(response -> {
                     assertThat(response.items()).hasSize(10);
                     assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
                     assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
                             .containsExactly("Victoria Luna", "Verna Wilkins", "Vera Lamb", "Sadie Davis", "Sabrina Garcia", "Rochelle Graves", "Phyllis Terry", "Pedro Sullivan", "Nora Waters", "Natasha Rivera");
                 });
@@ -209,6 +220,7 @@ class UsersControllerPagingTest {
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -237,6 +249,7 @@ class UsersControllerPagingTest {
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -261,6 +274,7 @@ class UsersControllerPagingTest {
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -287,6 +301,7 @@ class UsersControllerPagingTest {
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -314,6 +329,7 @@ class UsersControllerPagingTest {
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -339,6 +355,7 @@ class UsersControllerPagingTest {
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy)
                 .exchange()
                 .expectStatus()
                 .isOk()

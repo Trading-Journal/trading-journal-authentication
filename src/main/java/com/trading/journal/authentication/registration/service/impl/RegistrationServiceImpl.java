@@ -7,6 +7,7 @@ import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.service.UserService;
+import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
@@ -23,6 +24,8 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final UserService userService;
 
     private final TenancyService tenancyService;
+    
+    private final UserAuthorityService userAuthorityService;
 
     private final VerificationService verificationService;
 
@@ -31,8 +34,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public SignUpResponse signUp(@Valid UserRegistration userRegistration) {
         Tenancy tenancy = tenancyService.create(Tenancy.builder().name(userRegistration.getCompanyName()).userUsage(1).build());
-        User applicationUser = userService.createNewUser(userRegistration, tenancy);
-        return sendVerification(applicationUser.getEmail());
+        User user = userService.createNewUser(userRegistration, tenancy);
+        userAuthorityService.saveOrganisationAdminUserAuthorities(user);
+        return sendVerification(user.getEmail());
     }
 
     @Override
@@ -46,9 +50,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     public SignUpResponse sendVerification(String email) {
         SignUpResponse signUpResponse = new SignUpResponse(email, true);
         if (verificationProperties.isEnabled()) {
-            User applicationUser = userService.getUserByEmail(email);
-            if (!applicationUser.getEnabled()) {
-                verificationService.send(VerificationType.REGISTRATION, applicationUser);
+            User user = userService.getUserByEmail(email);
+            if (!user.getEnabled()) {
+                verificationService.send(VerificationType.REGISTRATION, user);
                 signUpResponse = new SignUpResponse(email, false);
             }
         }
