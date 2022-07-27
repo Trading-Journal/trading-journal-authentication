@@ -158,4 +158,44 @@ class VerificationEmailServiceImplTest {
 
         verificationEmailService.sendEmail(verification, applicationUser);
     }
+
+    @DisplayName("Given verification NEW_ORGANISATION_USER and application user end and email with correct URL")
+    @Test
+    void sendOrgRegistration() {
+        String hash = UUID.randomUUID().toString();
+
+        when(hostProperties.getFrontEnd()).thenReturn("http://site.com");
+        when(hostProperties.getVerificationPage()).thenReturn("auth/email-verified");
+        Verification verification = new Verification(1L, "mail@mail.com", VerificationType.NEW_ORGANISATION_USER, VerificationStatus.PENDING, hash, LocalDateTime.now());
+
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
+
+        String url = String.format("http://site.com/auth/email-verified?hash=%s", hash);
+        List<EmailField> fields = Arrays.asList(
+                new EmailField("$NAME", "User Admin"),
+                new EmailField("$URL", url)
+        );
+
+        EmailRequest emailRequest = new EmailRequest(
+                "Voçê foi incluido como usuário do sistema",
+                "mail/organisation-verification.html",
+                fields,
+                singletonList("mail@mail.com")
+        );
+
+        doNothing().when(emailSender).send(emailRequest);
+
+        verificationEmailService.sendEmail(verification, applicationUser);
+    }
 }

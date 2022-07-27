@@ -42,8 +42,8 @@ public class OrganisationUsersController implements OrganisationUsersApi {
     }
 
     @Override
-    public ResponseEntity<UserInfo> create(@AccessToken AccessTokenInfo accessTokenInfo, @Valid UserRegistration registration) {
-        return ok(userManagementService.create(accessTokenInfo.tenancyId(), registration));
+    public ResponseEntity<UserInfo> create(@AccessToken AccessTokenInfo accessTokenInfo, @Valid UserRegistration userRegistration) {
+        return ok(userManagementService.create(accessTokenInfo.tenancyId(), userRegistration));
     }
 
     @Override

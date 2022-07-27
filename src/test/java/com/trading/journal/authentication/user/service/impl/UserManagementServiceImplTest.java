@@ -5,9 +5,7 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
-import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.registration.service.RegistrationService;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
 import com.trading.journal.authentication.user.AuthoritiesChange;
@@ -17,6 +15,8 @@ import com.trading.journal.authentication.user.UserManagementRepository;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import com.trading.journal.authentication.verification.VerificationType;
+import com.trading.journal.authentication.verification.service.VerificationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +54,7 @@ class UserManagementServiceImplTest {
     UserService userService;
 
     @Mock
-    RegistrationService registrationService;
+    VerificationService verificationService;
 
     @InjectMocks
     UserManagementServiceImpl applicationUserManagementService;
@@ -356,7 +356,7 @@ class UserManagementServiceImplTest {
                 () -> applicationUserManagementService.create(tenancyId, UserRegistration.builder().build()));
 
         verify(userService, never()).createNewUser(any(), any());
-        verify(registrationService, never()).sendVerification(anyString());
+        verify(verificationService, never()).send(any(), any());
         verify(tenancyService, never()).increaseUsage(anyLong());
     }
 
@@ -373,7 +373,7 @@ class UserManagementServiceImplTest {
         assertThat(exception.getStatusText()).isEqualTo("Tenancy has reach its user limit");
 
         verify(userService, never()).createNewUser(any(), any());
-        verify(registrationService, never()).sendVerification(anyString());
+        verify(verificationService, never()).send(any(), any());
         verify(tenancyService, never()).increaseUsage(anyLong());
     }
 
@@ -383,12 +383,11 @@ class UserManagementServiceImplTest {
         Tenancy tenancy = Tenancy.builder().id(1L).userUsage(1).userLimit(10).build();
         when(tenancyService.getById(1L)).thenReturn(tenancy);
 
-        UserRegistration userRegistration = UserRegistration.builder()
-                .email("mail@mail.com")
-                .build();
+        UserRegistration userRegistration = UserRegistration.builder().email("mail@mail.com").build();
+        User user = User.builder().email("mail@mail.com").build();
 
-        when(userService.createNewUser(userRegistration, tenancy)).thenReturn(User.builder().email("mail@mail.com").build());
-        when(registrationService.sendVerification("mail@mail.com")).thenReturn(new SignUpResponse("mail@mail.com", true));
+        when(userService.createNewUser(argThat(registration -> registration.getEmail().equals("mail@mail.com")), eq(tenancy))).thenReturn(user);
+        doNothing().when(verificationService).send(VerificationType.NEW_ORGANISATION_USER, user);
         when(tenancyService.increaseUsage(1L)).thenReturn(tenancy);
 
         UserInfo userInfo = applicationUserManagementService.create(1L, userRegistration);

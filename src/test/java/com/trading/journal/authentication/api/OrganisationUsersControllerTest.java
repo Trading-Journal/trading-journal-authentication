@@ -15,6 +15,7 @@ import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,6 +87,15 @@ class OrganisationUsersControllerTest {
         LoginResponse loginResponse = authenticationService.signIn(login);
         assertThat(loginResponse).isNotNull();
         token = loginResponse.accessToken();
+    }
+
+    @AfterAll
+    public static void shotDown(@Autowired UserRepository userRepository,
+                                @Autowired UserAuthorityRepository userAuthorityRepository,
+                                @Autowired TenancyRepository tenancyRepository) {
+        userRepository.deleteAll();
+        userAuthorityRepository.deleteAll();
+        tenancyRepository.deleteAll();
     }
 
     @DisplayName("Page organisation users")

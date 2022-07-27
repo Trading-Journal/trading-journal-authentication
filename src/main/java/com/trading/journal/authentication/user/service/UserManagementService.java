@@ -14,7 +14,7 @@ public interface UserManagementService {
 
     UserInfo getUserById(Long tenancyId, Long id);
 
-    UserInfo create(Long tenancyId, UserRegistration registration);
+    UserInfo create(Long tenancyId, UserRegistration userRegistration);
 
     void disableUserById(Long tenancyId, Long id);
 

@@ -28,6 +28,7 @@ public class VerificationServiceImpl implements VerificationService {
     public void send(VerificationType verificationType, User applicationUser) {
         Verification verification = verificationRepository.getByTypeAndEmail(verificationType, applicationUser.getEmail())
                 .orElseGet(() -> Verification.builder().email(applicationUser.getEmail()).type(verificationType).build());
+
         verification = verification.renew(hashProvider.generateHash(verification.getEmail()));
         verification = verificationRepository.save(verification);
         verificationEmailService.sendEmail(verification, applicationUser);
@@ -42,10 +43,15 @@ public class VerificationServiceImpl implements VerificationService {
 
     @Override
     public void verify(Verification verification) {
-        if (VerificationType.ADMIN_REGISTRATION.equals(verification.getType())) {
+        if (shouldSendChangePassword(verification)) {
             User applicationUser = userService.getUserByEmail(verification.getEmail());
             this.send(VerificationType.CHANGE_PASSWORD, applicationUser);
         }
         verificationRepository.delete(verification);
+    }
+
+    private static boolean shouldSendChangePassword(Verification verification) {
+        return VerificationType.ADMIN_REGISTRATION.equals(verification.getType())
+                || VerificationType.NEW_ORGANISATION_USER.equals(verification.getType());
     }
 }

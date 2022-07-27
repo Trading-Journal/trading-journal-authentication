@@ -50,6 +50,11 @@ public class VerificationEmailServiceImpl implements VerificationEmailService {
                     VerificationFields.ADMIN_REGISTRATION_EMAIL_TEMPLATE.getValue(),
                     getEmailFields(name, hostProperties.getVerificationPage(), verification),
                     singletonList(applicationUser.getEmail()));
+            case NEW_ORGANISATION_USER -> new EmailRequest(
+                    "Voçê foi incluido como usuário do sistema",
+                    VerificationFields.NEW_ORGANISATION_USER.getValue(),
+                    getEmailFields(name, hostProperties.getVerificationPage(), verification),
+                    singletonList(applicationUser.getEmail()));
         };
     }
 

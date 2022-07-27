@@ -6,7 +6,6 @@ import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.pageable.specifications.FilterLike;
 import com.trading.journal.authentication.pageable.specifications.FilterTenancy;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.registration.service.RegistrationService;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
 import com.trading.journal.authentication.user.AuthoritiesChange;
@@ -17,6 +16,8 @@ import com.trading.journal.authentication.user.service.UserManagementService;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import com.trading.journal.authentication.verification.VerificationType;
+import com.trading.journal.authentication.verification.service.VerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -35,7 +36,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     private final UserService userService;
 
-    private final RegistrationService registrationService;
+    private final VerificationService verificationService;
 
     private final TenancyService tenancyService;
 
@@ -64,11 +65,11 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public UserInfo create(Long tenancyId, UserRegistration registration) {
+    public UserInfo create(Long tenancyId, UserRegistration userRegistration) {
         Tenancy tenancy = tenancyService.getById(tenancyId);
         if (tenancy.increaseUsageAllowed()) {
-            User user = userService.createNewUser(registration, tenancy);
-            registrationService.sendVerification(user.getEmail());
+            User user = userService.createNewUser(userRegistration, tenancy);
+            verificationService.send(VerificationType.NEW_ORGANISATION_USER, user);
             tenancyService.increaseUsage(tenancy.getId());
             return new UserInfo(user);
         }
@@ -112,7 +113,6 @@ public class UserManagementServiceImpl implements UserManagementService {
         return userManagementRepository.findByTenancyIdAndId(tenancyId, id)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, MESSAGE));
     }
-
 
     private static class Columns {
         public static final String USER_NAME = "userName";

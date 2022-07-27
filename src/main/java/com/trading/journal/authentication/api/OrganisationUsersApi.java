@@ -23,7 +23,7 @@ public interface OrganisationUsersApi extends PageableApi<UserInfo> {
     @ApiResponses(@ApiResponse(code = 200, message = "New user created"))
     @PostMapping()
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<UserInfo> create(AccessTokenInfo accessTokenInfo, @RequestBody UserRegistration registration);
+    ResponseEntity<UserInfo> create(AccessTokenInfo accessTokenInfo, @RequestBody UserRegistration userRegistration);
 
     @ApiOperation(notes = "Disable user", value = "Disable user by id")
     @ApiResponses(@ApiResponse(code = 200, message = "User disabled"))

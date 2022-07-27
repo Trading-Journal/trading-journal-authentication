@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static net.logstash.logback.argument.StructuredArguments.kv;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.status;
 
@@ -27,12 +26,10 @@ import static org.springframework.http.ResponseEntity.status;
 public class ApiExceptionHandler {
     private static final String CLIENT_EXCEPTION_HAPPENED = "Client Exception happened";
     private static final String UNEXPECTED_EXCEPTION_HAPPENED = "Unexpected Exception happened";
-    private static final String CONSTRAINT_MESSAGE = "Constraints violations found.";
 
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<Map<String, String>> handleClientException(final HttpClientErrorException ex) {
-        log.error(CLIENT_EXCEPTION_HAPPENED, ex, kv("error", ex.getStatusText()),
-                kv("status", ex.getRawStatusCode()));
+        log.error(CLIENT_EXCEPTION_HAPPENED, ex);
         final Map<String, String> errors = new ConcurrentHashMap<>();
         errors.put("error", ex.getStatusText());
         return status(ex.getStatusCode()).body(errors);
@@ -54,8 +51,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(
-            final MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(final MethodArgumentNotValidException ex) {
         return status(BAD_REQUEST).body(getBindingResult(ex.getBindingResult(), ex));
     }
 
@@ -69,13 +65,13 @@ public class ApiExceptionHandler {
             errors.put(fieldName, error.getDefaultMessage());
         }
         final String message = Optional.ofNullable(ex.getCause()).orElse(ex).getMessage();
-        log.error(CONSTRAINT_MESSAGE, ex, kv("error-message", message), kv("errors", errors));
+        log.error(message, ex);
         return errors;
     }
 
     private Map<String, String> extractMessage(Exception exception) {
         final String message = Optional.ofNullable(exception.getCause()).orElse(exception).getMessage();
-        log.error(UNEXPECTED_EXCEPTION_HAPPENED, exception, kv("error-message", message));
+        log.error(UNEXPECTED_EXCEPTION_HAPPENED, exception);
         final Map<String, String> errors = new ConcurrentHashMap<>();
         errors.put("error", Optional.ofNullable(message).orElse(UNEXPECTED_EXCEPTION_HAPPENED));
         return errors;
