@@ -3,7 +3,6 @@
 ## Pending
 
 * Role tenancy (Company) Administrator
-  * Can load and change user for the same tenancy (Company)
   * Can add or remove users - based on tenancy limits
   * Endpoint to retrieve tenancy limits for the organisation access
   * Add the MockSecurity again

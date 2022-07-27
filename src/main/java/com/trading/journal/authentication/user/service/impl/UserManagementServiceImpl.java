@@ -5,11 +5,16 @@ import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.pageable.specifications.FilterLike;
 import com.trading.journal.authentication.pageable.specifications.FilterTenancy;
+import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.registration.service.RegistrationService;
+import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.tenancy.service.TenancyService;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.UserManagementRepository;
 import com.trading.journal.authentication.user.service.UserManagementService;
+import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +32,12 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     public static final String MESSAGE = "User id not found";
     private final UserManagementRepository userManagementRepository;
+
+    private final UserService userService;
+
+    private final RegistrationService registrationService;
+
+    private final TenancyService tenancyService;
 
     private final UserAuthorityService userAuthorityService;
 
@@ -53,6 +64,18 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
+    public UserInfo create(Long tenancyId, UserRegistration registration) {
+        Tenancy tenancy = tenancyService.getById(tenancyId);
+        if (tenancy.increaseUsageAllowed()) {
+            User user = userService.createNewUser(registration, tenancy);
+            registrationService.sendVerification(user.getEmail());
+            tenancyService.increaseUsage(tenancy.getId());
+            return new UserInfo(user);
+        }
+        throw new ApplicationException("Tenancy has reach its user limit");
+    }
+
+    @Override
     public void disableUserById(Long tenancyId, Long id) {
         User user = getUser(tenancyId, id);
         user.disable();
@@ -70,6 +93,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     public void deleteUserById(Long tenancyId, Long id) {
         User user = getUser(tenancyId, id);
         userManagementRepository.delete(user);
+        tenancyService.lowerUsage(tenancyId);
     }
 
     @Override

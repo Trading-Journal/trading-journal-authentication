@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -46,7 +49,12 @@ public class UserInfo {
         this.email = applicationUser.getEmail();
         this.enabled = applicationUser.getEnabled();
         this.verified = applicationUser.getVerified();
-        this.authorities = applicationUser.getAuthorities().stream().map(UserAuthority::getAuthority).map(Authority::getName).collect(Collectors.toList());
         this.createdAt = applicationUser.getCreatedAt();
+        this.authorities = ofNullable(applicationUser.getAuthorities())
+                .orElse(emptyList())
+                .stream()
+                .map(UserAuthority::getAuthority)
+                .map(Authority::getName)
+                .collect(Collectors.toList());
     }
 }

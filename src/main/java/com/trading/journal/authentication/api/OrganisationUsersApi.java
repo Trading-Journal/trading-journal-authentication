@@ -1,6 +1,7 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
+import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.userauthority.UserAuthority;
@@ -17,6 +18,12 @@ import java.util.List;
 @Api(tags = "Organisation Users Api")
 @RequestMapping("/organisation/users")
 public interface OrganisationUsersApi extends PageableApi<UserInfo> {
+
+    @ApiOperation(notes = "Create a new user", value = "Create a new user for organisation", response = UserInfo.class)
+    @ApiResponses(@ApiResponse(code = 200, message = "New user created"))
+    @PostMapping()
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<UserInfo> create(AccessTokenInfo accessTokenInfo, @RequestBody UserRegistration registration);
 
     @ApiOperation(notes = "Disable user", value = "Disable user by id")
     @ApiResponses(@ApiResponse(code = 200, message = "User disabled"))

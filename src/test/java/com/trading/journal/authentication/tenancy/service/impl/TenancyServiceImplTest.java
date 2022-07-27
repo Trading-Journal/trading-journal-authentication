@@ -184,4 +184,112 @@ class TenancyServiceImplTest {
 
         verify(tenancyRepository, never()).save(any());
     }
+
+    @DisplayName("Lower tenancy usage")
+    @Test
+    void lowerUsage() {
+        Tenancy savedTenancy = Tenancy.builder().id(1L).name("tenancy1").userLimit(10).userUsage(5).build();
+        when(tenancyRepository.findById(1L)).thenReturn(Optional.of(savedTenancy));
+
+        Tenancy tenancyToSave = Tenancy.builder().id(1L).name("tenancy1").userLimit(10).userUsage(4).build();
+        when(tenancyRepository.save(argThat(tenancy -> tenancy.getUserUsage().equals(4)))).thenReturn(tenancyToSave);
+
+        Tenancy tenancy = tenancyService.lowerUsage(1L);
+        assertThat(tenancy).isEqualTo(tenancyToSave);
+    }
+
+    @DisplayName("Lower tenancy usage when usage and limit are zero do not change it")
+    @Test
+    void lowerUsageNotChange() {
+        Tenancy savedTenancy = Tenancy.builder().id(1L).name("tenancy1").userLimit(0).userUsage(0).build();
+        when(tenancyRepository.findById(1L)).thenReturn(Optional.of(savedTenancy));
+
+        Tenancy tenancyToSave = Tenancy.builder().id(1L).name("tenancy1").userLimit(0).userUsage(0).build();
+        when(tenancyRepository.save(argThat(tenancy -> tenancy.getUserUsage().equals(0)))).thenReturn(tenancyToSave);
+
+        Tenancy tenancy = tenancyService.lowerUsage(1L);
+        assertThat(tenancy).isEqualTo(tenancyToSave);
+    }
+
+    @DisplayName("Lower tenancy usage by id not found")
+    @Test
+    void lowerUsageNotFoundError() {
+        when(tenancyRepository.findById(1L)).thenReturn(Optional.empty());
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.lowerUsage(1L));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getStatusText()).isEqualTo("Tenancy id not found");
+
+        verify(tenancyRepository, never()).save(any());
+    }
+
+    @DisplayName("Increase tenancy usage")
+    @Test
+    void increaseUsage() {
+        Tenancy savedTenancy = Tenancy.builder().id(1L).name("tenancy1").userLimit(10).userUsage(5).build();
+        when(tenancyRepository.findById(1L)).thenReturn(Optional.of(savedTenancy));
+
+        Tenancy tenancyToSave = Tenancy.builder().id(1L).name("tenancy1").userLimit(10).userUsage(6).build();
+        when(tenancyRepository.save(argThat(tenancy -> tenancy.getUserUsage().equals(6)))).thenReturn(tenancyToSave);
+
+        Tenancy tenancy = tenancyService.increaseUsage(1L);
+        assertThat(tenancy).isEqualTo(tenancyToSave);
+    }
+
+    @DisplayName("Increase tenancy usage by id not found")
+    @Test
+    void increaseNotFoundError() {
+        when(tenancyRepository.findById(1L)).thenReturn(Optional.empty());
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.increaseUsage(1L));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getStatusText()).isEqualTo("Tenancy id not found");
+
+        verify(tenancyRepository, never()).save(any());
+    }
+
+    @DisplayName("Increase tenancy usage has reach its limit return an exception")
+    @Test
+    void increaseLimitError() {
+        Tenancy savedTenancy = Tenancy.builder().id(1L).name("tenancy1").userLimit(10).userUsage(10).build();
+        when(tenancyRepository.findById(1L)).thenReturn(Optional.of(savedTenancy));
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.increaseUsage(1L));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("Tenancy has reach its user limit");
+
+        verify(tenancyRepository, never()).save(any());
+    }
+
+    @DisplayName("Increase tenancy allowed")
+    @Test
+    void increaseAllowed() {
+        Tenancy savedTenancy = Tenancy.builder().id(1L).name("tenancy1").userLimit(10).userUsage(5).build();
+        when(tenancyRepository.findById(1L)).thenReturn(Optional.of(savedTenancy));
+
+        boolean increaseUsageAllowed = tenancyService.increaseUsageAllowed(1L);
+        assertThat(increaseUsageAllowed).isTrue();
+    }
+
+    @DisplayName("Increase tenancy not allowed")
+    @Test
+    void increaseNotAllowed() {
+        Tenancy savedTenancy = Tenancy.builder().id(1L).name("tenancy1").userLimit(10).userUsage(10).build();
+        when(tenancyRepository.findById(1L)).thenReturn(Optional.of(savedTenancy));
+
+        boolean increaseUsageAllowed = tenancyService.increaseUsageAllowed(1L);
+        assertThat(increaseUsageAllowed).isFalse();
+    }
+
+    @DisplayName("Increase allowed by id not found")
+    @Test
+    void increaseAllowedNotFoundError() {
+        when(tenancyRepository.findById(1L)).thenReturn(Optional.empty());
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.increaseUsageAllowed(1L));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getStatusText()).isEqualTo("Tenancy id not found");
+
+        verify(tenancyRepository, never()).save(any());
+    }
 }

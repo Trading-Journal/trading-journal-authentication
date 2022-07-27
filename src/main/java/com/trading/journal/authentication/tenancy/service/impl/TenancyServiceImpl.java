@@ -67,6 +67,29 @@ public class TenancyServiceImpl implements TenancyService {
         return tenancyRepository.save(tenancy);
     }
 
+    @Override
+    public Tenancy lowerUsage(Long id) {
+        Tenancy tenancy = getById(id);
+        tenancy.lowerUsage();
+        return tenancyRepository.save(tenancy);
+    }
+
+    @Override
+    public Tenancy increaseUsage(Long id) {
+        Tenancy tenancy = getById(id);
+        if(tenancy.increaseUsageAllowed()){
+            tenancy.increaseUsage();
+            return tenancyRepository.save(tenancy);
+        }
+        throw new ApplicationException("Tenancy has reach its user limit");
+    }
+
+    @Override
+    public boolean increaseUsageAllowed(Long id) {
+        Tenancy tenancy = getById(id);
+        return tenancy.increaseUsageAllowed();
+    }
+
     private static class Columns {
         public static final String NAME = "name";
     }

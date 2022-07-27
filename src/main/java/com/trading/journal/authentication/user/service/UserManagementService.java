@@ -2,6 +2,7 @@ package com.trading.journal.authentication.user.service;
 
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
+import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.userauthority.UserAuthority;
@@ -12,6 +13,8 @@ public interface UserManagementService {
     PageResponse<UserInfo> getAll(Long tenancyId, PageableRequest pageRequest);
 
     UserInfo getUserById(Long tenancyId, Long id);
+
+    UserInfo create(Long tenancyId, UserRegistration registration);
 
     void disableUserById(Long tenancyId, Long id);
 

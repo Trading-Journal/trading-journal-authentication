@@ -5,10 +5,16 @@ import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
+import com.trading.journal.authentication.registration.SignUpResponse;
+import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.registration.service.RegistrationService;
+import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.tenancy.service.TenancyService;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.UserManagementRepository;
+import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import org.junit.jupiter.api.DisplayName;
@@ -30,8 +36,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class UserManagementServiceImplTest {
@@ -41,6 +46,15 @@ class UserManagementServiceImplTest {
 
     @Mock
     UserAuthorityService userAuthorityService;
+
+    @Mock
+    TenancyService tenancyService;
+
+    @Mock
+    UserService userService;
+
+    @Mock
+    RegistrationService registrationService;
 
     @InjectMocks
     UserManagementServiceImpl applicationUserManagementService;
@@ -222,6 +236,7 @@ class UserManagementServiceImplTest {
                 .build();
 
         when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.of(applicationUser));
+        when(tenancyService.lowerUsage(10L)).thenReturn(Tenancy.builder().build());
 
         applicationUserManagementService.deleteUserById(10L, userId);
 
@@ -237,6 +252,8 @@ class UserManagementServiceImplTest {
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.deleteUserById(10L, userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("User id not found");
+
+        verify(tenancyService, never()).lowerUsage(anyLong());
     }
 
     @DisplayName("Add user authorities successfully")
@@ -327,5 +344,55 @@ class UserManagementServiceImplTest {
         );
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("User id not found");
+    }
+
+    @DisplayName("Create a new user when tenancy is not found thrown an exception")
+    @Test
+    void createUserTenancyException() {
+        Long tenancyId = 1L;
+        when(tenancyService.getById(tenancyId)).thenThrow(new ApplicationException(""));
+
+        assertThrows(ApplicationException.class,
+                () -> applicationUserManagementService.create(tenancyId, UserRegistration.builder().build()));
+
+        verify(userService, never()).createNewUser(any(), any());
+        verify(registrationService, never()).sendVerification(anyString());
+        verify(tenancyService, never()).increaseUsage(anyLong());
+    }
+
+    @DisplayName("Create a new user when tenancy is not allowed to increase usage thrown an exception")
+    @Test
+    void createUserTenancyIncreaseNotAllowed() {
+        Long tenancyId = 1L;
+        when(tenancyService.getById(tenancyId)).thenReturn(Tenancy.builder().userUsage(10).userLimit(10).build());
+
+        ApplicationException exception = assertThrows(ApplicationException.class,
+                () -> applicationUserManagementService.create(tenancyId, UserRegistration.builder().build()));
+
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("Tenancy has reach its user limit");
+
+        verify(userService, never()).createNewUser(any(), any());
+        verify(registrationService, never()).sendVerification(anyString());
+        verify(tenancyService, never()).increaseUsage(anyLong());
+    }
+
+    @DisplayName("Create a new user ")
+    @Test
+    void createUser() {
+        Tenancy tenancy = Tenancy.builder().id(1L).userUsage(1).userLimit(10).build();
+        when(tenancyService.getById(1L)).thenReturn(tenancy);
+
+        UserRegistration userRegistration = UserRegistration.builder()
+                .email("mail@mail.com")
+                .build();
+
+        when(userService.createNewUser(userRegistration, tenancy)).thenReturn(User.builder().email("mail@mail.com").build());
+        when(registrationService.sendVerification("mail@mail.com")).thenReturn(new SignUpResponse("mail@mail.com", true));
+        when(tenancyService.increaseUsage(1L)).thenReturn(tenancy);
+
+        UserInfo userInfo = applicationUserManagementService.create(1L, userRegistration);
+
+        assertThat(userInfo.getEmail()).isEqualTo("mail@mail.com");
     }
 }

@@ -4,6 +4,7 @@ import com.trading.journal.authentication.jwt.data.AccessToken;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
+import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.UserManagementService;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -37,6 +39,11 @@ public class OrganisationUsersController implements OrganisationUsersApi {
     @Override
     public ResponseEntity<UserInfo> getById(@AccessToken AccessTokenInfo accessTokenInfo, Long id) {
         return ok(userManagementService.getUserById(accessTokenInfo.tenancyId(), id));
+    }
+
+    @Override
+    public ResponseEntity<UserInfo> create(@AccessToken AccessTokenInfo accessTokenInfo, @Valid UserRegistration registration) {
+        return ok(userManagementService.create(accessTokenInfo.tenancyId(), registration));
     }
 
     @Override
