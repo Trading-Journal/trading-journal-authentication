@@ -3,6 +3,7 @@ package com.trading.journal.authentication.user.service.impl;
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.properties.AdminUserProperties;
@@ -13,6 +14,7 @@ import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationRepository;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,11 @@ class AdminUserServiceImplIntegratedTest {
         verificationRepository.deleteAll();
         userAuthorityRepository.deleteAll();
         doNothing().when(verificationEmailService).sendEmail(any(), any());
+    }
+
+    @AfterAll
+    public static void shutdown(@Autowired UserRepository userRepository){
+        userRepository.deleteAll();
     }
 
     @Test

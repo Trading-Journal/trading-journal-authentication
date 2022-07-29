@@ -3,7 +3,6 @@
 ## Pending
 
 * Role tenancy (Company) Administrator
-  * Add the MockSecurity again
   * Can add or remove users - based on tenancy limits (missing integrated tests)
     * New user should change password
   * Endpoint to retrieve tenancy limits for the organisation access

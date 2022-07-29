@@ -1,13 +1,12 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
-import com.trading.journal.authentication.jwt.data.AccessToken;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -39,8 +38,12 @@ public class AccessTokenResolverTest {
     @Mock
     JwtTokenReader tokenReader;
 
-    @InjectMocks
     AccessTokenResolver accessTokenResolver;
+
+    @BeforeEach
+    public void setUp() {
+        accessTokenResolver = new AccessTokenResolver(tokenReader, new JwtResolveTokenHttpHeader());
+    }
 
     @DisplayName("Given a access token resolve into AccessTokenInfo")
     @Test
@@ -66,13 +69,5 @@ public class AccessTokenResolverTest {
         assertThat(tokenInfo.subject()).isEqualTo("UserAdm");
         assertThat(tokenInfo.tenancyName()).isEqualTo("tenancy_1");
         assertThat(tokenInfo.scopes()).containsExactly("USER");
-    }
-
-    @DisplayName("Support parameter is false ")
-    @Test
-    void supportFalse() {
-        when(methodParameter.getMethodAnnotation(AccessToken.class)).thenReturn(null);
-        boolean supportsParameter = accessTokenResolver.supportsParameter(methodParameter);
-        assertThat(supportsParameter).isFalse();
     }
 }

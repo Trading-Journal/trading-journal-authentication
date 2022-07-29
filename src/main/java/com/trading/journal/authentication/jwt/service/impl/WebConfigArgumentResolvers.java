@@ -1,6 +1,5 @@
 package com.trading.journal.authentication.jwt.service.impl;
 
-import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -12,10 +11,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebConfigArgumentResolvers implements WebMvcConfigurer {
 
-    private final JwtTokenReader tokenReader;
+    private final AccessTokenResolver accessTokenResolver;
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-        argumentResolvers.add(new AccessTokenResolver(tokenReader));
+        argumentResolvers.add(accessTokenResolver);
     }
 }

@@ -1,15 +1,10 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.TestLoader;
-import com.trading.journal.authentication.authentication.Login;
-import com.trading.journal.authentication.authentication.LoginResponse;
-import com.trading.journal.authentication.authentication.service.AuthenticationService;
+import com.trading.journal.authentication.WithCustomMockUser;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
-import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserRepository;
-import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,59 +12,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@WithCustomMockUser(authorities = {"ROLE_ADMIN"})
 class TenanciesControllerTest {
 
     public static final String PATH_ID = "/admin/tenancies/{id}";
 
     public static final String PATH_LIMIT = "/admin/tenancies/{id}/limit/{limit}";
-    private static String token;
 
     @Autowired
     TenancyRepository tenancyRepository;
 
-    @Autowired
-    private WebTestClient webTestClient;
+    private static WebTestClient webTestClient;
 
     @BeforeAll
-    public static void setUp(
-            @Autowired UserRepository userRepository,
-            @Autowired PasswordEncoder encoder,
-            @Autowired AuthenticationService authenticationService,
-            @Autowired UserAuthorityService userAuthorityService,
-            @Autowired TenancyRepository tenancyRepository
-    ) {
-        userRepository.deleteAll();
-        TestLoader.load50Tenancies(tenancyRepository);
-        User user = User.builder()
-                .userName("johnwick")
-                .password(encoder.encode("dad231#$#4"))
-                .firstName("John")
-                .lastName("Wick")
-                .email("johnwick@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .build();
-        User applicationUser = userRepository.save(user);
-        userAuthorityService.saveAdminUserAuthorities(applicationUser);
+    public static void setUp(@Autowired WebApplicationContext applicationContext, @Autowired TenancyRepository tenancyRepository) {
+        webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
 
-        Login login = new Login("johnwick@mail.com", "dad231#$#4");
-        LoginResponse loginResponse = authenticationService.signIn(login);
-        assertThat(loginResponse).isNotNull();
-        token = loginResponse.accessToken();
+        Stream<String> tenacies = Stream.of(
+                "andyjohnson", "angelduncan", "angelowells", "arthurlawrence", "bernardmyers", "bethguzman", "blakecoleman", "brianmann", "cameronfleming", "carltonsantos",
+                "carrietate", "catherinejones", "cecilperkins", "colinward", "conradhernandez", "doloreswilliamson", "dorisparker", "earlnorris", "eddiemassey", "elenaboyd",
+                "elisavargas", "ermablack", "ernestinesteele", "ernestokim", "fanniehines", "gabrieldixon", "garylogan", "gerardwebb", "idagarza", "isaacjames",
+                "jeromepratt", "joeldunn", "juliecarson", "kathyoliver", "katrinahawkins", "larryrobbins", "laurieadams", "lorettastanley", "luketyler", "melindafields",
+                "natasharivera", "norawaters", "pedrosullivan", "phyllisterry", "rochellegraves", "sabrinagarcia", "sadiedavis", "veralamb", "vernawilkins", "victorialuna"
+        );
+        tenacies.map(tenancy -> Tenancy.builder().name(tenancy).build())
+                .forEach(tenancyRepository::save);
+    }
+
+    @AfterAll
+    public static void shotDown(@Autowired TenancyRepository tenancyRepository) {
+        tenancyRepository.deleteAll();
     }
 
     @DisplayName("Get tenancy by id")
@@ -83,7 +69,6 @@ class TenanciesControllerTest {
                         .path(PATH_ID)
                         .build(tenancy.getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -105,7 +90,6 @@ class TenanciesControllerTest {
                         .path(PATH_ID)
                         .build(id))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -127,7 +111,6 @@ class TenanciesControllerTest {
                         .pathSegment("disable")
                         .build(tenancy.getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -147,7 +130,6 @@ class TenanciesControllerTest {
                         .pathSegment("disable")
                         .build(id))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -173,7 +155,6 @@ class TenanciesControllerTest {
                         .pathSegment("enable")
                         .build(tenancy.getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -193,7 +174,6 @@ class TenanciesControllerTest {
                         .pathSegment("enable")
                         .build(id))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -216,7 +196,6 @@ class TenanciesControllerTest {
                         .path(PATH_LIMIT)
                         .build(tenancy.getId(), 10))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -241,7 +220,6 @@ class TenanciesControllerTest {
                         .path(PATH_LIMIT)
                         .build(id, 10))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -255,7 +233,7 @@ class TenanciesControllerTest {
     @DisplayName("Set new tenancy limit exception when limit is lower than current usage")
     @Test
     void limitUsageError() {
-        Tenancy tenancy =  tenancyRepository.save(Tenancy.builder().name("invalid-limit").userLimit(15).userUsage(11).build());
+        Tenancy tenancy = tenancyRepository.save(Tenancy.builder().name("invalid-limit").userLimit(15).userUsage(11).build());
         assertThat(tenancy.getUserUsage()).isEqualTo(11);
 
         webTestClient
@@ -264,7 +242,6 @@ class TenanciesControllerTest {
                         .path(PATH_LIMIT)
                         .build(tenancy.getId(), 10))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isBadRequest()

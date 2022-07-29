@@ -7,6 +7,7 @@ CREATE TABLE `Tenancy` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
 );
+
 CREATE TABLE `Users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `tenancyId` int NULL,

@@ -1,9 +1,7 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.authentication.Login;
-import com.trading.journal.authentication.authentication.LoginResponse;
-import com.trading.journal.authentication.authentication.service.AuthenticationService;
+import com.trading.journal.authentication.WithCustomMockUser;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.AuthorityRepository;
@@ -11,7 +9,6 @@ import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
-import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,9 +17,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
@@ -37,8 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 class AuthoritiesControllerTest {
 
-    private static String token;
-
     @Autowired
     AuthorityRepository authorityRepository;
 
@@ -48,43 +44,21 @@ class AuthoritiesControllerTest {
     @Autowired
     UserRepository userRepository;
 
-    @Autowired
-    private WebTestClient webTestClient;
+    private static WebTestClient webTestClient;
 
     @BeforeAll
-    public static void setUp(
-            @Autowired UserRepository userRepository,
-            @Autowired PasswordEncoder encoder,
-            @Autowired AuthenticationService authenticationService,
-            @Autowired UserAuthorityService userAuthorityService
-    ) {
-        User user = User.builder()
-                .userName("johnwick3")
-                .password(encoder.encode("dad231#$#4"))
-                .firstName("John")
-                .lastName("Wick")
-                .email("johnwick3@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .build();
-        User applicationUser = userRepository.save(user);
-        userAuthorityService.saveAdminUserAuthorities(applicationUser);
-
-        Login login = new Login("johnwick3@mail.com", "dad231#$#4");
-        LoginResponse loginResponse = authenticationService.signIn(login);
-        assertThat(loginResponse).isNotNull();
-        token = loginResponse.accessToken();
+    public static void setUp(@Autowired WebApplicationContext applicationContext) {
+        webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
     }
 
     @DisplayName("Get all authorities")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void getAll() {
         webTestClient
                 .get()
                 .uri("/admin/authorities")
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -99,12 +73,12 @@ class AuthoritiesControllerTest {
 
     @DisplayName("Get all authorities category")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void getAllCategories() {
         webTestClient
                 .get()
                 .uri("/admin/authorities/categories")
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -118,6 +92,7 @@ class AuthoritiesControllerTest {
 
     @DisplayName("Get authority by id")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void byId() {
         Optional<Authority> roleUser = authorityRepository.getByName("ROLE_USER");
         assertThat(roleUser).isNotEmpty();
@@ -128,7 +103,6 @@ class AuthoritiesControllerTest {
                         .path("/admin/authorities/{id}")
                         .build(roleUser.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -147,7 +121,6 @@ class AuthoritiesControllerTest {
                         .path("/admin/authorities/{id}")
                         .build(roleAdmin.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -163,7 +136,6 @@ class AuthoritiesControllerTest {
                         .path("/admin/authorities/{id}")
                         .build(100L))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -176,13 +148,13 @@ class AuthoritiesControllerTest {
 
     @DisplayName("Create a new authority")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void create() {
         webTestClient
                 .post()
                 .uri("/admin/authorities")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"))
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isCreated()
@@ -199,7 +171,6 @@ class AuthoritiesControllerTest {
                 .uri("/admin/authorities")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"))
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.CONFLICT)
@@ -216,6 +187,7 @@ class AuthoritiesControllerTest {
 
     @DisplayName("Update a authority")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void update() {
         Optional<Authority> roleUser = authorityRepository.getByName("ROLE_USER");
         assertThat(roleUser).isNotEmpty();
@@ -227,7 +199,6 @@ class AuthoritiesControllerTest {
                         .build(roleUser.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_USER_UPDATED"))
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -247,7 +218,6 @@ class AuthoritiesControllerTest {
                         .build(roleUser.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_ADMIN"))
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.CONFLICT)
@@ -264,7 +234,6 @@ class AuthoritiesControllerTest {
                         .build(100L))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_ADMIN"))
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.NOT_FOUND)
@@ -279,14 +248,24 @@ class AuthoritiesControllerTest {
 
     @DisplayName("Delete a authority")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void delete() {
-        User applicationUser = userRepository.findByEmail("johnwick3@mail.com").orElse(null);
-        assertThat(applicationUser).isNotNull();
+        User user = User.builder()
+                .userName("johnwick")
+                .password("dad231#$#4")
+                .firstName("John")
+                .lastName("Wick")
+                .email("johnwick@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+        user = userRepository.save(user);
         Authority anotherRole = authorityRepository.save(new Authority(AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"));
         UserAuthority anotherRoleUserAuthority = userAuthorityRepository.save(
                 UserAuthority.builder()
                         .authority(anotherRole)
-                        .applicationUser(applicationUser)
+                        .applicationUser(user)
                         .build()
         );
 
@@ -296,7 +275,6 @@ class AuthoritiesControllerTest {
                         .path("/admin/authorities/{id}")
                         .build(anotherRole.getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
@@ -314,7 +292,6 @@ class AuthoritiesControllerTest {
                         .path("/admin/authorities/{id}")
                         .build(anotherRole.getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -325,7 +302,6 @@ class AuthoritiesControllerTest {
                         .path("/admin/authorities/{id}")
                         .build(anotherRole.getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.NOT_FOUND)

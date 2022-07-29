@@ -1,31 +1,47 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.authentication.Login;
-import com.trading.journal.authentication.authentication.LoginResponse;
-import com.trading.journal.authentication.authentication.service.AuthenticationService;
+import com.trading.journal.authentication.WithCustomMockUser;
+import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
+import com.trading.journal.authentication.jwt.service.JwtResolveToken;
+import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.tenancy.Tenancy;
-import com.trading.journal.authentication.tenancy.TenancyRepository;
+import com.trading.journal.authentication.tenancy.service.TenancyService;
+import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.UserRepository;
+import com.trading.journal.authentication.user.UserManagementRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -36,35 +52,75 @@ class OrganisationUsersControllerMultiTenancyTest {
 
     public static final String PATH_BY_ID = "/organisation/users/{id}";
 
-    @Autowired
-    private WebTestClient webTestClient;
+    @MockBean
+    JwtTokenReader tokenReader;
 
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    TenancyRepository tenancyRepository;
-    @Autowired
-    PasswordEncoder encoder;
-    @Autowired
-    AuthenticationService authenticationService;
-    @Autowired
+    @MockBean
+    JwtResolveToken resolveToken;
+
+    @MockBean
+    UserManagementRepository userManagementRepository;
+
+    @MockBean
+    TenancyService tenancyService;
+
+    @MockBean
     UserAuthorityService userAuthorityService;
 
+    private static WebTestClient webTestClient;
+
     @BeforeAll
-    public static void setUp(@Autowired UserRepository userRepository, @Autowired TenancyRepository tenancyRepository) {
-        userRepository.deleteAll();
-        tenancyRepository.deleteAll();
+    public static void setUp(@Autowired WebApplicationContext applicationContext) {
+        webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
     }
 
-    @DisplayName("Page organisation users for multiple tenancies")
+    @BeforeEach
+    public void mockResolveToken() {
+        when(resolveToken.resolve(any())).thenReturn("token");
+    }
+
+    @DisplayName("Page organisation users tenancy Tenancy10")
     @Test
-    void page() {
-        Tenancy tenancy = createTenancy("tenancy 1");
-        String token = createOrgAdminUser(tenancy, "username1");
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 10L, tenancyName = "tenancy10")
+    void pageTenancyCalled10() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 10L, "tenancy10", singletonList("TENANCY_ADMIN")));
 
-        createSampleUser(tenancy, "user 1 tenancy 1");
-        createSampleUser(tenancy, "user 2 tenancy 1");
-        createSampleUser(tenancy, "user 2 tenancy 1");
+        when(userManagementRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<User>(
+                asList(User.builder()
+                                .userName("userName1")
+                                .email("userName1@mail.com")
+                                .password(UUID.randomUUID().toString())
+                                .firstName("user 1")
+                                .lastName("tenancy 10")
+                                .enabled(true)
+                                .verified(true)
+                                .createdAt(LocalDateTime.now())
+                                .build(),
+                        User.builder()
+                                .userName("userName2")
+                                .email("userName2@mail.com")
+                                .password(UUID.randomUUID().toString())
+                                .firstName("user 2")
+                                .lastName("tenancy 10")
+                                .enabled(true)
+                                .verified(true)
+                                .createdAt(LocalDateTime.now())
+                                .build(),
+                        User.builder()
+                                .userName("userName3")
+                                .email("userName3@mail.com")
+                                .password(UUID.randomUUID().toString())
+                                .firstName("user 3")
+                                .lastName("tenancy 10")
+                                .enabled(true)
+                                .verified(true)
+                                .createdAt(LocalDateTime.now())
+                                .build()
+                ),
+                PageRequest.of(0, 1),
+                3
+        ));
 
         webTestClient
                 .get()
@@ -73,7 +129,6 @@ class OrganisationUsersControllerMultiTenancyTest {
                         .queryParam("filter", "user ")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -82,76 +137,399 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .value(response -> {
                     assertThat(response.items()).hasSize(3);
                     assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.items()).extracting(UserInfo::getFirstName)
-                            .containsExactly("user 1 tenancy 1", "user 2 tenancy 1", "user 2 tenancy 1");
+                    assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
+                            .containsExactly("user 1 tenancy 10", "user 2 tenancy 10", "user 3 tenancy 10");
                 });
+    }
 
-        tenancy = createTenancy("tenancy 2");
-        token = createOrgAdminUser(tenancy, "username2");
+    @DisplayName("Get user by id")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void getUserById() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
 
-        createSampleUser(tenancy, "user 1 tenancy 2");
-        createSampleUser(tenancy, "user 2 tenancy 2");
-        createSampleUser(tenancy, "user 2 tenancy 2");
+        when(userManagementRepository.findByTenancyIdAndId(20L, 100L)).thenReturn(
+                Optional.of(User.builder()
+                        .userName("userName1")
+                        .email("userName1@mail.com")
+                        .password(UUID.randomUUID().toString())
+                        .enabled(true)
+                        .verified(true)
+                        .createdAt(LocalDateTime.now())
+                        .build())
+        );
 
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(PATH)
-                        .queryParam("filter", "user ")
-                        .build())
+                        .path(PATH_BY_ID)
+                        .build(100L))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<UserInfo>>() {
-                })
+                .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.items()).hasSize(3);
-                    assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.items()).extracting(UserInfo::getFirstName)
-                            .containsExactly("user 1 tenancy 2", "user 2 tenancy 2", "user 2 tenancy 2");
+                    assertThat(response.getEmail()).isEqualTo("userName1@mail.com");
+                    assertThat(response.getVerified()).isEqualTo(true);
+                    assertThat(response.getEnabled()).isEqualTo(true);
                 });
     }
 
-    private Tenancy createTenancy(String name) {
-        return tenancyRepository.save(Tenancy.builder().name(name).build());
+    @DisplayName("Get user by id not found")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void getUserByIdNotFound() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        long userId = 1000L;
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .build(userId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
     }
 
-    private String createOrgAdminUser(Tenancy tenancy, String username) {
-        User user = User.builder()
-                .userName(username)
-                .password(encoder.encode("dad231#$#4"))
-                .firstName("John")
-                .lastName("Wick")
-                .email(username + "@mail.com")
-                .enabled(true)
+    @DisplayName("Disable user by id")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void disableUserById() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        when(userManagementRepository.findByTenancyIdAndId(20L, 100L)).thenReturn(
+                Optional.of(User.builder()
+                        .userName("userName1")
+                        .email("userName1@mail.com")
+                        .password(UUID.randomUUID().toString())
+                        .enabled(true)
+                        .verified(true)
+                        .createdAt(LocalDateTime.now())
+                        .build())
+        );
+
+        when(userManagementRepository.save(argThat(user -> user.getEnabled().equals(false)))).thenReturn(User.builder()
+                .userName("userName1")
+                .email("userName1@mail.com")
+                .password(UUID.randomUUID().toString())
+                .enabled(false)
                 .verified(true)
                 .createdAt(LocalDateTime.now())
-                .tenancy(tenancy)
-                .build();
-        User applicationUser = userRepository.save(user);
-        userAuthorityService.saveCommonUserAuthorities(applicationUser);
-        userAuthorityService.saveOrganisationAdminUserAuthorities(applicationUser);
+                .build());
 
-        Login login = new Login(username + "@mail.com", "dad231#$#4");
-        LoginResponse loginResponse = authenticationService.signIn(login);
-        assertThat(loginResponse).isNotNull();
-        return loginResponse.accessToken();
+        webTestClient
+                .patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .pathSegment("disable")
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserInfo.class)
+                .value(response -> {
+                    assertThat(response.getVerified()).isEqualTo(true);
+                    assertThat(response.getEnabled()).isEqualTo(false);
+                });
     }
 
-    private void createSampleUser(Tenancy tenancy, String name) {
-        User user = User.builder()
-                .userName(name)
-                .password("dad231#$#4")
-                .firstName(name)
-                .lastName("Surname")
-                .email(name + "@mail.com")
-                .enabled(true)
+    @DisplayName("Disable user by id not found")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void disableUserByIdNotFound() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        webTestClient
+                .patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .pathSegment("disable")
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
+    }
+
+    @DisplayName("Enable user by id")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void enableUserById() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        when(userManagementRepository.findByTenancyIdAndId(20L, 100L)).thenReturn(
+                Optional.of(User.builder()
+                        .userName("userName1")
+                        .email("userName1@mail.com")
+                        .password(UUID.randomUUID().toString())
+                        .enabled(false)
+                        .verified(true)
+                        .createdAt(LocalDateTime.now())
+                        .build())
+        );
+
+        when(userManagementRepository.save(argThat(user -> user.getEnabled().equals(true)))).thenReturn(User.builder()
+                .userName("userName1")
+                .email("userName1@mail.com")
+                .password(UUID.randomUUID().toString())
+                .enabled(false)
                 .verified(true)
                 .createdAt(LocalDateTime.now())
-                .tenancy(tenancy)
+                .build());
+
+        webTestClient
+                .patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .pathSegment("enable")
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserInfo.class)
+                .value(response -> {
+                    assertThat(response.getVerified()).isEqualTo(true);
+                    assertThat(response.getEnabled()).isEqualTo(true);
+                });
+    }
+
+    @DisplayName("Enable user by id not found")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void enableUserByIdNotFound() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        webTestClient
+                .patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .pathSegment("enable")
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
+    }
+
+    @DisplayName("Delete user by id")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void deleteUserById() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        when(userManagementRepository.findByTenancyIdAndId(20L, 100L)).thenReturn(
+                Optional.of(User.builder()
+                        .userName("userName1")
+                        .email("userName1@mail.com")
+                        .password(UUID.randomUUID().toString())
+                        .enabled(false)
+                        .verified(true)
+                        .createdAt(LocalDateTime.now())
+                        .build())
+        );
+
+        when(tenancyService.lowerUsage(20L)).thenReturn(Tenancy.builder().build());
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    @DisplayName("Delete user by id not found")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void DeleteUserByIdNotFound() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
+    }
+
+
+    @DisplayName("Add authorities to user")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void addAuthorities() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        User user = User.builder()
+                .userName("userName1")
+                .email("userName1@mail.com")
+                .password(UUID.randomUUID().toString())
+                .enabled(false)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
                 .build();
-        userRepository.save(user);
+        when(userManagementRepository.findByTenancyIdAndId(20L, 100L)).thenReturn(Optional.of(user));
+
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
+        when(userAuthorityService.addAuthorities(user, authoritiesChange)).thenReturn(emptyList());
+
+        webTestClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    @DisplayName("Add authorities user by id not found")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void addAuthoritiesUserNotFound() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
+
+        webTestClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
+    }
+
+    @DisplayName("Delete authority from user")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void deleteAuthority() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        User user = User.builder()
+                .userName("userName1")
+                .email("userName1@mail.com")
+                .password(UUID.randomUUID().toString())
+                .enabled(false)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+        when(userManagementRepository.findByTenancyIdAndId(20L, 100L)).thenReturn(Optional.of(user));
+
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
+        when(userAuthorityService.deleteAuthorities(user, authoritiesChange)).thenReturn(emptyList());
+
+        authoritiesChange = new AuthoritiesChange(singletonList("ROLE_USER"));
+        webTestClient
+                .method(HttpMethod.DELETE)
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+
+    @DisplayName("Delete authorities user by id not found")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void deleteAuthoritiesUserNotFound() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        AuthoritiesChange authoritiesChange = new AuthoritiesChange(singletonList("ROLE_ADMIN"));
+        webTestClient
+                .method(HttpMethod.DELETE)
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_BY_ID)
+                        .pathSegment("authorities")
+                        .build(100L))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(authoritiesChange)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("User id not found")
+                );
     }
 }

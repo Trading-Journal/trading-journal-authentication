@@ -9,6 +9,7 @@ import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
@@ -16,6 +17,7 @@ import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.service.AdminUserService;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -73,6 +75,12 @@ public class SecurityConfigurationTest {
     public void setUp() {
         doNothing().when(emailSender).send(any());
         userRepository.deleteAll();
+    }
+
+    @AfterAll
+    public static void shutdown(@Autowired UserRepository userRepository, @Autowired TenancyRepository tenancyRepository){
+        userRepository.deleteAll();
+        tenancyRepository.deleteAll();
     }
 
     @Test
