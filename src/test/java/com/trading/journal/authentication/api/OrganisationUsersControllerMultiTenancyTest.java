@@ -6,13 +6,18 @@ import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.service.JwtResolveToken;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.pageable.PageResponse;
+import com.trading.journal.authentication.registration.SignUpResponse;
+import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.UserManagementRepository;
+import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import com.trading.journal.authentication.verification.VerificationType;
+import com.trading.journal.authentication.verification.service.VerificationService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,7 +46,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -65,7 +70,13 @@ class OrganisationUsersControllerMultiTenancyTest {
     TenancyService tenancyService;
 
     @MockBean
+    VerificationService verificationService;
+
+    @MockBean
     UserAuthorityService userAuthorityService;
+
+    @MockBean
+    UserService userService;
 
     private static WebTestClient webTestClient;
 
@@ -531,5 +542,93 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .value(response ->
                         assertThat(response.get("error")).isEqualTo("User id not found")
                 );
+    }
+
+    @DisplayName("Create a new user")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void createUser() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        Tenancy tenancy = Tenancy.builder().userLimit(10).userUsage(1).build();
+        when(tenancyService.getById(20L)).thenReturn(tenancy);
+
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "firstName",
+                "lastName",
+                "UserName5",
+                "mail@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+
+        User user = User.builder()
+                .id(1L)
+                .userName("UserName5")
+                .password("password")
+                .firstName("firstName")
+                .lastName("lastName")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .build();
+        when(userService.createNewUser(userRegistration, tenancy)).thenReturn(user);
+
+        doNothing().when(verificationService).send(VerificationType.NEW_ORGANISATION_USER, user);
+
+        when(tenancyService.increaseUsage(20L)).thenReturn(tenancy);
+
+        webTestClient
+                .post()
+                .uri(PATH)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userRegistration)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserInfo.class)
+                .value(response -> {
+                    assertThat(response.getUserName()).isEqualTo(user.getUserName());
+                    assertThat(response.getFirstName()).isEqualTo(user.getFirstName());
+                    assertThat(response.getLastName()).isEqualTo(user.getLastName());
+                    assertThat(response.getEmail()).isEqualTo(user.getEmail());
+                });
+    }
+
+    @DisplayName("Create a new user without available user limit return exception")
+    @Test
+    @WithCustomMockUser(authorities = {"TENANCY_ADMIN"}, tenancyId = 20L, tenancyName = "tenancy20")
+    void createUserNoLimit() {
+        when(tokenReader.getAccessTokenInfo(anyString()))
+                .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
+
+        Tenancy tenancy = Tenancy.builder().userLimit(10).userUsage(10).build();
+        when(tenancyService.getById(20L)).thenReturn(tenancy);
+
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "firstName",
+                "lastName",
+                "UserName5",
+                "mail@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+
+        webTestClient
+                .post()
+                .uri(PATH)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userRegistration)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> assertThat(response.get("error")).isEqualTo("Tenancy has reach its user limit"));
+
+        verify(userService, never()).createNewUser(any(), any());
+        verify(verificationService, never()).send(any(), any());
+        verify(tenancyService, never()).increaseUsage(anyLong());
     }
 }
