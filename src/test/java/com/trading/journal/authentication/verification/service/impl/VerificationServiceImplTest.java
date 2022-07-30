@@ -10,6 +10,7 @@ import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationRepository;
 import com.trading.journal.authentication.verification.VerificationStatus;
 import com.trading.journal.authentication.verification.VerificationType;
+import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import com.trading.journal.authentication.verification.service.HashProvider;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +45,9 @@ class VerificationServiceImplTest {
 
     @Mock
     HashProvider hashProvider;
+
+    @Mock
+    VerificationProperties verificationProperties;
 
     @InjectMocks
     VerificationServiceImpl verificationService;
@@ -80,6 +84,32 @@ class VerificationServiceImplTest {
         verificationService.send(VerificationType.REGISTRATION, applicationUser);
     }
 
+    @DisplayName("Is verification REGISTRATION but email verification is not enabled then do not send")
+    @Test
+    void registrationVerificationNoSend() {
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
+        when(verificationProperties.isEnabled()).thenReturn(false);
+
+        verificationService.send(VerificationType.REGISTRATION, applicationUser);
+
+        verify(hashProvider, never()).generateHash(anyString());
+        verify(verificationRepository, never()).save(any());
+        verify(verificationEmailService, never()).sendEmail(any(), any());
+    }
+
     @DisplayName("Given verification type CHANGE_PASSWORD and application user send the verification to user email and never execute delete because previous verification did not exist")
     @Test
     void changePasswordVerification() {
@@ -105,6 +135,7 @@ class VerificationServiceImplTest {
                 .build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Optional.empty());
+        when(verificationProperties.isEnabled()).thenReturn(false);
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
@@ -142,6 +173,32 @@ class VerificationServiceImplTest {
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
         verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
+    }
+
+    @DisplayName("Is verification ADMIN_REGISTRATION but email verification is not enabled then do not send")
+    @Test
+    void registrationAdminVerificationNoSend() {
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
+        when(verificationProperties.isEnabled()).thenReturn(false);
+
+        verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
+
+        verify(hashProvider, never()).generateHash(anyString());
+        verify(verificationRepository, never()).save(any());
+        verify(verificationEmailService, never()).sendEmail(any(), any());
     }
 
     @DisplayName("Given verification type NEW_ORGANISATION_USER and application user send the verification to user email and never execute delete because previous verification did not exist")
@@ -201,6 +258,7 @@ class VerificationServiceImplTest {
                 .build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
+        when(verificationProperties.isEnabled()).thenReturn(true);
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());

@@ -31,7 +31,7 @@ import static org.mockito.Mockito.doNothing;
 @SpringBootTest
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
-@TestPropertySource(properties = {"journal.authentication.admin-user.email=admin@email.com"})
+@TestPropertySource(properties = {"journal.authentication.admin-user.email=admin@email.com", "journal.authentication.verification.enabled=true"})
 class AdminUserServiceImplIntegratedTest {
 
     @Autowired

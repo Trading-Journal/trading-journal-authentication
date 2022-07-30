@@ -68,6 +68,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     public UserInfo create(Long tenancyId, UserRegistration userRegistration) {
         Tenancy tenancy = tenancyService.getById(tenancyId);
         if (tenancy.increaseUsageAllowed()) {
+            userRegistration.randomPassword();
             User user = userService.createNewUser(userRegistration, tenancy);
             verificationService.send(VerificationType.NEW_ORGANISATION_USER, user);
             tenancyService.increaseUsage(tenancy.getId());

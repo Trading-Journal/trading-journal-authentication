@@ -9,6 +9,7 @@ import org.springframework.util.StringUtils;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -63,5 +64,11 @@ public class UserRegistration implements PasswordAndConfirmation {
     @Override
     public String getConfirmPassword() {
         return confirmPassword;
+    }
+
+    public void randomPassword() {
+        String password = UUID.randomUUID().toString();
+        this.password = password;
+        this.confirmPassword = password;
     }
 }

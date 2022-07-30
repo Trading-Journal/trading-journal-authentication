@@ -5,6 +5,7 @@ import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
+import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import com.trading.journal.authentication.verification.service.HashProvider;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
 import com.trading.journal.authentication.verification.VerificationRepository;
@@ -24,11 +25,15 @@ public class VerificationServiceImpl implements VerificationService {
 
     private final HashProvider hashProvider;
 
+    private final VerificationProperties verificationProperties;
+
     @Override
     public void send(VerificationType verificationType, User applicationUser) {
         Verification verification = verificationRepository.getByTypeAndEmail(verificationType, applicationUser.getEmail())
                 .orElseGet(() -> Verification.builder().email(applicationUser.getEmail()).type(verificationType).build());
-
+        if(doNotSendVerification(verification)) {
+            return;
+        }
         verification = verification.renew(hashProvider.generateHash(verification.getEmail()));
         verification = verificationRepository.save(verification);
         verificationEmailService.sendEmail(verification, applicationUser);
@@ -44,14 +49,28 @@ public class VerificationServiceImpl implements VerificationService {
     @Override
     public void verify(Verification verification) {
         if (shouldSendChangePassword(verification)) {
-            User applicationUser = userService.getUserByEmail(verification.getEmail());
-            this.send(VerificationType.CHANGE_PASSWORD, applicationUser);
+            sendChangePassword(verification);
         }
         verificationRepository.delete(verification);
     }
 
+    private void sendChangePassword(Verification verification) {
+        User applicationUser = userService.getUserByEmail(verification.getEmail());
+        this.send(VerificationType.CHANGE_PASSWORD, applicationUser);
+    }
+
     private static boolean shouldSendChangePassword(Verification verification) {
         return VerificationType.ADMIN_REGISTRATION.equals(verification.getType())
+                || VerificationType.NEW_ORGANISATION_USER.equals(verification.getType());
+    }
+
+    private boolean doNotSendVerification(Verification verification) {
+        return isUserRegistration(verification) && !verificationProperties.isEnabled();
+    }
+
+    private static boolean isUserRegistration(Verification verification) {
+        return VerificationType.ADMIN_REGISTRATION.equals(verification.getType())
+                || VerificationType.REGISTRATION.equals(verification.getType())
                 || VerificationType.NEW_ORGANISATION_USER.equals(verification.getType());
     }
 }

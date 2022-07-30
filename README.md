@@ -3,9 +3,8 @@
 ## Pending
 
 * Role tenancy (Company) Administrator
-  * Can add or remove users - based on tenancy limits (missing integrated tests)
-    * New user should change password
   * Endpoint to retrieve tenancy data and limits for the organisation access
+* Api to retrieve verifications for one email (Admin access only)
 * Postman Collection with tests for all endpoints
 * Change me endpoint to update user data
 * Authorities endpoints
@@ -31,6 +30,16 @@
 * Use token generated here in another project to validate flow and Lib (above)
 * Create version 1.0.0
 * Create TAG with current code for reuse in other projects
+
+## Pending for the future
+* Manage user session
+  * Can cancel a user session forcing a new login
+  * Cache the session status somehow
+    * Update this cache during login with time equal to jwt expiration
+    * Evict this cache when delete user session
+  * JWT lib will have a new version to validate JWT against some API
+    * Use configuration for that
+    * The API must receive the JWT and check if session is still valis
 
 ## Swagger
 

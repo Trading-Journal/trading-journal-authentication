@@ -1,7 +1,6 @@
 package com.trading.journal.authentication.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.userauthority.UserAuthority;
@@ -21,7 +20,6 @@ import static java.util.Optional.ofNullable;
 @ToString
 public class UserInfo {
 
-    @JsonIgnore
     private Long id;
 
     private String userName;

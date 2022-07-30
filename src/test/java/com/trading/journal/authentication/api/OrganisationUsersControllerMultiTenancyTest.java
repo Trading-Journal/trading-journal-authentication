@@ -6,7 +6,6 @@ import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.service.JwtResolveToken;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.pageable.PageResponse;
-import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
@@ -573,7 +572,7 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .enabled(true)
                 .verified(true)
                 .build();
-        when(userService.createNewUser(userRegistration, tenancy)).thenReturn(user);
+        when(userService.createNewUser(any(), eq(tenancy))).thenReturn(user);
 
         doNothing().when(verificationService).send(VerificationType.NEW_ORGANISATION_USER, user);
 
