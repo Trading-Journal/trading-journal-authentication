@@ -16,4 +16,10 @@ public interface TenancyService {
     void enable(Long id);
 
     Tenancy newLimit(Long id, Integer limit);
+
+    Tenancy lowerUsage(Long id);
+
+    Tenancy increaseUsage(Long id);
+
+    boolean increaseUsageAllowed(Long id);
 }

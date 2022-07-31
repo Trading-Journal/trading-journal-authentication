@@ -10,6 +10,7 @@ import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationRepository;
 import com.trading.journal.authentication.verification.VerificationStatus;
 import com.trading.journal.authentication.verification.VerificationType;
+import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import com.trading.journal.authentication.verification.service.HashProvider;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +45,9 @@ class VerificationServiceImplTest {
 
     @Mock
     HashProvider hashProvider;
+
+    @Mock
+    VerificationProperties verificationProperties;
 
     @InjectMocks
     VerificationServiceImpl verificationService;
@@ -80,6 +84,32 @@ class VerificationServiceImplTest {
         verificationService.send(VerificationType.REGISTRATION, applicationUser);
     }
 
+    @DisplayName("Is verification REGISTRATION but email verification is not enabled then do not send")
+    @Test
+    void registrationVerificationNoSend() {
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
+        when(verificationProperties.isEnabled()).thenReturn(false);
+
+        verificationService.send(VerificationType.REGISTRATION, applicationUser);
+
+        verify(hashProvider, never()).generateHash(anyString());
+        verify(verificationRepository, never()).save(any());
+        verify(verificationEmailService, never()).sendEmail(any(), any());
+    }
+
     @DisplayName("Given verification type CHANGE_PASSWORD and application user send the verification to user email and never execute delete because previous verification did not exist")
     @Test
     void changePasswordVerification() {
@@ -105,6 +135,7 @@ class VerificationServiceImplTest {
                 .build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Optional.empty());
+        when(verificationProperties.isEnabled()).thenReturn(false);
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
@@ -144,6 +175,64 @@ class VerificationServiceImplTest {
         verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
     }
 
+    @DisplayName("Is verification ADMIN_REGISTRATION but email verification is not enabled then do not send")
+    @Test
+    void registrationAdminVerificationNoSend() {
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
+        when(verificationProperties.isEnabled()).thenReturn(false);
+
+        verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
+
+        verify(hashProvider, never()).generateHash(anyString());
+        verify(verificationRepository, never()).save(any());
+        verify(verificationEmailService, never()).sendEmail(any(), any());
+    }
+
+    @DisplayName("Given verification type NEW_ORGANISATION_USER and application user send the verification to user email and never execute delete because previous verification did not exist")
+    @Test
+    void orgUserRegistrationVerification() {
+        String hash = UUID.randomUUID().toString();
+        Verification verificationSaved = new Verification(1L,
+                "mail@mail.com",
+                VerificationType.NEW_ORGANISATION_USER,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.NEW_ORGANISATION_USER, applicationUser.getEmail())).thenReturn(Optional.empty());
+        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.save(any())).thenReturn(verificationSaved);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
+
+        verificationService.send(VerificationType.NEW_ORGANISATION_USER, applicationUser);
+    }
+
     @DisplayName("Given verification type REGISTRATION and application user send the verification to user email and execute delete because previous verification did exist")
     @Test
     void registrationVerificationDeletePrevious() {
@@ -169,6 +258,7 @@ class VerificationServiceImplTest {
                 .build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
+        when(verificationProperties.isEnabled()).thenReturn(true);
         when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
@@ -240,6 +330,38 @@ class VerificationServiceImplTest {
         verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
     }
 
+    @DisplayName("Given verification type NEW_ORGANISATION_USER and application user send the verification to user email and execute delete because previous verification did exist")
+    @Test
+    void orgUserVerificationDeletePrevious() {
+        String hash = UUID.randomUUID().toString();
+        Verification verificationSaved = new Verification(1L,
+                "mail@mail.com",
+                VerificationType.NEW_ORGANISATION_USER,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.NEW_ORGANISATION_USER, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
+        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.save(any())).thenReturn(verificationSaved);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
+
+        verificationService.send(VerificationType.NEW_ORGANISATION_USER, applicationUser);
+    }
+
     @DisplayName("Given hash and email find current Verification REGISTRATION")
     @Test
     void retrieveRegistration() {
@@ -287,6 +409,26 @@ class VerificationServiceImplTest {
         Verification verificationSaved = new Verification(1L,
                 email,
                 VerificationType.ADMIN_REGISTRATION,
+                VerificationStatus.PENDING,
+                hash,
+                LocalDateTime.now());
+
+        when(hashProvider.readHashValue(hash)).thenReturn(email);
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Optional.of(verificationSaved));
+
+        Verification verification = verificationService.retrieve(hash);
+
+        assertThat(verificationSaved).isEqualTo(verification);
+    }
+
+    @DisplayName("Given hash and email find current Verification NEW_ORGANISATION_USER")
+    @Test
+    void retrieveNEW_ORGANISATION_USER() {
+        String hash = "12456";
+        String email = "mail@mail.com";
+        Verification verificationSaved = new Verification(1L,
+                email,
+                VerificationType.NEW_ORGANISATION_USER,
                 VerificationStatus.PENDING,
                 hash,
                 LocalDateTime.now());
@@ -352,7 +494,7 @@ class VerificationServiceImplTest {
         verify(verificationEmailService, never()).sendEmail(any(), any());
     }
 
-    @DisplayName("Given Verification ADMIN_REGISTRATION delete it when Verify")
+    @DisplayName("Given Verification ADMIN_REGISTRATION send a CHANGE_PASSWORD request and delete ADMIN_REGISTRATION")
     @Test
     void verifyAndDeleteAdminRegistration() {
         String hash = UUID.randomUUID().toString();
@@ -361,6 +503,49 @@ class VerificationServiceImplTest {
         Verification adminRegistration = new Verification(1L,
                 email,
                 VerificationType.ADMIN_REGISTRATION,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        Verification changerPassword = new Verification(1L,
+                email,
+                VerificationType.CHANGE_PASSWORD,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(false)
+                .verified(false)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+
+        when(userService.getUserByEmail(email)).thenReturn(applicationUser);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(Optional.empty());
+        when(hashProvider.generateHash(email)).thenReturn(hash);
+        when(verificationRepository.save(any())).thenReturn(changerPassword);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
+        doNothing().when(verificationRepository).delete(adminRegistration);
+
+        verificationService.verify(adminRegistration);
+    }
+
+    @DisplayName("Given Verification NEW_ORGANISATION_USER send a CHANGE_PASSWORD request and delete ADMIN_REGISTRATION")
+    @Test
+    void verifyAndDeleteNEW_ORGANISATION_USER() {
+        String hash = UUID.randomUUID().toString();
+        String email = "mail@mail.com";
+
+        Verification adminRegistration = new Verification(1L,
+                email,
+                VerificationType.NEW_ORGANISATION_USER,
                 VerificationStatus.PENDING,
                 "12456",
                 LocalDateTime.now());

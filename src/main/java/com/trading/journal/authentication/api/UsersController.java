@@ -21,47 +21,47 @@ public class UsersController implements UsersApi {
     private final UserManagementService userManagementService;
 
     @Override
-    public ResponseEntity<PageResponse<UserInfo>> getAll(Integer page, Integer size, String[] sort, String filter) {
+    public ResponseEntity<PageResponse<UserInfo>> getAll(Long tenancy, Integer page, Integer size, String[] sort, String filter) {
         PageableRequest pageableRequest = PageableRequest.builder()
                 .page(page)
                 .size(size)
                 .sort(sort)
                 .filter(filter)
                 .build();
-        PageResponse<UserInfo> pageResponse = userManagementService.getAll(pageableRequest);
+        PageResponse<UserInfo> pageResponse = userManagementService.getAll(tenancy, pageableRequest);
         return ok(pageResponse);
     }
 
     @Override
-    public ResponseEntity<UserInfo> getById(Long id) {
-        return ok(userManagementService.getUserById(id));
+    public ResponseEntity<UserInfo> getById(Long tenancy, Long id) {
+        return ok(userManagementService.getUserById(tenancy, id));
     }
 
     @Override
-    public ResponseEntity<Void> disable(Long id) {
-        userManagementService.disableUserById(id);
+    public ResponseEntity<Void> disable(Long tenancy, Long id) {
+        userManagementService.disableUserById(tenancy, id);
         return ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> enable(Long id) {
-        userManagementService.enableUserById(id);
+    public ResponseEntity<Void> enable(Long tenancy, Long id) {
+        userManagementService.enableUserById(tenancy, id);
         return ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> delete(Long id) {
-        userManagementService.deleteUserById(id);
+    public ResponseEntity<Void> delete(Long tenancy, Long id) {
+        userManagementService.deleteUserById(tenancy, id);
         return ok().build();
     }
 
     @Override
-    public ResponseEntity<List<UserAuthority>> addAuthorities(Long id, AuthoritiesChange authorities) {
-        return ok(userManagementService.addAuthorities(id, authorities));
+    public ResponseEntity<List<UserAuthority>> addAuthorities(Long tenancy, Long id, AuthoritiesChange authorities) {
+        return ok(userManagementService.addAuthorities(tenancy, id, authorities));
     }
 
     @Override
-    public ResponseEntity<List<UserAuthority>> deleteAuthorities(Long id, AuthoritiesChange authorities) {
-        return ok(userManagementService.deleteAuthorities(id, authorities));
+    public ResponseEntity<List<UserAuthority>> deleteAuthorities(Long tenancy, Long id, AuthoritiesChange authorities) {
+        return ok(userManagementService.deleteAuthorities(tenancy, id, authorities));
     }
 }

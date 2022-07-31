@@ -7,6 +7,7 @@ CREATE TABLE `Tenancy` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
 );
+
 CREATE TABLE `Users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `tenancyId` int NULL,
@@ -53,3 +54,4 @@ CREATE TABLE `Verifications` (
 
 INSERT INTO Authorities (category, name) VALUES ('COMMON_USER','ROLE_USER');
 INSERT INTO Authorities (category, name) VALUES ('ADMINISTRATOR','ROLE_ADMIN');
+INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN');

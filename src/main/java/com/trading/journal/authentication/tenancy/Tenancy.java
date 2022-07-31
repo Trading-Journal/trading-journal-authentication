@@ -45,4 +45,20 @@ public class Tenancy {
     public void newLimit(Integer limit) {
         this.userLimit = limit;
     }
+
+    public void lowerUsage() {
+        if (userUsage > 0) {
+            userUsage--;
+        }
+    }
+
+    public void increaseUsage() {
+        if (userUsage < userLimit) {
+            userUsage++;
+        }
+    }
+
+    public boolean increaseUsageAllowed() {
+        return userLimit > userUsage;
+    }
 }

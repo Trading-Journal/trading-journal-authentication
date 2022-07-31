@@ -210,6 +210,9 @@
                     <rulesets>
                         <ruleset>${project.basedir}/pmd/pmd-ruleset.xml</ruleset>
                     </rulesets>
+                    <excludes>
+                        <exclude>com/trading/journal/authentication/api/**Api.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>

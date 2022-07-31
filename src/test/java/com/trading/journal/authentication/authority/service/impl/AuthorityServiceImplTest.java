@@ -74,9 +74,9 @@ class AuthorityServiceImplTest {
     void getAllCategories() {
         List<AuthorityCategory> categories = authorityService.getAllCategories();
 
-        assertThat(categories).hasSize(2);
+        assertThat(categories).hasSize(3);
 
-        assertThat(categories).containsExactlyInAnyOrder(AuthorityCategory.ADMINISTRATOR, AuthorityCategory.COMMON_USER);
+        assertThat(categories).containsExactlyInAnyOrder(AuthorityCategory.ADMINISTRATOR, AuthorityCategory.COMMON_USER, AuthorityCategory.ORGANISATION);
     }
 
     @DisplayName("Return Authority by id")

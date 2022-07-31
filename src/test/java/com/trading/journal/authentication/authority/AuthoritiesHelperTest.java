@@ -17,6 +17,9 @@ class AuthoritiesHelperTest {
 
         assertThat(AuthoritiesHelper.ROLE_ADMIN.getLabel()).isEqualTo("ROLE_ADMIN");
         assertThat(AuthoritiesHelper.ROLE_ADMIN.getCategory()).isEqualTo(AuthorityCategory.ADMINISTRATOR);
+
+        assertThat(AuthoritiesHelper.TENANCY_ADMIN.getLabel()).isEqualTo("TENANCY_ADMIN");
+        assertThat(AuthoritiesHelper.TENANCY_ADMIN.getCategory()).isEqualTo(AuthorityCategory.ORGANISATION);
     }
 
     @DisplayName("Get authorities by COMMON_USER category")
@@ -33,5 +36,13 @@ class AuthoritiesHelperTest {
         List<AuthoritiesHelper> list = AuthoritiesHelper.getByCategory(AuthorityCategory.ADMINISTRATOR);
         assertThat(list).hasSize(1);
         assertThat(list).extracting(AuthoritiesHelper::getLabel).containsExactly("ROLE_ADMIN");
+    }
+
+    @DisplayName("Get authorities by ORGANISATION_ADMINISTRATOR category")
+    @Test
+    void getByCategoryORGANISATION_ADMINISTRATOR() {
+        List<AuthoritiesHelper> list = AuthoritiesHelper.getByCategory(AuthorityCategory.ORGANISATION);
+        assertThat(list).hasSize(1);
+        assertThat(list).extracting(AuthoritiesHelper::getLabel).containsExactly("TENANCY_ADMIN");
     }
 }

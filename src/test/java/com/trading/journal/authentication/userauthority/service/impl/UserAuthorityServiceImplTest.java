@@ -37,10 +37,10 @@ class UserAuthorityServiceImplTest {
     @InjectMocks
     UserAuthorityServiceImpl userAuthorityService;
 
-    @DisplayName("Given application user for ONE authority when saving common authorities, save user authorities")
+    @DisplayName("Given user for ONE authority when saving common authorities, save user authorities")
     @Test
     void saveOneCommonAuthority() {
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -56,18 +56,18 @@ class UserAuthorityServiceImplTest {
         Authority authority = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
         when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(singletonList(authority));
 
-        UserAuthority userAuthority = new UserAuthority(applicationUser, authority);
+        UserAuthority userAuthority = new UserAuthority(user, authority);
         when(userAuthorityRepository.save(any())).thenReturn(userAuthority);
 
-        List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(applicationUser);
+        List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(user);
         assertThat(userAuthorities).hasSize(1);
         assertThat(userAuthorities.get(0)).isEqualTo(userAuthority);
     }
 
-    @DisplayName("Given application user for TWO authority when saving common authorities, save user authorities")
+    @DisplayName("Given user for TWO authority when saving common authorities, save user authorities")
     @Test
     void saveTwoCommonAuthority() {
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -84,21 +84,21 @@ class UserAuthorityServiceImplTest {
         Authority authority2 = Authority.builder().id(2L).category(AuthorityCategory.COMMON_USER).name("ADMIN").build();
         when(authorityService.getAuthoritiesByCategory(AuthorityCategory.COMMON_USER)).thenReturn(Arrays.asList(authority1, authority2));
 
-        UserAuthority userAuthority1 = new UserAuthority(applicationUser, authority1);
-        UserAuthority userAuthority2 = new UserAuthority(applicationUser, authority2);
+        UserAuthority userAuthority1 = new UserAuthority(user, authority1);
+        UserAuthority userAuthority2 = new UserAuthority(user, authority2);
         when(userAuthorityRepository.save(userAuthority1)).thenReturn(userAuthority1);
         when(userAuthorityRepository.save(userAuthority2)).thenReturn(userAuthority2);
 
-        List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(applicationUser);
+        List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(user);
         assertThat(userAuthorities).hasSize(2);
 
         verify(userAuthorityRepository, times(2)).save(any());
     }
 
-    @DisplayName("Given application user for admin authority when saving admin authorities, save user authorities")
+    @DisplayName("Given user for admin authority when saving admin authorities, save user authorities")
     @Test
     void saveOneAdminAuthority() {
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -115,14 +115,41 @@ class UserAuthorityServiceImplTest {
         Authority authorityUser = Authority.builder().id(1L).category(AuthorityCategory.COMMON_USER).name("USER").build();
         when(authorityService.getAll()).thenReturn(Arrays.asList(authorityAdmin, authorityUser));
 
-        UserAuthority userAuthorityUser = new UserAuthority(applicationUser, authorityAdmin);
-        UserAuthority userAuthorityAdmin = new UserAuthority(applicationUser, authorityUser);
+        UserAuthority userAuthorityUser = new UserAuthority(user, authorityAdmin);
+        UserAuthority userAuthorityAdmin = new UserAuthority(user, authorityUser);
         when(userAuthorityRepository.save(userAuthorityUser)).thenReturn(userAuthorityUser);
         when(userAuthorityRepository.save(userAuthorityAdmin)).thenReturn(userAuthorityAdmin);
 
-        userAuthorityService.saveAdminUserAuthorities(applicationUser);
+        userAuthorityService.saveAdminUserAuthorities(user);
 
         verify(userAuthorityRepository, times(2)).save(any());
+    }
+
+    @DisplayName("Given user for ONE authority when saving organisation authorities, save user authorities")
+    @Test
+    void saveOneOrganisationAuthority() {
+        User user = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+
+        Authority authority = Authority.builder().id(1L).category(AuthorityCategory.ORGANISATION).name("ORG_USER").build();
+        when(authorityService.getAuthoritiesByCategory(AuthorityCategory.ORGANISATION)).thenReturn(singletonList(authority));
+
+        UserAuthority userAuthority = new UserAuthority(user, authority);
+        when(userAuthorityRepository.save(any())).thenReturn(userAuthority);
+
+        List<UserAuthority> userAuthorities = userAuthorityService.saveOrganisationAdminUserAuthorities(user);
+        assertThat(userAuthorities).hasSize(1);
+        assertThat(userAuthorities.get(0)).isEqualTo(userAuthority);
     }
 
     @DisplayName("Add new authority to the user")
@@ -133,7 +160,7 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -146,7 +173,7 @@ class UserAuthorityServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
+        userAuthorityService.addAuthorities(user, authoritiesChange);
 
         verify(userAuthorityRepository).save(any());
     }
@@ -158,7 +185,7 @@ class UserAuthorityServiceImplTest {
 
         when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -173,7 +200,7 @@ class UserAuthorityServiceImplTest {
                 ))
                 .build();
 
-        userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
+        userAuthorityService.addAuthorities(user, authoritiesChange);
 
         verify(userAuthorityRepository).save(any());
     }
@@ -187,7 +214,7 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
         when(authorityService.getByName("ANOTHER_ROLE")).thenReturn(Optional.of(new Authority(3L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE")));
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -200,7 +227,7 @@ class UserAuthorityServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
+        userAuthorityService.addAuthorities(user, authoritiesChange);
 
         verify(userAuthorityRepository, times(2)).save(any());
     }
@@ -213,7 +240,7 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -228,7 +255,7 @@ class UserAuthorityServiceImplTest {
                         new UserAuthority(null, new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))))
                 .build();
 
-        userAuthorityService.addAuthorities(applicationUser, authoritiesChange);
+        userAuthorityService.addAuthorities(user, authoritiesChange);
 
         verify(userAuthorityRepository, never()).save(any());
     }
@@ -241,7 +268,7 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -254,7 +281,7 @@ class UserAuthorityServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
+        userAuthorityService.deleteAuthorities(user, authoritiesChange);
 
         verify(userAuthorityRepository).delete(any());
     }
@@ -268,7 +295,7 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
         when(authorityService.getByName("ANOTHER_ROLE")).thenReturn(Optional.of(new Authority(5L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE")));
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -284,7 +311,7 @@ class UserAuthorityServiceImplTest {
                 ))
                 .build();
 
-        userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
+        userAuthorityService.deleteAuthorities(user, authoritiesChange);
 
         verify(userAuthorityRepository).delete(any());
     }
@@ -297,7 +324,7 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_USER")).thenReturn(Optional.of(new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")));
         when(authorityService.getByName("ANOTHER_ROLE")).thenReturn(Optional.of(new Authority(3L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE")));
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -312,7 +339,7 @@ class UserAuthorityServiceImplTest {
                         , new UserAuthority(null, new Authority(3L, AuthorityCategory.ADMINISTRATOR, "ANOTHER_ROLE"))))
                 .build();
 
-        userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
+        userAuthorityService.deleteAuthorities(user, authoritiesChange);
 
         verify(userAuthorityRepository, times(2)).delete(any());
     }
@@ -325,7 +352,7 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ANOTHER_ROLE_USER")).thenReturn(Optional.empty());
         when(authorityService.getByName("ANOTHER_ROLE_ADMIN")).thenReturn(Optional.empty());
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -341,7 +368,7 @@ class UserAuthorityServiceImplTest {
                 ))
                 .build();
 
-        userAuthorityService.deleteAuthorities(applicationUser, authoritiesChange);
+        userAuthorityService.deleteAuthorities(user, authoritiesChange);
 
         verify(userAuthorityRepository, never()).delete(any());
     }

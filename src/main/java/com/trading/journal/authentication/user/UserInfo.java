@@ -1,26 +1,25 @@
 package com.trading.journal.authentication.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.jwt.helper.DateHelper;
 import com.trading.journal.authentication.userauthority.UserAuthority;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Builder
+@ToString
 public class UserInfo {
 
-    @JsonIgnore
     private Long id;
 
     private String userName;
@@ -48,7 +47,12 @@ public class UserInfo {
         this.email = applicationUser.getEmail();
         this.enabled = applicationUser.getEnabled();
         this.verified = applicationUser.getVerified();
-        this.authorities = applicationUser.getAuthorities().stream().map(UserAuthority::getAuthority).map(Authority::getName).collect(Collectors.toList());
         this.createdAt = applicationUser.getCreatedAt();
+        this.authorities = ofNullable(applicationUser.getAuthorities())
+                .orElse(emptyList())
+                .stream()
+                .map(UserAuthority::getAuthority)
+                .map(Authority::getName)
+                .collect(Collectors.toList());
     }
 }

@@ -2,9 +2,13 @@
 
 ## Pending
 
-* Role tenancy (Company) Administrator
-  * Can load and change user for the same tenancy (Company)
-  * Can manage users - based on tenancy limits
+* Api to retrieve verifications for one email (Admin access only)
+* Postman Collection with tests for all endpoints
+* Change me endpoint to update user data
+* Authorities endpoints
+  * Enable access to  ORGANISATION user
+  * Do not manage system admin when category when it is an ORGANISATION user
+  * Manage all when logged user id ADMINISTRATOR
 * Delete account
   * Delete common user
   * Delete tenancy (Company) admin user:
@@ -24,6 +28,16 @@
 * Use token generated here in another project to validate flow and Lib (above)
 * Create version 1.0.0
 * Create TAG with current code for reuse in other projects
+
+## Pending for the future
+* Manage user session
+  * Can cancel a user session forcing a new login
+  * Cache the session status somehow
+    * Update this cache during login with time equal to jwt expiration
+    * Evict this cache when delete user session
+  * JWT lib will have a new version to validate JWT against some API
+    * Use configuration for that
+    * The API must receive the JWT and check if session is still valis
 
 ## Swagger
 
@@ -114,6 +128,7 @@ CREATE TABLE `Verifications` (
 ```
 INSERT INTO Authorities (category, name) VALUES ('COMMON_USER','ROLE_USER');
 INSERT INTO Authorities (category, name) VALUES ('ADMINISTRATOR','ROLE_ADMIN');
+INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN');
 ```
 
 ## Configurations

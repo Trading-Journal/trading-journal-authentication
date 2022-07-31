@@ -1,16 +1,12 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.TestLoader;
-import com.trading.journal.authentication.authentication.Login;
-import com.trading.journal.authentication.authentication.LoginResponse;
-import com.trading.journal.authentication.authentication.service.AuthenticationService;
+import com.trading.journal.authentication.WithCustomMockUser;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
-import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
-import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,53 +14,51 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.LocalDateTime;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@WithCustomMockUser(authorities = {"ROLE_ADMIN"})
 class TenanciesControllerPagingTest {
 
     public static final String PATH = "/admin/tenancies";
-    private static String token;
-
-    @Autowired
-    private WebTestClient webTestClient;
+    private static WebTestClient webTestClient;
 
     @BeforeAll
     public static void setUp(
-            @Autowired UserRepository userRepository,
-            @Autowired PasswordEncoder encoder,
-            @Autowired AuthenticationService authenticationService,
-            @Autowired UserAuthorityService userAuthorityService,
-            @Autowired TenancyRepository tenancyRepository
+            @Autowired WebApplicationContext applicationContext,
+            @Autowired TenancyRepository tenancyRepository,
+            @Autowired UserRepository userRepository
     ) {
-        userRepository.deleteAll();
-        TestLoader.load50Tenancies(tenancyRepository);
-        User user = User.builder()
-                .userName("johnwick")
-                .password(encoder.encode("dad231#$#4"))
-                .firstName("John")
-                .lastName("Wick")
-                .email("johnwick@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .build();
-        User applicationUser = userRepository.save(user);
-        userAuthorityService.saveAdminUserAuthorities(applicationUser);
+        webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
 
-        Login login = new Login("johnwick@mail.com", "dad231#$#4");
-        LoginResponse loginResponse = authenticationService.signIn(login);
-        assertThat(loginResponse).isNotNull();
-        token = loginResponse.accessToken();
+        userRepository.deleteAll();
+        tenancyRepository.deleteAll();
+
+        Stream<String> tenacies = Stream.of(
+                "andyjohnson", "angelduncan", "angelowells", "arthurlawrence", "bernardmyers", "bethguzman", "blakecoleman", "brianmann", "cameronfleming", "carltonsantos",
+                "carrietate", "catherinejones", "cecilperkins", "colinward", "conradhernandez", "doloreswilliamson", "dorisparker", "earlnorris", "eddiemassey", "elenaboyd",
+                "elisavargas", "ermablack", "ernestinesteele", "ernestokim", "fanniehines", "gabrieldixon", "garylogan", "gerardwebb", "idagarza", "isaacjames",
+                "jeromepratt", "joeldunn", "juliecarson", "kathyoliver", "katrinahawkins", "larryrobbins", "laurieadams", "lorettastanley", "luketyler", "melindafields",
+                "natasharivera", "norawaters", "pedrosullivan", "phyllisterry", "rochellegraves", "sabrinagarcia", "sadiedavis", "veralamb", "vernawilkins", "victorialuna"
+        );
+        tenacies.map(tenancy -> Tenancy.builder().name(tenancy).build())
+                .forEach(tenancyRepository::save);
+    }
+
+    @AfterAll
+    public static void shotDown(@Autowired TenancyRepository tenancyRepository, @Autowired UserRepository userRepository) {
+        userRepository.deleteAll();
+        tenancyRepository.deleteAll();
     }
 
     @DisplayName("Get first page of all tenancies without any arguments")
@@ -76,7 +70,6 @@ class TenanciesControllerPagingTest {
                         .path(PATH)
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -103,7 +96,6 @@ class TenanciesControllerPagingTest {
                         .queryParam("size", "10")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -130,7 +122,6 @@ class TenanciesControllerPagingTest {
                         .queryParam("size", "10")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -154,7 +145,6 @@ class TenanciesControllerPagingTest {
                         .queryParam("sort", "name", "desc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -180,7 +170,6 @@ class TenanciesControllerPagingTest {
                         .queryParam("filter", "son")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -192,7 +181,7 @@ class TenanciesControllerPagingTest {
                     assertThat(response.totalPages()).isEqualTo(1);
                     assertThat(response.totalItems()).isEqualTo(3L);
                     assertThat(response.items()).extracting(Tenancy::getName)
-                            .containsExactly("andyjohnson","doloreswilliamson","juliecarson");
+                            .containsExactly("andyjohnson", "doloreswilliamson", "juliecarson");
                 });
     }
 
@@ -208,7 +197,6 @@ class TenanciesControllerPagingTest {
                         .queryParam("filter", "la")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -220,7 +208,7 @@ class TenanciesControllerPagingTest {
                     assertThat(response.totalPages()).isEqualTo(2);
                     assertThat(response.totalItems()).isEqualTo(6L);
                     assertThat(response.items()).extracting(Tenancy::getName)
-                            .containsExactly("arthurlawrence","blakecoleman","ermablack","larryrobbins");
+                            .containsExactly("arthurlawrence", "blakecoleman", "ermablack", "larryrobbins");
                 });
 
         webTestClient
@@ -232,7 +220,6 @@ class TenanciesControllerPagingTest {
                         .queryParam("filter", "la")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -244,7 +231,7 @@ class TenanciesControllerPagingTest {
                     assertThat(response.totalPages()).isEqualTo(2);
                     assertThat(response.totalItems()).isEqualTo(6L);
                     assertThat(response.items()).extracting(Tenancy::getName)
-                            .containsExactly("laurieadams","veralamb");
+                            .containsExactly("laurieadams", "veralamb");
                 });
     }
 
@@ -258,7 +245,6 @@ class TenanciesControllerPagingTest {
                         .queryParam("filter", "www")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -285,7 +271,6 @@ class TenanciesControllerPagingTest {
                         .queryParam("sort", "name", "desc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -297,7 +282,7 @@ class TenanciesControllerPagingTest {
                     assertThat(response.totalPages()).isEqualTo(2);
                     assertThat(response.totalItems()).isEqualTo(6L);
                     assertThat(response.items()).extracting(Tenancy::getName)
-                            .containsExactly("veralamb","laurieadams","larryrobbins","ermablack");
+                            .containsExactly("veralamb", "laurieadams", "larryrobbins", "ermablack");
                 });
 
         webTestClient
@@ -310,7 +295,6 @@ class TenanciesControllerPagingTest {
                         .queryParam("sort", "name", "desc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -322,7 +306,7 @@ class TenanciesControllerPagingTest {
                     assertThat(response.totalPages()).isEqualTo(2);
                     assertThat(response.totalItems()).isEqualTo(6L);
                     assertThat(response.items()).extracting(Tenancy::getName)
-                            .containsExactly("blakecoleman","arthurlawrence");
+                            .containsExactly("blakecoleman", "arthurlawrence");
                 });
     }
 }

@@ -1,9 +1,7 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.authentication.Login;
-import com.trading.journal.authentication.authentication.LoginResponse;
-import com.trading.journal.authentication.authentication.service.AuthenticationService;
+import com.trading.journal.authentication.WithCustomMockUser;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.AuthorityRepository;
@@ -11,7 +9,6 @@ import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
-import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,14 +17,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,8 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
 class AuthoritiesControllerTest {
-
-    private static String token;
 
     @Autowired
     AuthorityRepository authorityRepository;
@@ -47,84 +44,65 @@ class AuthoritiesControllerTest {
     @Autowired
     UserRepository userRepository;
 
-    @Autowired
-    private WebTestClient webTestClient;
+    private static WebTestClient webTestClient;
 
     @BeforeAll
-    public static void setUp(
-            @Autowired UserRepository userRepository,
-            @Autowired PasswordEncoder encoder,
-            @Autowired AuthenticationService authenticationService,
-            @Autowired UserAuthorityService userAuthorityService
-    ) {
-        User user = User.builder()
-                .userName("johnwick3")
-                .password(encoder.encode("dad231#$#4"))
-                .firstName("John")
-                .lastName("Wick")
-                .email("johnwick3@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .build();
-        User applicationUser = userRepository.save(user);
-        userAuthorityService.saveAdminUserAuthorities(applicationUser);
-
-        Login login = new Login("johnwick3@mail.com", "dad231#$#4");
-        LoginResponse loginResponse = authenticationService.signIn(login);
-        assertThat(loginResponse).isNotNull();
-        token = loginResponse.accessToken();
+    public static void setUp(@Autowired WebApplicationContext applicationContext) {
+        webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
     }
 
     @DisplayName("Get all authorities")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void getAll() {
         webTestClient
                 .get()
                 .uri("/admin/authorities")
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<Authority>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(2);
-                    assertThat(response).extracting(Authority::getName).containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
-                    assertThat(response).extracting(Authority::getCategory).containsExactlyInAnyOrder(AuthorityCategory.COMMON_USER, AuthorityCategory.ADMINISTRATOR);
+                    assertThat(response).hasSize(3);
+                    assertThat(response).extracting(Authority::getName).containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN", "TENANCY_ADMIN");
+                    assertThat(response).extracting(Authority::getCategory).containsExactlyInAnyOrder(AuthorityCategory.COMMON_USER, AuthorityCategory.ADMINISTRATOR, AuthorityCategory.ORGANISATION);
                 });
     }
 
     @DisplayName("Get all authorities category")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void getAllCategories() {
         webTestClient
                 .get()
                 .uri("/admin/authorities/categories")
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<AuthorityCategory>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(2);
-                    assertThat(response).containsExactlyInAnyOrder(AuthorityCategory.COMMON_USER, AuthorityCategory.ADMINISTRATOR);
+                    assertThat(response).hasSize(3);
+                    assertThat(response).containsExactlyInAnyOrder(AuthorityCategory.COMMON_USER, AuthorityCategory.ADMINISTRATOR, AuthorityCategory.ORGANISATION);
                 });
     }
 
     @DisplayName("Get authority by id")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void byId() {
+        Optional<Authority> roleUser = authorityRepository.getByName("ROLE_USER");
+        assertThat(roleUser).isNotEmpty();
+
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(1L))
+                        .build(roleUser.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -134,13 +112,15 @@ class AuthoritiesControllerTest {
                     assertThat(response.getName()).isEqualTo("ROLE_USER");
                 });
 
+        Optional<Authority> roleAdmin = authorityRepository.getByName("ROLE_ADMIN");
+        assertThat(roleAdmin).isNotEmpty();
+
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(2L))
+                        .build(roleAdmin.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -154,9 +134,8 @@ class AuthoritiesControllerTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(3L))
+                        .build(100L))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -169,13 +148,13 @@ class AuthoritiesControllerTest {
 
     @DisplayName("Create a new authority")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void create() {
         webTestClient
                 .post()
                 .uri("/admin/authorities")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"))
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isCreated()
@@ -192,7 +171,6 @@ class AuthoritiesControllerTest {
                 .uri("/admin/authorities")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"))
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.CONFLICT)
@@ -202,20 +180,25 @@ class AuthoritiesControllerTest {
                         assertThat(response.get("error")).isEqualTo("Authority name already exists")
                 );
 
-        authorityRepository.deleteById(3L);
+        Optional<Authority> another_role = authorityRepository.getByName("ANOTHER_ROLE");
+        assertThat(another_role).isNotEmpty();
+        authorityRepository.deleteById(another_role.get().getId());
     }
 
     @DisplayName("Update a authority")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void update() {
+        Optional<Authority> roleUser = authorityRepository.getByName("ROLE_USER");
+        assertThat(roleUser).isNotEmpty();
+
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(1L))
+                        .build(roleUser.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_USER_UPDATED"))
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -226,16 +209,15 @@ class AuthoritiesControllerTest {
                 });
 
         List<Authority> authorities = authorityRepository.findAll();
-        assertThat(authorities).extracting(Authority::getName).containsExactlyInAnyOrder("ROLE_USER_UPDATED", "ROLE_ADMIN");
+        assertThat(authorities).extracting(Authority::getName).containsExactlyInAnyOrder("ROLE_USER_UPDATED", "ROLE_ADMIN", "TENANCY_ADMIN");
 
         webTestClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(1L))
+                        .build(roleUser.get().getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_ADMIN"))
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.CONFLICT)
@@ -249,10 +231,9 @@ class AuthoritiesControllerTest {
                 .put()
                 .uri(uriBuilder -> uriBuilder
                         .path("/admin/authorities/{id}")
-                        .build(3L))
+                        .build(100L))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new Authority(AuthorityCategory.COMMON_USER, "ROLE_ADMIN"))
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.NOT_FOUND)
@@ -267,15 +248,24 @@ class AuthoritiesControllerTest {
 
     @DisplayName("Delete a authority")
     @Test
+    @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void delete() {
-
-        User applicationUser = userRepository.findByEmail("johnwick3@mail.com").orElse(null);
-        assertThat(applicationUser).isNotNull();
+        User user = User.builder()
+                .userName("johnwick")
+                .password("dad231#$#4")
+                .firstName("John")
+                .lastName("Wick")
+                .email("johnwick@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+        user = userRepository.save(user);
         Authority anotherRole = authorityRepository.save(new Authority(AuthorityCategory.COMMON_USER, "ANOTHER_ROLE"));
         UserAuthority anotherRoleUserAuthority = userAuthorityRepository.save(
                 UserAuthority.builder()
                         .authority(anotherRole)
-                        .applicationUser(applicationUser)
+                        .applicationUser(user)
                         .build()
         );
 
@@ -285,7 +275,6 @@ class AuthoritiesControllerTest {
                         .path("/admin/authorities/{id}")
                         .build(anotherRole.getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
@@ -303,7 +292,6 @@ class AuthoritiesControllerTest {
                         .path("/admin/authorities/{id}")
                         .build(anotherRole.getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -314,7 +302,6 @@ class AuthoritiesControllerTest {
                         .path("/admin/authorities/{id}")
                         .build(anotherRole.getId()))
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.NOT_FOUND)

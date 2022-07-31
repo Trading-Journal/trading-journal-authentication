@@ -40,11 +40,15 @@ class LoadAuthoritiesTest {
                 singletonList(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ADMIN"))
         );
 
+        when(authorityService.getAuthoritiesByCategory(AuthorityCategory.ORGANISATION)).thenReturn(
+                singletonList(new Authority(3L, AuthorityCategory.ORGANISATION, "ORG_ADMIN"))
+        );
+
         Map<AuthorityCategory, String[]> authoritiesMap = loadAuthorities.getAuthorityCategoryMap();
 
-        assertThat(authoritiesMap.keySet()).containsExactlyInAnyOrder(AuthorityCategory.COMMON_USER, AuthorityCategory.ADMINISTRATOR);
+        assertThat(authoritiesMap.keySet()).containsExactlyInAnyOrder(AuthorityCategory.COMMON_USER, AuthorityCategory.ADMINISTRATOR, AuthorityCategory.ORGANISATION);
 
-        assertThat(authoritiesMap.values()).containsExactlyInAnyOrder(new String[]{"USER"},new String[]{"ADMIN"});
+        assertThat(authoritiesMap.values()).containsExactlyInAnyOrder(new String[]{"USER"},new String[]{"ADMIN"}, new String[]{"ORG_ADMIN"});
     }
 
     @DisplayName("Load authorities is empty return exception")

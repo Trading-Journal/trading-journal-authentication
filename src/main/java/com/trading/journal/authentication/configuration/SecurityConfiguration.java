@@ -46,6 +46,7 @@ public class SecurityConfiguration {
 
         Map<AuthorityCategory, String[]> authorityCategoryMap = loadAuthorities.getAuthorityCategoryMap();
         httpSecurity.authorizeRequests().antMatchers(getAdminPath()).hasAnyAuthority(authorityCategoryMap.get(AuthorityCategory.ADMINISTRATOR));
+        httpSecurity.authorizeRequests().antMatchers(getOrganisationAdminPath()).hasAnyAuthority(authorityCategoryMap.get(AuthorityCategory.ORGANISATION));
         httpSecurity.authorizeRequests().anyRequest().hasAnyAuthority(authorityCategoryMap.get(AuthorityCategory.COMMON_USER));
         return httpSecurity.authenticationManager(authenticationManager).build();
     }
@@ -59,5 +60,9 @@ public class SecurityConfiguration {
 
     private String[] getAdminPath() {
         return new String[]{"/admin/**"};
+    }
+
+    private String[] getOrganisationAdminPath() {
+        return new String[]{"/organisation/**"};
     }
 }

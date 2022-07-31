@@ -8,6 +8,7 @@ import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.UserService;
+import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +43,8 @@ public class UserServiceImpl implements UserService {
         Boolean validUser = validateNewUser(userRegistration.getUserName(), userRegistration.getEmail());
         if (validUser) {
             User user = userRepository.save(buildUser(userRegistration, tenancy));
-            userAuthorityService.saveCommonUserAuthorities(user);
+            List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(user);
+            user.setUserAuthorities(userAuthorities);
             return user;
         } else {
             throw new ApplicationException("User name or email already exist");

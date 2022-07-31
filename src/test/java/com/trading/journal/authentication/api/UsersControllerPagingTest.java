@@ -1,17 +1,14 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
-import com.trading.journal.authentication.TestLoader;
-import com.trading.journal.authentication.authentication.Login;
-import com.trading.journal.authentication.authentication.LoginResponse;
-import com.trading.journal.authentication.authentication.service.AuthenticationService;
-import com.trading.journal.authentication.authority.service.AuthorityService;
+import com.trading.journal.authentication.WithCustomMockUser;
 import com.trading.journal.authentication.pageable.PageResponse;
+import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
-import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import com.trading.journal.authentication.user.UserRepository;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,54 +16,68 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@WithCustomMockUser(authorities = {"ROLE_ADMIN"})
 class UsersControllerPagingTest {
 
     public static final String PATH = "/admin/users";
-    private static String token;
 
-    @Autowired
-    private WebTestClient webTestClient;
+    private static WebTestClient webTestClient;
+
+    private static Tenancy tenancy;
 
     @BeforeAll
     public static void setUp(
-            @Autowired UserRepository userRepository,
-            @Autowired UserAuthorityRepository userAuthorityRepository,
-            @Autowired AuthorityService authorityService,
-            @Autowired PasswordEncoder encoder,
-            @Autowired AuthenticationService authenticationService,
-            @Autowired UserAuthorityService userAuthorityService
-    ) {
-        TestLoader.load50Users(userRepository, userAuthorityRepository, authorityService);
+            @Autowired WebApplicationContext applicationContext,
+            @Autowired TenancyRepository tenancyRepository,
+            @Autowired UserRepository userRepository) {
+        webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
+        tenancy = tenancyRepository.save(Tenancy.builder().name("tenancy").build());
+        Stream<String> users = Stream.of(
+                "Andy Johnson", "Angel Duncan", "Angelo Wells", "Arthur Lawrence", "Bernard Myers", "Beth Guzman", "Blake Coleman", "Brian Mann", "Cameron Fleming", "Carlton Santos",
+                "Carrie Tate", "Catherine Jones", "Cecil Perkins", "Colin Ward", "Conrad Hernandez", "Dolores Williamson", "Doris Parker", "Earl Norris", "Eddie Massey", "Elena Boyd",
+                "Elisa Vargas", "Erma Black", "Ernestine Steele", "Ernesto Kim", "Fannie Hines", "Gabriel Dixon", "Gary Logan", "Gerard Webb", "Ida Garza", "Isaac James",
+                "Jerome Pratt", "Joel Dunn", "Julie Carson", "Kathy Oliver", "Katrina Hawkins", "Larry Robbins", "Laurie Adams", "Loretta Stanley", "Luke Tyler", "Melinda Fields",
+                "Natasha Rivera", "Nora Waters", "Pedro Sullivan", "Phyllis Terry", "Rochelle Graves", "Sabrina Garcia", "Sadie Davis", "Vera Lamb", "Verna Wilkins", "Victoria Luna"
+        );
+        users.map(user -> {
+            String userName = user.replace(" ", "").toLowerCase();
+            String email = userName.concat("@email.com");
+            String[] names = user.split(" ");
+            String firstName = names[0];
+            String lastName = names[1];
+            return User.builder()
+                    .userName(userName)
+                    .email(email)
+                    .password(UUID.randomUUID().toString())
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .enabled(true)
+                    .verified(true)
+                    .createdAt(LocalDateTime.now())
+                    .tenancy(tenancy)
+                    .build();
+        }).forEach(userRepository::save);
+    }
 
-        User user = User.builder()
-                .userName("johnwick")
-                .password(encoder.encode("dad231#$#4"))
-                .firstName("John")
-                .lastName("Wick")
-                .email("johnwick@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .build();
-        User applicationUser = userRepository.save(user);
-        userAuthorityService.saveAdminUserAuthorities(applicationUser);
-
-        Login login = new Login("johnwick@mail.com", "dad231#$#4");
-        LoginResponse loginResponse = authenticationService.signIn(login);
-        assertThat(loginResponse).isNotNull();
-        token = loginResponse.accessToken();
+    @AfterAll
+    public static void shotDown(@Autowired UserRepository userRepository, @Autowired TenancyRepository tenancyRepository) {
+        userRepository.deleteAll();
+        tenancyRepository.deleteAll();
     }
 
     @DisplayName("Get first page of all users without any arguments")
@@ -78,7 +89,7 @@ class UsersControllerPagingTest {
                         .path(PATH)
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy.getId().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -87,8 +98,8 @@ class UsersControllerPagingTest {
                 .value(response -> {
                     assertThat(response.items()).hasSize(10);
                     assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
                     assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
                             .containsExactly("Andy Johnson", "Angel Duncan", "Angelo Wells", "Arthur Lawrence", "Bernard Myers", "Beth Guzman", "Blake Coleman", "Brian Mann", "Cameron Fleming", "Carlton Santos");
                 });
@@ -105,7 +116,7 @@ class UsersControllerPagingTest {
                         .queryParam("size", "10")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy.getId().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -114,8 +125,8 @@ class UsersControllerPagingTest {
                 .value(response -> {
                     assertThat(response.items()).hasSize(10);
                     assertThat(response.currentPage()).isEqualTo(3);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
                     assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
                             .containsExactly("Jerome Pratt", "Joel Dunn", "Julie Carson", "Kathy Oliver", "Katrina Hawkins", "Larry Robbins", "Laurie Adams", "Loretta Stanley", "Luke Tyler", "Melinda Fields");
                 });
@@ -132,7 +143,7 @@ class UsersControllerPagingTest {
                         .queryParam("size", "10")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy.getId().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -141,8 +152,8 @@ class UsersControllerPagingTest {
                 .value(response -> {
                     assertThat(response.items()).hasSize(0);
                     assertThat(response.currentPage()).isEqualTo(6);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
                 });
     }
 
@@ -156,7 +167,7 @@ class UsersControllerPagingTest {
                         .queryParam("sort", "firstName", "desc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy.getId().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -165,8 +176,8 @@ class UsersControllerPagingTest {
                 .value(response -> {
                     assertThat(response.items()).hasSize(10);
                     assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
                     assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
                             .containsExactly("Victoria Luna", "Verna Wilkins", "Vera Lamb", "Sadie Davis", "Sabrina Garcia", "Rochelle Graves", "Phyllis Terry", "Pedro Sullivan", "Nora Waters", "Natasha Rivera");
                 });
@@ -182,7 +193,7 @@ class UsersControllerPagingTest {
                         .queryParam("sort", "firstName", "desc", "lastName", "asc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy.getId().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -191,8 +202,8 @@ class UsersControllerPagingTest {
                 .value(response -> {
                     assertThat(response.items()).hasSize(10);
                     assertThat(response.currentPage()).isEqualTo(0);
-                    assertThat(response.totalPages()).isEqualTo(6);
-                    assertThat(response.totalItems()).isEqualTo(51L);
+                    assertThat(response.totalPages()).isEqualTo(5);
+                    assertThat(response.totalItems()).isEqualTo(50L);
                     assertThat(response.items()).extracting(userInfo -> userInfo.getFirstName().concat(" ").concat(userInfo.getLastName()))
                             .containsExactly("Victoria Luna", "Verna Wilkins", "Vera Lamb", "Sadie Davis", "Sabrina Garcia", "Rochelle Graves", "Phyllis Terry", "Pedro Sullivan", "Nora Waters", "Natasha Rivera");
                 });
@@ -208,7 +219,7 @@ class UsersControllerPagingTest {
                         .queryParam("filter", "son")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy.getId().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -236,7 +247,7 @@ class UsersControllerPagingTest {
                         .queryParam("filter", "la")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy.getId().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -260,7 +271,7 @@ class UsersControllerPagingTest {
                         .queryParam("filter", "la")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy.getId().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -286,7 +297,7 @@ class UsersControllerPagingTest {
                         .queryParam("filter", "www")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy.getId().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -313,7 +324,7 @@ class UsersControllerPagingTest {
                         .queryParam("sort", "lastName", "desc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy.getId().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -338,7 +349,7 @@ class UsersControllerPagingTest {
                         .queryParam("sort", "lastName", "desc")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
+                .header("tenancy", tenancy.getId().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()

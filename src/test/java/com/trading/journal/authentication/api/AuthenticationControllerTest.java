@@ -1,6 +1,8 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.UserRepository;
@@ -70,5 +72,7 @@ public class AuthenticationControllerTest {
         List<UserAuthority> userAuthorities = userAuthorityRepository.findAll();
         assert userAuthorities != null;
         userAuthorities.forEach(userAuthority -> assertThat(userAuthority.getAuthority()).isNotNull());
+        assertThat(userAuthorities).extracting(UserAuthority::getAuthority).extracting(Authority::getCategory)
+                .containsExactlyInAnyOrder(AuthorityCategory.ORGANISATION, AuthorityCategory.COMMON_USER);
     }
 }

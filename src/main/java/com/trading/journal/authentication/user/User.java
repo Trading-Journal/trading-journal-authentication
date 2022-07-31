@@ -66,4 +66,8 @@ public class User {
     public void changePassword(@NotBlank String newPassword) {
         this.password = newPassword;
     }
+
+    public void setUserAuthorities(List<UserAuthority> authorities){
+        this.authorities = authorities;
+    }
 }
