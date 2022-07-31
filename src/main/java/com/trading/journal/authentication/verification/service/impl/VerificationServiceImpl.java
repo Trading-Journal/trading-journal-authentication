@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class VerificationServiceImpl implements VerificationService {
@@ -31,7 +33,7 @@ public class VerificationServiceImpl implements VerificationService {
     public void send(VerificationType verificationType, User applicationUser) {
         Verification verification = verificationRepository.getByTypeAndEmail(verificationType, applicationUser.getEmail())
                 .orElseGet(() -> Verification.builder().email(applicationUser.getEmail()).type(verificationType).build());
-        if(doNotSendVerification(verification)) {
+        if (doNotSendVerification(verification)) {
             return;
         }
         verification = verification.renew(hashProvider.generateHash(verification.getEmail()));
@@ -52,6 +54,19 @@ public class VerificationServiceImpl implements VerificationService {
             sendChangePassword(verification);
         }
         verificationRepository.delete(verification);
+    }
+
+    @Override
+    public List<Verification> getByEmail(String email) {
+        return verificationRepository.getByEmail(email);
+    }
+
+    @Override
+    public Verification create(VerificationType verificationType, String email) {
+        User user = userService.getUserByEmail(email);
+        this.send(verificationType, user);
+        return verificationRepository.getByTypeAndEmail(verificationType, email)
+                .orElseThrow(() -> new ApplicationException("Verification not created"));
     }
 
     private void sendChangePassword(Verification verification) {

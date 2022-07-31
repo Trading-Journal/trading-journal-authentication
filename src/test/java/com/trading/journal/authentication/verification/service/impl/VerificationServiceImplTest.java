@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -63,7 +64,7 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -76,18 +77,18 @@ class VerificationServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
-        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, user.getEmail())).thenReturn(Optional.empty());
+        when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        verificationService.send(VerificationType.REGISTRATION, applicationUser);
+        verificationService.send(VerificationType.REGISTRATION, user);
     }
 
     @DisplayName("Is verification REGISTRATION but email verification is not enabled then do not send")
     @Test
     void registrationVerificationNoSend() {
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -100,10 +101,10 @@ class VerificationServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
+        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, user.getEmail())).thenReturn(Optional.empty());
         when(verificationProperties.isEnabled()).thenReturn(false);
 
-        verificationService.send(VerificationType.REGISTRATION, applicationUser);
+        verificationService.send(VerificationType.REGISTRATION, user);
 
         verify(hashProvider, never()).generateHash(anyString());
         verify(verificationRepository, never()).save(any());
@@ -121,7 +122,7 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -134,13 +135,13 @@ class VerificationServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Optional.empty());
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, user.getEmail())).thenReturn(Optional.empty());
         when(verificationProperties.isEnabled()).thenReturn(false);
-        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
+        verificationService.send(VerificationType.CHANGE_PASSWORD, user);
     }
 
     @DisplayName("Given verification type ADMIN_REGISTRATION and application user send the verification to user email and never execute delete because previous verification did not exist")
@@ -154,7 +155,7 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -167,18 +168,18 @@ class VerificationServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
-        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, user.getEmail())).thenReturn(Optional.empty());
+        when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
+        verificationService.send(VerificationType.ADMIN_REGISTRATION, user);
     }
 
     @DisplayName("Is verification ADMIN_REGISTRATION but email verification is not enabled then do not send")
     @Test
     void registrationAdminVerificationNoSend() {
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -191,10 +192,10 @@ class VerificationServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.empty());
+        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, user.getEmail())).thenReturn(Optional.empty());
         when(verificationProperties.isEnabled()).thenReturn(false);
 
-        verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
+        verificationService.send(VerificationType.ADMIN_REGISTRATION, user);
 
         verify(hashProvider, never()).generateHash(anyString());
         verify(verificationRepository, never()).save(any());
@@ -212,7 +213,7 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -225,12 +226,12 @@ class VerificationServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.NEW_ORGANISATION_USER, applicationUser.getEmail())).thenReturn(Optional.empty());
-        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.NEW_ORGANISATION_USER, user.getEmail())).thenReturn(Optional.empty());
+        when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        verificationService.send(VerificationType.NEW_ORGANISATION_USER, applicationUser);
+        verificationService.send(VerificationType.NEW_ORGANISATION_USER, user);
     }
 
     @DisplayName("Given verification type REGISTRATION and application user send the verification to user email and execute delete because previous verification did exist")
@@ -244,7 +245,7 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -257,13 +258,13 @@ class VerificationServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
+        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, user.getEmail())).thenReturn(Optional.of(verificationSaved));
         when(verificationProperties.isEnabled()).thenReturn(true);
-        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        verificationService.send(VerificationType.REGISTRATION, applicationUser);
+        verificationService.send(VerificationType.REGISTRATION, user);
     }
 
     @DisplayName("Given verification type CHANGE_PASSWORD and application user send the verification to user email and execute delete because previous verification did exist")
@@ -277,7 +278,7 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -290,12 +291,12 @@ class VerificationServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
-        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, user.getEmail())).thenReturn(Optional.of(verificationSaved));
+        when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
+        verificationService.send(VerificationType.CHANGE_PASSWORD, user);
     }
 
     @DisplayName("Given verification type ADMIN_REGISTRATION and application user send the verification to user email and execute delete because previous verification did exist")
@@ -309,7 +310,7 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -322,12 +323,12 @@ class VerificationServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
-        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, user.getEmail())).thenReturn(Optional.of(verificationSaved));
+        when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);
+        verificationService.send(VerificationType.ADMIN_REGISTRATION, user);
     }
 
     @DisplayName("Given verification type NEW_ORGANISATION_USER and application user send the verification to user email and execute delete because previous verification did exist")
@@ -341,7 +342,7 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -354,12 +355,12 @@ class VerificationServiceImplTest {
                 .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(verificationRepository.getByTypeAndEmail(VerificationType.NEW_ORGANISATION_USER, applicationUser.getEmail())).thenReturn(Optional.of(verificationSaved));
-        when(hashProvider.generateHash(applicationUser.getEmail())).thenReturn(hash);
+        when(verificationRepository.getByTypeAndEmail(VerificationType.NEW_ORGANISATION_USER, user.getEmail())).thenReturn(Optional.of(verificationSaved));
+        when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(verificationSaved);
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
-        verificationService.send(VerificationType.NEW_ORGANISATION_USER, applicationUser);
+        verificationService.send(VerificationType.NEW_ORGANISATION_USER, user);
     }
 
     @DisplayName("Given hash and email find current Verification REGISTRATION")
@@ -514,7 +515,7 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -527,7 +528,7 @@ class VerificationServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(userService.getUserByEmail(email)).thenReturn(applicationUser);
+        when(userService.getUserByEmail(email)).thenReturn(user);
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(Optional.empty());
         when(hashProvider.generateHash(email)).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(changerPassword);
@@ -557,7 +558,7 @@ class VerificationServiceImplTest {
                 "12456",
                 LocalDateTime.now());
 
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password")
@@ -570,7 +571,7 @@ class VerificationServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(userService.getUserByEmail(email)).thenReturn(applicationUser);
+        when(userService.getUserByEmail(email)).thenReturn(user);
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(Optional.empty());
         when(hashProvider.generateHash(email)).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(changerPassword);
@@ -578,5 +579,79 @@ class VerificationServiceImplTest {
         doNothing().when(verificationRepository).delete(adminRegistration);
 
         verificationService.verify(adminRegistration);
+    }
+
+    @DisplayName("Get all verifications by email")
+    @Test
+    void getByEmail() {
+        String email = "mail@mail.com";
+
+        List<Verification> verifications = asList(new Verification(1L,
+                        email,
+                        VerificationType.REGISTRATION,
+                        VerificationStatus.ERROR,
+                        "12456",
+                        LocalDateTime.now()),
+                new Verification(1L,
+                        email,
+                        VerificationType.NEW_ORGANISATION_USER,
+                        VerificationStatus.PENDING,
+                        "12456",
+                        LocalDateTime.now()));
+
+        when(verificationRepository.getByEmail(email)).thenReturn(verifications);
+
+        List<Verification> byEmail = verificationService.getByEmail(email);
+        assertThat(byEmail).isEqualTo(verifications);
+    }
+
+    @DisplayName("Get all verifications by email not found return empty list")
+    @Test
+    void getByEmailEmpty() {
+        String email = "mail@mail.com";
+
+        when(verificationRepository.getByEmail(email)).thenReturn(emptyList());
+
+        List<Verification> byEmail = verificationService.getByEmail(email);
+        assertThat(byEmail).isEmpty();
+    }
+
+    @DisplayName("Create  new verification given Type and Email")
+    @Test
+    void createByEmail() {
+        String email = "mail@mail.com";
+
+        User user = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+
+        when(userService.getUserByEmail(email)).thenReturn(user);
+
+        Verification verificationSaved = new Verification(1L,
+                email,
+                VerificationType.NEW_ORGANISATION_USER,
+                VerificationStatus.PENDING,
+                "12456",
+                LocalDateTime.now());
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, email)).thenReturn(Optional.empty());
+        when(hashProvider.generateHash(user.getEmail())).thenReturn("12456");
+        when(verificationRepository.save(any())).thenReturn(verificationSaved);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
+        when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, email)).thenReturn(Optional.of(verificationSaved));
+
+        Verification verification = verificationService.create(VerificationType.REGISTRATION, email);
+        assertThat(verification).isEqualTo(verificationSaved);
+
+        verify(verificationRepository, times(2)).getByTypeAndEmail(VerificationType.REGISTRATION, email);
     }
 }
