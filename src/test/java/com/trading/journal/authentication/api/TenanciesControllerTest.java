@@ -4,6 +4,7 @@ import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.WithCustomMockUser;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
+import com.trading.journal.authentication.user.UserRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +55,8 @@ class TenanciesControllerTest {
     }
 
     @AfterAll
-    public static void shotDown(@Autowired TenancyRepository tenancyRepository) {
+    public static void shotDown(@Autowired TenancyRepository tenancyRepository, @Autowired UserRepository userRepository) {
+        userRepository.deleteAll();
         tenancyRepository.deleteAll();
     }
 
