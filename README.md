@@ -2,8 +2,6 @@
 
 ## Pending
 
-* Role tenancy (Company) Administrator
-  * Endpoint to retrieve tenancy data and limits for the organisation access
 * Api to retrieve verifications for one email (Admin access only)
 * Postman Collection with tests for all endpoints
 * Change me endpoint to update user data

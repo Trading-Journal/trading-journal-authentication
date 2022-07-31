@@ -9,10 +9,10 @@ import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.service.AuthorityService;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.UserRegistration;
+import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.service.AdminUserService;
 import com.trading.journal.authentication.user.service.UserService;
@@ -68,6 +68,9 @@ public class SecurityConfigurationTest {
     @Autowired
     private WebTestClient webTestClient;
 
+    @Autowired
+    TenancyRepository tenancyRepository;
+
     @MockBean
     EmailSender emailSender;
 
@@ -78,7 +81,7 @@ public class SecurityConfigurationTest {
     }
 
     @AfterAll
-    public static void shutdown(@Autowired UserRepository userRepository, @Autowired TenancyRepository tenancyRepository){
+    public static void shutdown(@Autowired UserRepository userRepository, @Autowired TenancyRepository tenancyRepository) {
         userRepository.deleteAll();
         tenancyRepository.deleteAll();
     }
@@ -411,6 +414,79 @@ public class SecurityConfigurationTest {
         webTestClient
                 .get()
                 .uri("/admin/tenancies")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+
+    @DisplayName("Access Organisation Tenancy path with Organisation Admin user is granted")
+    @Test
+    void orgAdminAccessOrganisationTenancy() {
+        Tenancy tenancy = tenancyRepository.save(Tenancy.builder().name("admin-user").userLimit(10).userUsage(0).enabled(true).build());
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        userService.createNewUser(userRegistration, tenancy);
+        User user = userRepository.findByEmail("johnwick@mail.com").get();
+        user.enable();
+        user.verify();
+        user.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(user);
+        Authority authority = authorityService.getAuthoritiesByCategory(AuthorityCategory.ORGANISATION).get(0);
+        userAuthorityService.addAuthorities(user, new AuthoritiesChange(singletonList(authority.getName())));
+
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/organisation/tenancy/{id}")
+                        .build(tenancy.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    @DisplayName("Access Organisation users path with common user token fails")
+    @Test
+    void invalidAccessOrganisationTenancy() {
+        Tenancy tenancy = tenancyRepository.save(Tenancy.builder().name("common-user").userLimit(10).userUsage(0).enabled(true).build());
+
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        userService.createNewUser(userRegistration, tenancy);
+        User user = userRepository.findByEmail("johnwick@mail.com").get();
+        user.enable();
+        user.verify();
+        user.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(user);
+
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/organisation/tenancy/{id}")
+                        .build(tenancy.getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()
