@@ -4,12 +4,9 @@ import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.service.UserService;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
-import com.trading.journal.authentication.verification.Verification;
-import com.trading.journal.authentication.verification.VerificationRepository;
-import com.trading.journal.authentication.verification.VerificationStatus;
-import com.trading.journal.authentication.verification.VerificationType;
+import com.trading.journal.authentication.verification.*;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import com.trading.journal.authentication.verification.service.HashProvider;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
@@ -18,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -42,7 +40,7 @@ class VerificationServiceImplTest {
     VerificationEmailService verificationEmailService;
 
     @Mock
-    UserService userService;
+    UserRepository userRepository;
 
     @Mock
     HashProvider hashProvider;
@@ -57,25 +55,9 @@ class VerificationServiceImplTest {
     @Test
     void registrationVerification() {
         String hash = UUID.randomUUID().toString();
-        Verification verificationSaved = new Verification(1L,
-                "mail@mail.com",
-                VerificationType.REGISTRATION,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.REGISTRATION, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, user.getEmail())).thenReturn(Optional.empty());
         when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
@@ -88,18 +70,7 @@ class VerificationServiceImplTest {
     @DisplayName("Is verification REGISTRATION but email verification is not enabled then do not send")
     @Test
     void registrationVerificationNoSend() {
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, user.getEmail())).thenReturn(Optional.empty());
         when(verificationProperties.isEnabled()).thenReturn(false);
@@ -115,25 +86,9 @@ class VerificationServiceImplTest {
     @Test
     void changePasswordVerification() {
         String hash = UUID.randomUUID().toString();
-        Verification verificationSaved = new Verification(1L,
-                "mail@mail.com",
-                VerificationType.CHANGE_PASSWORD,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, user.getEmail())).thenReturn(Optional.empty());
         when(verificationProperties.isEnabled()).thenReturn(false);
@@ -148,25 +103,9 @@ class VerificationServiceImplTest {
     @Test
     void adminRegistrationVerification() {
         String hash = UUID.randomUUID().toString();
-        Verification verificationSaved = new Verification(1L,
-                "mail@mail.com",
-                VerificationType.ADMIN_REGISTRATION,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.ADMIN_REGISTRATION, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, user.getEmail())).thenReturn(Optional.empty());
         when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
@@ -179,18 +118,7 @@ class VerificationServiceImplTest {
     @DisplayName("Is verification ADMIN_REGISTRATION but email verification is not enabled then do not send")
     @Test
     void registrationAdminVerificationNoSend() {
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, user.getEmail())).thenReturn(Optional.empty());
         when(verificationProperties.isEnabled()).thenReturn(false);
@@ -206,25 +134,9 @@ class VerificationServiceImplTest {
     @Test
     void orgUserRegistrationVerification() {
         String hash = UUID.randomUUID().toString();
-        Verification verificationSaved = new Verification(1L,
-                "mail@mail.com",
-                VerificationType.NEW_ORGANISATION_USER,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.NEW_ORGANISATION_USER, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.NEW_ORGANISATION_USER, user.getEmail())).thenReturn(Optional.empty());
         when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
@@ -238,25 +150,9 @@ class VerificationServiceImplTest {
     @Test
     void registrationVerificationDeletePrevious() {
         String hash = UUID.randomUUID().toString();
-        Verification verificationSaved = new Verification(1L,
-                "mail@mail.com",
-                VerificationType.REGISTRATION,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.REGISTRATION, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, user.getEmail())).thenReturn(Optional.of(verificationSaved));
         when(verificationProperties.isEnabled()).thenReturn(true);
@@ -271,25 +167,9 @@ class VerificationServiceImplTest {
     @Test
     void changePasswordVerificationDeletePrevious() {
         String hash = UUID.randomUUID().toString();
-        Verification verificationSaved = new Verification(1L,
-                "mail@mail.com",
-                VerificationType.CHANGE_PASSWORD,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, user.getEmail())).thenReturn(Optional.of(verificationSaved));
         when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
@@ -303,25 +183,9 @@ class VerificationServiceImplTest {
     @Test
     void adminRegistrationVerificationDeletePrevious() {
         String hash = UUID.randomUUID().toString();
-        Verification verificationSaved = new Verification(1L,
-                "mail@mail.com",
-                VerificationType.ADMIN_REGISTRATION,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.ADMIN_REGISTRATION, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.ADMIN_REGISTRATION, user.getEmail())).thenReturn(Optional.of(verificationSaved));
         when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
@@ -335,25 +199,9 @@ class VerificationServiceImplTest {
     @Test
     void orgUserVerificationDeletePrevious() {
         String hash = UUID.randomUUID().toString();
-        Verification verificationSaved = new Verification(1L,
-                "mail@mail.com",
-                VerificationType.NEW_ORGANISATION_USER,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.NEW_ORGANISATION_USER, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.NEW_ORGANISATION_USER, user.getEmail())).thenReturn(Optional.of(verificationSaved));
         when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
@@ -368,12 +216,7 @@ class VerificationServiceImplTest {
     void retrieveRegistration() {
         String hash = "12456";
         String email = "mail@mail.com";
-        Verification verificationSaved = new Verification(1L,
-                email,
-                VerificationType.REGISTRATION,
-                VerificationStatus.PENDING,
-                hash,
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, email, VerificationType.REGISTRATION, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
         when(hashProvider.readHashValue(hash)).thenReturn(email);
         when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Optional.of(verificationSaved));
@@ -387,12 +230,7 @@ class VerificationServiceImplTest {
     void retrieveChangePassword() {
         String hash = "12456";
         String email = "mail@mail.com";
-        Verification verificationSaved = new Verification(1L,
-                email,
-                VerificationType.CHANGE_PASSWORD,
-                VerificationStatus.PENDING,
-                hash,
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, email, VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
         when(hashProvider.readHashValue(hash)).thenReturn(email);
         when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Optional.of(verificationSaved));
@@ -407,12 +245,7 @@ class VerificationServiceImplTest {
     void retrieveAdminRegistration() {
         String hash = "12456";
         String email = "mail@mail.com";
-        Verification verificationSaved = new Verification(1L,
-                email,
-                VerificationType.ADMIN_REGISTRATION,
-                VerificationStatus.PENDING,
-                hash,
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, email, VerificationType.ADMIN_REGISTRATION, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
         when(hashProvider.readHashValue(hash)).thenReturn(email);
         when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Optional.of(verificationSaved));
@@ -427,12 +260,7 @@ class VerificationServiceImplTest {
     void retrieveNEW_ORGANISATION_USER() {
         String hash = "12456";
         String email = "mail@mail.com";
-        Verification verificationSaved = new Verification(1L,
-                email,
-                VerificationType.NEW_ORGANISATION_USER,
-                VerificationStatus.PENDING,
-                hash,
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, email, VerificationType.NEW_ORGANISATION_USER, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
         when(hashProvider.readHashValue(hash)).thenReturn(email);
         when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Optional.of(verificationSaved));
@@ -458,18 +286,13 @@ class VerificationServiceImplTest {
     @DisplayName("Given Verification REGISTRATION delete it when Verify")
     @Test
     void deleteRegistration() {
-        Verification verificationSaved = new Verification(1L,
-                "mail@mail.com",
-                VerificationType.REGISTRATION,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.REGISTRATION, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
         doNothing().when(verificationRepository).delete(verificationSaved);
 
         verificationService.verify(verificationSaved);
 
-        verify(userService, never()).getUserByEmail(anyString());
+        verify(userRepository, never()).findByEmail(anyString());
         verify(hashProvider, never()).generateHash(anyString());
         verify(verificationRepository, never()).save(any());
         verify(verificationEmailService, never()).sendEmail(any(), any());
@@ -478,18 +301,13 @@ class VerificationServiceImplTest {
     @DisplayName("Given Verification CHANGE_PASSWORD delete it when Verify")
     @Test
     void deleteChangePassword() {
-        Verification verificationSaved = new Verification(1L,
-                "mail@mail.com",
-                VerificationType.CHANGE_PASSWORD,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
         doNothing().when(verificationRepository).delete(verificationSaved);
 
         verificationService.verify(verificationSaved);
 
-        verify(userService, never()).getUserByEmail(anyString());
+        verify(userRepository, never()).findByEmail(anyString());
         verify(hashProvider, never()).generateHash(anyString());
         verify(verificationRepository, never()).save(any());
         verify(verificationEmailService, never()).sendEmail(any(), any());
@@ -501,34 +319,13 @@ class VerificationServiceImplTest {
         String hash = UUID.randomUUID().toString();
         String email = "mail@mail.com";
 
-        Verification adminRegistration = new Verification(1L,
-                email,
-                VerificationType.ADMIN_REGISTRATION,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification adminRegistration = new Verification(1L, email, VerificationType.ADMIN_REGISTRATION, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        Verification changerPassword = new Verification(1L,
-                email,
-                VerificationType.CHANGE_PASSWORD,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification changerPassword = new Verification(1L, email, VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(false)
-                .verified(false)
-                .createdAt(LocalDateTime.now())
-                .authorities(emptyList())
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(false).verified(false).createdAt(LocalDateTime.now()).authorities(emptyList()).build();
 
-        when(userService.getUserByEmail(email)).thenReturn(user);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(Optional.empty());
         when(hashProvider.generateHash(email)).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(changerPassword);
@@ -544,34 +341,13 @@ class VerificationServiceImplTest {
         String hash = UUID.randomUUID().toString();
         String email = "mail@mail.com";
 
-        Verification adminRegistration = new Verification(1L,
-                email,
-                VerificationType.NEW_ORGANISATION_USER,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification adminRegistration = new Verification(1L, email, VerificationType.NEW_ORGANISATION_USER, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        Verification changerPassword = new Verification(1L,
-                email,
-                VerificationType.CHANGE_PASSWORD,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification changerPassword = new Verification(1L, email, VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(false)
-                .verified(false)
-                .createdAt(LocalDateTime.now())
-                .authorities(emptyList())
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(false).verified(false).createdAt(LocalDateTime.now()).authorities(emptyList()).build();
 
-        when(userService.getUserByEmail(email)).thenReturn(user);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email)).thenReturn(Optional.empty());
         when(hashProvider.generateHash(email)).thenReturn(hash);
         when(verificationRepository.save(any())).thenReturn(changerPassword);
@@ -586,18 +362,7 @@ class VerificationServiceImplTest {
     void getByEmail() {
         String email = "mail@mail.com";
 
-        List<Verification> verifications = asList(new Verification(1L,
-                        email,
-                        VerificationType.REGISTRATION,
-                        VerificationStatus.ERROR,
-                        "12456",
-                        LocalDateTime.now()),
-                new Verification(1L,
-                        email,
-                        VerificationType.NEW_ORGANISATION_USER,
-                        VerificationStatus.PENDING,
-                        "12456",
-                        LocalDateTime.now()));
+        List<Verification> verifications = asList(new Verification(1L, email, VerificationType.REGISTRATION, VerificationStatus.ERROR, "12456", LocalDateTime.now()), new Verification(1L, email, VerificationType.NEW_ORGANISATION_USER, VerificationStatus.PENDING, "12456", LocalDateTime.now()));
 
         when(verificationRepository.getByEmail(email)).thenReturn(verifications);
 
@@ -616,32 +381,16 @@ class VerificationServiceImplTest {
         assertThat(byEmail).isEmpty();
     }
 
-    @DisplayName("Create  new verification given Type and Email")
+    @DisplayName("Create new verification given Type and Email")
     @Test
     void createByEmail() {
         String email = "mail@mail.com";
 
-        User user = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email(email)
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .authorities(emptyList())
-                .build();
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email(email).enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(emptyList()).build();
 
-        when(userService.getUserByEmail(email)).thenReturn(user);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
-        Verification verificationSaved = new Verification(1L,
-                email,
-                VerificationType.NEW_ORGANISATION_USER,
-                VerificationStatus.PENDING,
-                "12456",
-                LocalDateTime.now());
+        Verification verificationSaved = new Verification(1L, email, VerificationType.NEW_ORGANISATION_USER, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, email)).thenReturn(Optional.empty());
         when(hashProvider.generateHash(user.getEmail())).thenReturn("12456");
@@ -649,9 +398,28 @@ class VerificationServiceImplTest {
         doNothing().when(verificationEmailService).sendEmail(any(), any());
         when(verificationRepository.getByTypeAndEmail(VerificationType.REGISTRATION, email)).thenReturn(Optional.of(verificationSaved));
 
-        Verification verification = verificationService.create(VerificationType.REGISTRATION, email);
+        VerificationRequest request = new VerificationRequest(email, VerificationType.REGISTRATION);
+        Verification verification = verificationService.create(request);
         assertThat(verification).isEqualTo(verificationSaved);
 
         verify(verificationRepository, times(2)).getByTypeAndEmail(VerificationType.REGISTRATION, email);
+    }
+
+    @DisplayName("Create new verification given Type and Email, email not found return exception")
+    @Test
+    void createByEmailException() {
+        String email = "mail@mail.com";
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        VerificationRequest request = new VerificationRequest(email, VerificationType.REGISTRATION);
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> verificationService.create(request));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getStatusText()).isEqualTo("User mail@mail.com does not exist");
+
+        verify(verificationRepository, never()).getByTypeAndEmail(any(), any());
+        verify(hashProvider, never()).generateHash(anyString());
+        verify(verificationRepository, never()).save(any());
+        verify(verificationEmailService, never()).sendEmail(any(), any());
     }
 }

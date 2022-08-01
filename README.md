@@ -2,8 +2,6 @@
 
 ## Pending
 
-* Api to retrieve verifications for one email (Admin access only)
-  * Create a new verification for an email (just in case something fail) (Admin access only)
 * Postman Collection with tests for all endpoints
 * Change me endpoint to update user data
 * Authorities endpoints

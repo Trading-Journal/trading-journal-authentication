@@ -2,6 +2,7 @@ package com.trading.journal.authentication.verification.service;
 
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.verification.Verification;
+import com.trading.journal.authentication.verification.VerificationRequest;
 import com.trading.journal.authentication.verification.VerificationType;
 
 import java.util.List;
@@ -16,5 +17,5 @@ public interface VerificationService {
 
     List<Verification> getByEmail(String email);
 
-    Verification create(VerificationType verificationType, String email);
+    Verification create(VerificationRequest verificationRequest);
 }
