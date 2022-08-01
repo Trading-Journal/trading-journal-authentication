@@ -4,6 +4,8 @@ import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.tenancy.Tenancy;
 
+import java.util.Optional;
+
 public interface TenancyService {
     PageResponse<Tenancy> getAll(PageableRequest pageRequest);
 
@@ -22,4 +24,8 @@ public interface TenancyService {
     Tenancy increaseUsage(Long id);
 
     boolean increaseUsageAllowed(Long id);
+
+    Optional<Tenancy> getByEmail(String email);
+
+    void delete(Long id);
 }

@@ -1,5 +1,7 @@
 package com.trading.journal.authentication.verification;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.trading.journal.authentication.jwt.helper.DateHelper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,6 +38,7 @@ public class Verification {
     @NotBlank
     private String hash;
 
+    @JsonFormat(pattern = DateHelper.DATE_TIME_FORMAT)
     private LocalDateTime lastChange;
 
     public Verification renew(String hash) {

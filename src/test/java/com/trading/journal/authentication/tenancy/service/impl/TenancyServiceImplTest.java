@@ -5,6 +5,8 @@ import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
+import com.trading.journal.authentication.user.User;
+import com.trading.journal.authentication.user.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +18,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -28,6 +31,9 @@ class TenancyServiceImplTest {
 
     @Mock
     TenancyRepository tenancyRepository;
+
+    @Mock
+    UserRepository userRepository;
 
     @InjectMocks
     TenancyServiceImpl tenancyService;
@@ -291,5 +297,56 @@ class TenancyServiceImplTest {
         assertThat(exception.getStatusText()).isEqualTo("Tenancy id not found");
 
         verify(tenancyRepository, never()).save(any());
+    }
+
+    @DisplayName("Find tenancy by user email return tenancy")
+    @Test
+    void findByEmail() {
+        String email = "mail@mail.com";
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(User.builder().tenancy(
+                Tenancy.builder().name("tenancy").build()
+        ).build()));
+
+        Optional<Tenancy> tenancy = tenancyService.getByEmail(email);
+        assertThat(tenancy).isPresent();
+        assertThat(tenancy.get().getName()).isEqualTo("tenancy");
+    }
+
+    @DisplayName("Find tenancy by user email not found")
+    @Test
+    void findByEmailEmpty() {
+        String email = "mail@mail.com";
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        Optional<Tenancy> tenancy = tenancyService.getByEmail(email);
+        assertThat(tenancy).isNotPresent();
+    }
+
+    @DisplayName("Delete tenancy by id")
+    @Test
+    void deleteTenancy() {
+        Long tenancyId = 10L;
+
+        when(userRepository.findByTenancyId(tenancyId)).thenReturn(emptyList());
+
+        tenancyService.delete(tenancyId);
+
+        verify(tenancyRepository).deleteById(tenancyId);
+    }
+
+    @DisplayName("Delete tenancy by id if there is users return exception")
+    @Test
+    void deleteTenancyError() {
+        Long tenancyId = 10L;
+
+        when(userRepository.findByTenancyId(tenancyId)).thenReturn(
+                singletonList(User.builder().tenancy(Tenancy.builder().name("tenancy").build()).build())
+        );
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.delete(tenancyId));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(exception.getStatusText()).isEqualTo("Delete this tenancy not allowed because there are users using it");
+
+        verify(tenancyRepository, never()).deleteById(anyLong());
     }
 }

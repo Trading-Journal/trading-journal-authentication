@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.springframework.http.ResponseEntity.notFound;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
@@ -48,5 +49,18 @@ public class TenanciesController implements TenanciesApi {
     @Override
     public ResponseEntity<Tenancy> limit(Long id, Integer limit) {
         return ok(tenancyService.newLimit(id, limit));
+    }
+
+    @Override
+    public ResponseEntity<Tenancy> getByEmail(String email) {
+        return tenancyService.getByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(notFound().build());
+    }
+
+    @Override
+    public ResponseEntity<Void> delete(Long id) {
+        tenancyService.delete(id);
+        return ok().build();
     }
 }

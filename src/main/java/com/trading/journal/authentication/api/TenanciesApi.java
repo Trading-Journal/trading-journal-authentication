@@ -44,4 +44,16 @@ public interface TenanciesApi {
     @PatchMapping("/{id}/limit/{limit}")
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Tenancy> limit(@PathVariable Long id, @PathVariable Integer limit);
+
+    @ApiOperation(notes = "Get Tenancy by user email", value = "Get Tenancy by user email")
+    @ApiResponses(@ApiResponse(code = 200, message = "Tenancy retrieved"))
+    @GetMapping("/by-email/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<Tenancy> getByEmail(@PathVariable String email);
+
+    @ApiOperation(notes = "Delete tenancy by id", value = "Delete tenancy by id only if there is not user there")
+    @ApiResponses(@ApiResponse(code = 200, message = "Tenancy Deleted"))
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<Void> delete(@PathVariable Long id);
 }

@@ -44,7 +44,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 accessToken.token(),
                 refreshToken.token(),
                 accessToken.issuedAt(),
-                applicationUser.getFirstName());
+                applicationUser.getUserName());
     }
 
     @Override
@@ -58,7 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 accessToken.token(),
                 refreshToken,
                 accessToken.issuedAt(),
-                applicationUser.getFirstName());
+                applicationUser.getUserName());
     }
 
     private String validateRefreshTokenAndGetUserName(String refreshToken) {
