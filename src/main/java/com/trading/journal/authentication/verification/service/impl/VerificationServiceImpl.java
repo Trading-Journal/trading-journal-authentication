@@ -2,17 +2,20 @@ package com.trading.journal.authentication.verification.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.service.UserService;
+import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.verification.Verification;
+import com.trading.journal.authentication.verification.VerificationRepository;
+import com.trading.journal.authentication.verification.VerificationRequest;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import com.trading.journal.authentication.verification.service.HashProvider;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
-import com.trading.journal.authentication.verification.VerificationRepository;
 import com.trading.journal.authentication.verification.service.VerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +24,7 @@ public class VerificationServiceImpl implements VerificationService {
     private final VerificationRepository verificationRepository;
     private final VerificationEmailService verificationEmailService;
 
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     private final HashProvider hashProvider;
 
@@ -31,7 +34,7 @@ public class VerificationServiceImpl implements VerificationService {
     public void send(VerificationType verificationType, User applicationUser) {
         Verification verification = verificationRepository.getByTypeAndEmail(verificationType, applicationUser.getEmail())
                 .orElseGet(() -> Verification.builder().email(applicationUser.getEmail()).type(verificationType).build());
-        if(doNotSendVerification(verification)) {
+        if (doNotSendVerification(verification)) {
             return;
         }
         verification = verification.renew(hashProvider.generateHash(verification.getEmail()));
@@ -54,9 +57,25 @@ public class VerificationServiceImpl implements VerificationService {
         verificationRepository.delete(verification);
     }
 
+    @Override
+    public List<Verification> getByEmail(String email) {
+        return verificationRepository.getByEmail(email);
+    }
+
+    @Override
+    public Verification create(VerificationRequest verificationRequest) {
+        User user = userRepository.findByEmail(verificationRequest.email())
+                .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, String.format("User %s does not exist", verificationRequest.email())));
+
+        this.send(verificationRequest.verificationType(), user);
+        return verificationRepository.getByTypeAndEmail(verificationRequest.verificationType(), verificationRequest.email())
+                .orElseThrow(() -> new ApplicationException("Verification not created"));
+    }
+
     private void sendChangePassword(Verification verification) {
-        User applicationUser = userService.getUserByEmail(verification.getEmail());
-        this.send(VerificationType.CHANGE_PASSWORD, applicationUser);
+        User user = userRepository.findByEmail(verification.getEmail())
+                .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, String.format("User %s does not exist", verification.getEmail())));
+        this.send(VerificationType.CHANGE_PASSWORD, user);
     }
 
     private static boolean shouldSendChangePassword(Verification verification) {

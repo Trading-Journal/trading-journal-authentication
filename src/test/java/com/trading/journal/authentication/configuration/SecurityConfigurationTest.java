@@ -17,6 +17,10 @@ import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.service.AdminUserService;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import com.trading.journal.authentication.verification.Verification;
+import com.trading.journal.authentication.verification.VerificationRepository;
+import com.trading.journal.authentication.verification.VerificationStatus;
+import com.trading.journal.authentication.verification.VerificationType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +36,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
@@ -66,6 +72,9 @@ public class SecurityConfigurationTest {
     PasswordEncoder encoder;
 
     @Autowired
+    VerificationRepository verificationRepository;
+
+    @Autowired
     private WebTestClient webTestClient;
 
     @Autowired
@@ -78,6 +87,7 @@ public class SecurityConfigurationTest {
     public void setUp() {
         doNothing().when(emailSender).send(any());
         userRepository.deleteAll();
+        tenancyRepository.deleteAll();
     }
 
     @AfterAll
@@ -487,6 +497,128 @@ public class SecurityConfigurationTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/organisation/tenancy/{id}")
                         .build(tenancy.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+
+    @DisplayName("Access Verifications path with Admin user is granted")
+    @Test
+    void adminAccessVerifications() {
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        adminUserService.createAdmin(userRegistration);
+
+        User applicationUser = userRepository.findByEmail("johnwick@mail.com").get();
+        applicationUser.enable();
+        applicationUser.verify();
+        applicationUser.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(applicationUser);
+
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        String email = "mail@mail.com";
+
+        verificationRepository.save(Verification.builder()
+                .email(email)
+                .type(VerificationType.REGISTRATION)
+                .hash(UUID.randomUUID().toString())
+                .lastChange(LocalDateTime.now())
+                .status(VerificationStatus.DONE)
+                .build());
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/verifications/{email}")
+                        .build(email))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    @DisplayName("Access Verifications path with Common user is denied")
+    @Test
+    void userAccessVerificationsDenied() {
+        Tenancy tenancy = tenancyRepository.save(Tenancy.builder().name("common-user").userLimit(10).userUsage(0).enabled(true).build());
+
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        userService.createNewUser(userRegistration, tenancy);
+        User user = userRepository.findByEmail("johnwick@mail.com").get();
+        user.enable();
+        user.verify();
+        user.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(user);
+
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        String email = "mail@mail.com";
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/verifications/{email}")
+                        .build(email))
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponse.accessToken())
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+
+    @DisplayName("Access Verifications path with Organisation Admin user is denied")
+    @Test
+    void orgUserAccessVerificationsDenied() {
+        Tenancy tenancy = tenancyRepository.save(Tenancy.builder().name("admin-user").userLimit(10).userUsage(0).enabled(true).build());
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "John",
+                "Wick",
+                "johnwick",
+                "johnwick@mail.com",
+                "dad231#$#4",
+                "dad231#$#4");
+        userService.createNewUser(userRegistration, tenancy);
+        User user = userRepository.findByEmail("johnwick@mail.com").get();
+        user.enable();
+        user.verify();
+        user.changePassword(encoder.encode("dad231#$#4"));
+        userRepository.save(user);
+        Authority authority = authorityService.getAuthoritiesByCategory(AuthorityCategory.ORGANISATION).get(0);
+        userAuthorityService.addAuthorities(user, new AuthoritiesChange(singletonList(authority.getName())));
+
+        Login login = new Login(userRegistration.getEmail(), userRegistration.getPassword());
+        LoginResponse loginResponse = authenticationService.signIn(login);
+        assertThat(loginResponse).isNotNull();
+
+        String email = "mail@mail.com";
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/verifications/{email}")
+                        .build(email))
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()

@@ -13,4 +13,6 @@ public interface VerificationRepository extends CrudRepository<Verification, Lon
     Optional<Verification> getByHashAndEmail(String hash, String email);
 
     Optional<Verification> getByTypeAndEmail(VerificationType type, String email);
+
+    List<Verification> getByEmail(String email);
 }
