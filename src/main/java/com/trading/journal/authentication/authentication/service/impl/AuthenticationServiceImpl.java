@@ -11,13 +11,13 @@ import com.trading.journal.authentication.jwt.helper.JwtConstants;
 import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
@@ -35,33 +35,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public LoginResponse signIn(@Valid Login login) {
         Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password()));
         ContextUser principal = (ContextUser) authenticate.getPrincipal();
-        User applicationUser = userService.getUserByEmail(principal.email());
+        User user = userService.getUserByEmail(principal.email())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        TokenData accessToken = jwtTokenProvider.generateAccessToken(applicationUser);
-        TokenData refreshToken = jwtTokenProvider.generateRefreshToken(applicationUser);
+        TokenData accessToken = jwtTokenProvider.generateAccessToken(user);
+        TokenData refreshToken = jwtTokenProvider.generateRefreshToken(user);
         return new LoginResponse(
                 JwtConstants.TOKEN_TYPE,
                 accessToken.token(),
                 refreshToken.token(),
                 accessToken.issuedAt(),
-                applicationUser.getUserName());
+                user.getUserName());
     }
 
     @Override
     public LoginResponse refreshToken(String refreshToken) {
-        String userName = validateRefreshTokenAndGetUserName(refreshToken);
-        UserInfo userInfo = userService.getUserInfo(userName);
-        User applicationUser = userService.getUserByEmail(userInfo.getEmail());
-        TokenData accessToken = jwtTokenProvider.generateAccessToken(applicationUser);
+        String email = validateRefreshTokenAndGetUserEmail(refreshToken);
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        TokenData accessToken = jwtTokenProvider.generateAccessToken(user);
         return new LoginResponse(
                 JwtConstants.TOKEN_TYPE,
                 accessToken.token(),
                 refreshToken,
                 accessToken.issuedAt(),
-                applicationUser.getUserName());
+                user.getUserName());
     }
 
-    private String validateRefreshTokenAndGetUserName(String refreshToken) {
+    private String validateRefreshTokenAndGetUserEmail(String refreshToken) {
         if (!jwtTokenReader.isTokenValid(refreshToken)) {
             throw new ApplicationException(HttpStatus.UNAUTHORIZED, "Refresh token is expired");
         }

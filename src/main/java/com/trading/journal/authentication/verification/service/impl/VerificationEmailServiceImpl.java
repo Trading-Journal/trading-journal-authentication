@@ -55,6 +55,11 @@ public class VerificationEmailServiceImpl implements VerificationEmailService {
                     VerificationFields.NEW_ORGANISATION_USER.getValue(),
                     getEmailFields(name, hostProperties.getVerificationPage(), verification),
                     singletonList(applicationUser.getEmail()));
+            case DELETE_ME -> new EmailRequest(
+                    "Voçê solicitou para ser removido como usuário do sistema",
+                    VerificationFields.DELETE_ME.getValue(),
+                    getEmailFields(name, hostProperties.getVerificationPage(), verification),
+                    singletonList(applicationUser.getEmail()));
         };
     }
 

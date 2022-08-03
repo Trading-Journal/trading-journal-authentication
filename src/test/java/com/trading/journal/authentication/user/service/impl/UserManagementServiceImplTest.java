@@ -15,6 +15,7 @@ import com.trading.journal.authentication.user.UserManagementRepository;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationService;
 import org.junit.jupiter.api.DisplayName;
@@ -57,7 +58,7 @@ class UserManagementServiceImplTest {
     VerificationService verificationService;
 
     @InjectMocks
-    UserManagementServiceImpl applicationUserManagementService;
+    UserManagementServiceImpl userManagementService;
 
     @DisplayName("Given page request page users query without filter")
     @Test
@@ -80,7 +81,7 @@ class UserManagementServiceImplTest {
                 pageableRequest.pageable(),
                 2
         ));
-        PageResponse<UserInfo> response = applicationUserManagementService.getAll(10L, pageableRequest);
+        PageResponse<UserInfo> response = userManagementService.getAll(10L, pageableRequest);
         assertThat(response.items()).hasSize(1);
         assertThat(response.totalPages()).isEqualTo(1);
         assertThat(response.totalItems()).isEqualTo(1L);
@@ -109,7 +110,7 @@ class UserManagementServiceImplTest {
                 2
         ));
 
-        PageResponse<UserInfo> response = applicationUserManagementService.getAll(1L, pageableRequest);
+        PageResponse<UserInfo> response = userManagementService.getAll(1L, pageableRequest);
         assertThat(response.items()).hasSize(1);
         assertThat(response.totalPages()).isEqualTo(1);
         assertThat(response.totalItems()).isEqualTo(1L);
@@ -133,7 +134,7 @@ class UserManagementServiceImplTest {
                 .authorities(emptyList())
                 .build()));
 
-        UserInfo userInfo = applicationUserManagementService.getUserById(10L, userId);
+        UserInfo userInfo = userManagementService.getUserById(10L, userId);
         assertThat(userInfo).isNotNull();
     }
 
@@ -143,9 +144,9 @@ class UserManagementServiceImplTest {
         Long userId = 10L;
         when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.getUserById(10L, userId));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> userManagementService.getUserById(10L, userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(exception.getStatusText()).isEqualTo("User id not found");
+        assertThat(exception.getStatusText()).isEqualTo("User not found");
     }
 
     @DisplayName("Disable user successfully")
@@ -169,7 +170,7 @@ class UserManagementServiceImplTest {
 
         when(userManagementRepository.save(argThat(user -> user.getEnabled().equals(false)))).thenReturn(applicationUser);
 
-        applicationUserManagementService.disableUserById(10L, userId);
+        userManagementService.disableUserById(10L, userId);
     }
 
     @DisplayName("Disable user that does not exists return not found exception")
@@ -178,9 +179,9 @@ class UserManagementServiceImplTest {
         Long userId = 10L;
         when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.disableUserById(10L, userId));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> userManagementService.disableUserById(10L, userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(exception.getStatusText()).isEqualTo("User id not found");
+        assertThat(exception.getStatusText()).isEqualTo("User not found");
     }
 
     @DisplayName("Enable user successfully")
@@ -204,7 +205,7 @@ class UserManagementServiceImplTest {
 
         when(userManagementRepository.save(argThat(user -> user.getEnabled().equals(true)))).thenReturn(applicationUser);
 
-        applicationUserManagementService.enableUserById(10L, userId);
+        userManagementService.enableUserById(10L, userId);
     }
 
     @DisplayName("Enable user that does not exists return not found exception")
@@ -213,9 +214,9 @@ class UserManagementServiceImplTest {
         Long userId = 10L;
         when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.enableUserById(10L, userId));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> userManagementService.enableUserById(10L, userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(exception.getStatusText()).isEqualTo("User id not found");
+        assertThat(exception.getStatusText()).isEqualTo("User not found");
     }
 
     @DisplayName("delete user successfully")
@@ -238,7 +239,7 @@ class UserManagementServiceImplTest {
         when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.of(applicationUser));
         when(tenancyService.lowerUsage(10L)).thenReturn(Tenancy.builder().build());
 
-        applicationUserManagementService.deleteUserById(10L, userId);
+        userManagementService.deleteUserById(10L, userId);
 
         verify(userManagementRepository).delete(applicationUser);
     }
@@ -249,9 +250,9 @@ class UserManagementServiceImplTest {
         Long userId = 10L;
         when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserManagementService.deleteUserById(10L, userId));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> userManagementService.deleteUserById(10L, userId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(exception.getStatusText()).isEqualTo("User id not found");
+        assertThat(exception.getStatusText()).isEqualTo("User not found");
 
         verify(tenancyService, never()).lowerUsage(anyLong());
     }
@@ -283,7 +284,7 @@ class UserManagementServiceImplTest {
         when(userAuthorityService.addAuthorities(applicationUser, change))
                 .thenReturn(userAuthorities);
 
-        List<UserAuthority> actualAuthorities = applicationUserManagementService.addAuthorities(10L, userId, change);
+        List<UserAuthority> actualAuthorities = userManagementService.addAuthorities(10L, userId, change);
         assertThat(actualAuthorities).hasSize(2);
     }
 
@@ -294,10 +295,10 @@ class UserManagementServiceImplTest {
         when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class,
-                () -> applicationUserManagementService.addAuthorities(10L, userId, new AuthoritiesChange(singletonList("USER_ROLE")))
+                () -> userManagementService.addAuthorities(10L, userId, new AuthoritiesChange(singletonList("USER_ROLE")))
         );
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(exception.getStatusText()).isEqualTo("User id not found");
+        assertThat(exception.getStatusText()).isEqualTo("User not found");
     }
 
     @DisplayName("Remove user authorities successfully")
@@ -329,7 +330,7 @@ class UserManagementServiceImplTest {
         when(userAuthorityService.deleteAuthorities(applicationUser, change))
                 .thenReturn(userAuthorities);
 
-        List<UserAuthority> actualAuthorities = applicationUserManagementService.deleteAuthorities(10L, userId, change);
+        List<UserAuthority> actualAuthorities = userManagementService.deleteAuthorities(10L, userId, change);
         assertThat(actualAuthorities).hasSize(1);
     }
 
@@ -340,10 +341,10 @@ class UserManagementServiceImplTest {
         when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.empty());
 
         ApplicationException exception = assertThrows(ApplicationException.class,
-                () -> applicationUserManagementService.deleteAuthorities(10L, userId, new AuthoritiesChange(singletonList("USER_ROLE")))
+                () -> userManagementService.deleteAuthorities(10L, userId, new AuthoritiesChange(singletonList("USER_ROLE")))
         );
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(exception.getStatusText()).isEqualTo("User id not found");
+        assertThat(exception.getStatusText()).isEqualTo("User not found");
     }
 
     @DisplayName("Create a new user when tenancy is not found thrown an exception")
@@ -353,7 +354,7 @@ class UserManagementServiceImplTest {
         when(tenancyService.getById(tenancyId)).thenThrow(new ApplicationException(""));
 
         assertThrows(ApplicationException.class,
-                () -> applicationUserManagementService.create(tenancyId, UserRegistration.builder().build()));
+                () -> userManagementService.create(tenancyId, UserRegistration.builder().build()));
 
         verify(userService, never()).createNewUser(any(), any());
         verify(verificationService, never()).send(any(), any());
@@ -367,7 +368,7 @@ class UserManagementServiceImplTest {
         when(tenancyService.getById(tenancyId)).thenReturn(Tenancy.builder().userUsage(10).userLimit(10).build());
 
         ApplicationException exception = assertThrows(ApplicationException.class,
-                () -> applicationUserManagementService.create(tenancyId, UserRegistration.builder().build()));
+                () -> userManagementService.create(tenancyId, UserRegistration.builder().build()));
 
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("Tenancy has reach its user limit");
@@ -390,8 +391,190 @@ class UserManagementServiceImplTest {
         doNothing().when(verificationService).send(VerificationType.NEW_ORGANISATION_USER, user);
         when(tenancyService.increaseUsage(1L)).thenReturn(tenancy);
 
-        UserInfo userInfo = applicationUserManagementService.create(1L, userRegistration);
+        UserInfo userInfo = userManagementService.create(1L, userRegistration);
 
         assertThat(userInfo.getEmail()).isEqualTo("mail@mail.com");
+    }
+
+    @DisplayName("Request to delete me")
+    @Test
+    void requestToDeleteMe() {
+        String email = "mail@mail.com";
+        Long tenancyId = 10L;
+        User user = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+
+        when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.of(user));
+        doNothing().when(verificationService).send(VerificationType.DELETE_ME, user);
+
+        userManagementService.deleteMeRequest(tenancyId, email);
+    }
+
+    @DisplayName("Request to delete me email not found throw an exception")
+    @Test
+    void requestToDeleteMeError() {
+        String email = "mail@mail.com";
+        Long tenancyId = 10L;
+        when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.empty());
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () ->
+                userManagementService.deleteMeRequest(tenancyId, email));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("Email mail@mail.com not found");
+
+        verify(verificationService, never()).send(any(), any());
+    }
+
+    @DisplayName("Delete me retrieve hash exception")
+    @Test
+    void deleteMeRetrieveHash() {
+        when(verificationService.retrieve(anyString())).thenThrow(new ApplicationException(HttpStatus.BAD_REQUEST, "Request is invalid"));
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () ->
+                userManagementService.deleteMe(10L, "mail@mail.com", "hash"));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("Request is invalid");
+
+        verify(userManagementRepository, never()).findByTenancyIdAndEmail(any(), any());
+        verify(userManagementRepository, never()).delete(any());
+        verify(tenancyService, never()).lowerUsage(anyLong());
+        verify(verificationService, never()).verify(any());
+        verify(userService, never()).existsByTenancyId(anyLong());
+        verify(tenancyService, never()).delete(anyLong());
+    }
+
+    @DisplayName("Delete me email and verification email are different")
+    @Test
+    void deleteMeDifferentEmails() {
+        String email = "mail@mail.com";
+
+        Verification verification = Verification.builder()
+                .hash("123")
+                .email("othermail@mail.com")
+                .build();
+        when(verificationService.retrieve(anyString())).thenReturn(verification);
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () ->
+                userManagementService.deleteMe(10L, email, "hash"));
+
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("Verification does not exist or is invalid");
+
+        verify(userManagementRepository, never()).findByTenancyIdAndEmail(any(), any());
+        verify(userManagementRepository, never()).delete(any());
+        verify(tenancyService, never()).lowerUsage(anyLong());
+        verify(verificationService, never()).verify(any());
+        verify(userService, never()).existsByTenancyId(anyLong());
+        verify(tenancyService, never()).delete(anyLong());
+    }
+
+    @DisplayName("Delete me email not found")
+    @Test
+    void deleteMeEmailNotFound() {
+        String email = "mail@mail.com";
+        Long tenancyId = 10L;
+
+        Verification verification = Verification.builder()
+                .hash("123")
+                .email(email)
+                .build();
+        when(verificationService.retrieve(anyString())).thenReturn(verification);
+
+        when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.empty());
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () ->
+                userManagementService.deleteMe(tenancyId, email, "hash"));
+
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("Email mail@mail.com not found");
+
+        verify(userManagementRepository, never()).delete(any());
+        verify(tenancyService, never()).lowerUsage(anyLong());
+        verify(verificationService, never()).verify(any());
+        verify(userService, never()).existsByTenancyId(anyLong());
+        verify(tenancyService, never()).delete(anyLong());
+    }
+
+    @DisplayName("Delete me but do not delete tenancy because there is still users there")
+    @Test
+    void deleteMeNoTenancyDelete() {
+        String email = "mail@mail.com";
+        Long tenancyId = 10L;
+
+        Verification verification = Verification.builder()
+                .hash("123")
+                .email(email)
+                .build();
+        when(verificationService.retrieve(anyString())).thenReturn(verification);
+
+        User user = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+        when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.of(user));
+        when(userManagementRepository.findByTenancyIdAndId(tenancyId, 1L)).thenReturn(Optional.of(user));
+
+        doNothing().when(userManagementRepository).delete(user);
+        when(tenancyService.lowerUsage(tenancyId)).thenReturn(Tenancy.builder().build());
+        doNothing().when(verificationService).verify(verification);
+        when(userService.existsByTenancyId(tenancyId)).thenReturn(true);
+
+        userManagementService.deleteMe(tenancyId, email, "hash");
+
+        verify(tenancyService, never()).delete(anyLong());
+    }
+
+    @DisplayName("Delete me and delete tenancy")
+    @Test
+    void deleteMeAndTenancy() {
+        String email = "mail@mail.com";
+        Long tenancyId = 10L;
+
+        Verification verification = Verification.builder()
+                .hash("123")
+                .email(email)
+                .build();
+        when(verificationService.retrieve(anyString())).thenReturn(verification);
+
+        User user = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+        when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.of(user));
+        when(userManagementRepository.findByTenancyIdAndId(tenancyId, 1L)).thenReturn(Optional.of(user));
+
+        doNothing().when(userManagementRepository).delete(user);
+        when(tenancyService.lowerUsage(tenancyId)).thenReturn(Tenancy.builder().build());
+        doNothing().when(verificationService).verify(verification);
+        when(userService.existsByTenancyId(tenancyId)).thenReturn(false);
+        doNothing().when(tenancyService).delete(tenancyId);
+
+        userManagementService.deleteMe(tenancyId, email, "hash");
     }
 }

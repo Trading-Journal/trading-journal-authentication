@@ -146,6 +146,22 @@ class VerificationServiceImplTest {
         verificationService.send(VerificationType.NEW_ORGANISATION_USER, user);
     }
 
+    @DisplayName("Given verification type DELETE_ME and application user send the verification to user email and never execute delete because previous verification did not exist")
+    @Test
+    void DELETE_MEVerification() {
+        String hash = UUID.randomUUID().toString();
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.DELETE_ME, VerificationStatus.PENDING, "12456", LocalDateTime.now());
+
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.DELETE_ME, user.getEmail())).thenReturn(Optional.empty());
+        when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
+        when(verificationRepository.save(any())).thenReturn(verificationSaved);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
+
+        verificationService.send(VerificationType.DELETE_ME, user);
+    }
+
     @DisplayName("Given verification type REGISTRATION and application user send the verification to user email and execute delete because previous verification did exist")
     @Test
     void registrationVerificationDeletePrevious() {
@@ -161,6 +177,23 @@ class VerificationServiceImplTest {
         doNothing().when(verificationEmailService).sendEmail(any(), any());
 
         verificationService.send(VerificationType.REGISTRATION, user);
+    }
+
+    @DisplayName("Given verification type DELETE_ME and application user send the verification to user email and execute delete because previous verification did exist")
+    @Test
+    void DELETE_MEVerificationDeletePrevious() {
+        String hash = UUID.randomUUID().toString();
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.DELETE_ME, VerificationStatus.PENDING, "12456", LocalDateTime.now());
+
+        User user = User.builder().id(1L).userName("UserName").password("password").firstName("lastName").lastName("Wick").email("mail@mail.com").enabled(true).verified(true).createdAt(LocalDateTime.now()).authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")))).build();
+
+        when(verificationRepository.getByTypeAndEmail(VerificationType.DELETE_ME, user.getEmail())).thenReturn(Optional.of(verificationSaved));
+        when(verificationProperties.isEnabled()).thenReturn(true);
+        when(hashProvider.generateHash(user.getEmail())).thenReturn(hash);
+        when(verificationRepository.save(any())).thenReturn(verificationSaved);
+        doNothing().when(verificationEmailService).sendEmail(any(), any());
+
+        verificationService.send(VerificationType.DELETE_ME, user);
     }
 
     @DisplayName("Given verification type CHANGE_PASSWORD and application user send the verification to user email and execute delete because previous verification did exist")
@@ -270,6 +303,21 @@ class VerificationServiceImplTest {
         assertThat(verificationSaved).isEqualTo(verification);
     }
 
+    @DisplayName("Given hash and email find current Verification DELETE_ME")
+    @Test
+    void retrieveDELETE_ME() {
+        String hash = "12456";
+        String email = "mail@mail.com";
+        Verification verificationSaved = new Verification(1L, email, VerificationType.DELETE_ME, VerificationStatus.PENDING, hash, LocalDateTime.now());
+
+        when(hashProvider.readHashValue(hash)).thenReturn(email);
+        when(verificationRepository.getByHashAndEmail(hash, email)).thenReturn(Optional.of(verificationSaved));
+
+        Verification verification = verificationService.retrieve(hash);
+
+        assertThat(verificationSaved).isEqualTo(verification);
+    }
+
     @DisplayName("Given hash and email find current Verification not found return exception")
     @Test
     void retrieveException() {
@@ -302,6 +350,21 @@ class VerificationServiceImplTest {
     @Test
     void deleteChangePassword() {
         Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, "12456", LocalDateTime.now());
+
+        doNothing().when(verificationRepository).delete(verificationSaved);
+
+        verificationService.verify(verificationSaved);
+
+        verify(userRepository, never()).findByEmail(anyString());
+        verify(hashProvider, never()).generateHash(anyString());
+        verify(verificationRepository, never()).save(any());
+        verify(verificationEmailService, never()).sendEmail(any(), any());
+    }
+
+    @DisplayName("Given Verification DELETE_ME delete it when Verify")
+    @Test
+    void deleteDELETE_ME() {
+        Verification verificationSaved = new Verification(1L, "mail@mail.com", VerificationType.DELETE_ME, VerificationStatus.PENDING, "12456", LocalDateTime.now());
 
         doNothing().when(verificationRepository).delete(verificationSaved);
 

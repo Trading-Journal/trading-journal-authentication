@@ -128,11 +128,11 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isUnauthorized()
+                .isBadRequest()
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .value(response ->
-                        assertThat(response.get("error")).isEqualTo("User mail@mail.com does not exist")
+                        assertThat(response.get("error")).isEqualTo("User not found")
                 );
 
         Optional<Verification> verification = verificationRepository.getByTypeAndEmail(VerificationType.CHANGE_PASSWORD, email);

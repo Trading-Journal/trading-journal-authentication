@@ -1,13 +1,13 @@
 package com.trading.journal.authentication.password.service.impl;
 
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.email.EmailField;
 import com.trading.journal.authentication.email.EmailRequest;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.password.ChangePassword;
 import com.trading.journal.authentication.password.service.PasswordManagementService;
 import com.trading.journal.authentication.user.User;
+import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationService;
@@ -31,8 +31,9 @@ public class PasswordManagementServiceImpl implements PasswordManagementService 
 
     @Override
     public void requestPasswordChange(String email) {
-        User applicationUser = userService.getUserByEmail(email);
-        verificationService.send(VerificationType.CHANGE_PASSWORD, applicationUser);
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new ApplicationException(HttpStatus.BAD_REQUEST, "User not found"));
+        verificationService.send(VerificationType.CHANGE_PASSWORD, user);
         userService.unprovenUser(email);
     }
 

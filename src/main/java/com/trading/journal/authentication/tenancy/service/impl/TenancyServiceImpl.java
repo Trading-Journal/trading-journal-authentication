@@ -8,14 +8,13 @@ import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserRepository;
+import com.trading.journal.authentication.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -24,7 +23,7 @@ public class TenancyServiceImpl implements TenancyService {
 
     private final TenancyRepository tenancyRepository;
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Override
     public PageResponse<Tenancy> getAll(PageableRequest pageRequest) {
@@ -99,17 +98,17 @@ public class TenancyServiceImpl implements TenancyService {
 
     @Override
     public Optional<Tenancy> getByEmail(String email) {
-        return userRepository.findByEmail(email)
+        return userService.getUserByEmail(email)
                 .map(User::getTenancy);
     }
 
     @Override
     public void delete(Long id) {
-        List<User> users = userRepository.findByTenancyId(id);
-        if (users.isEmpty()) {
-            tenancyRepository.deleteById(id);
-        } else {
+        Boolean userInTenancy = userService.existsByTenancyId(id);
+        if (userInTenancy) {
             throw new ApplicationException(HttpStatus.CONFLICT, "Delete this tenancy not allowed because there are users using it");
+        } else {
+            tenancyRepository.deleteById(id);
         }
     }
 

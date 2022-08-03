@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
@@ -119,7 +120,7 @@ public class RegistrationServiceImplTest {
         when(tenancyService.create(argThat(ten -> ten.getName().equals("UserName")))).thenReturn(tenancy);
         when(userService.createNewUser(userRegistration, tenancy)).thenReturn(user);
         when(userAuthorityService.saveOrganisationAdminUserAuthorities(user)).thenReturn(emptyList());
-        when(userService.getUserByEmail("mail@mail.com")).thenReturn(user);
+        when(userService.getUserByEmail("mail@mail.com")).thenReturn(Optional.of(user));
         when(verificationProperties.isEnabled()).thenReturn(true);
         doNothing().when(verificationService).send(VerificationType.REGISTRATION, user);
 
@@ -178,7 +179,7 @@ public class RegistrationServiceImplTest {
                 .build();
 
         when(verificationProperties.isEnabled()).thenReturn(true);
-        when(userService.getUserByEmail(email)).thenReturn(user);
+        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
         doNothing().when(verificationService).send(VerificationType.REGISTRATION, user);
 
         SignUpResponse signUpResponse = registrationService.sendVerification(email);
@@ -219,7 +220,7 @@ public class RegistrationServiceImplTest {
                 .build();
 
         when(verificationProperties.isEnabled()).thenReturn(true);
-        when(userService.getUserByEmail(email)).thenReturn(user);
+        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
 
         SignUpResponse signUpResponse = registrationService.sendVerification(email);
         assertThat(signUpResponse.email()).isEqualTo(email);

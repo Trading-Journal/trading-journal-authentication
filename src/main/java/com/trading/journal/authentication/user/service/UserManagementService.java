@@ -25,4 +25,8 @@ public interface UserManagementService {
     List<UserAuthority> addAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities);
 
     List<UserAuthority> deleteAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities);
+
+    void deleteMeRequest(Long tenancyId, String email);
+
+    void deleteMe(Long tenancyId, String email, String hash);
 }

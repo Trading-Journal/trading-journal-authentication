@@ -7,11 +7,12 @@ import com.trading.journal.authentication.user.UserInfo;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 @Service
 public interface UserService {
 
-    User getUserByEmail(String email);
+    Optional<User> getUserByEmail(String email);
 
     User createNewUser(@NotNull UserRegistration userRegistration, Tenancy tenancy);
 
@@ -21,11 +22,11 @@ public interface UserService {
 
     Boolean emailExists(String email);
 
-    UserInfo getUserInfo(String email);
-
     void verifyUser(String email);
 
     void unprovenUser(String email);
 
     User changePassword(String email, String password);
+
+    Boolean existsByTenancyId(Long tenancyId);
 }

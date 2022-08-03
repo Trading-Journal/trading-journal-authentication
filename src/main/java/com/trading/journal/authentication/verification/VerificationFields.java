@@ -13,6 +13,8 @@ public enum VerificationFields {
     ADMIN_REGISTRATION_EMAIL_TEMPLATE("mail/admin-registration.html"),
 
     NEW_ORGANISATION_USER("mail/organisation-verification.html"),
+
+    DELETE_ME("mail/delete-me.html"),
     USER_NAME("$NAME"),
     URL("$URL"),
     HASH("hash");

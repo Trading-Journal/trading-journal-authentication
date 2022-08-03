@@ -17,5 +17,5 @@ public interface UserRepository extends CrudRepository<User, Long> {
     @Query(value = "SELECT COUNT(Users.id) FROM Users inner join UserAuthorities on Users.id = UserAuthorities.userId inner join Authorities on Authorities.id = UserAuthorities.authorityId where Authorities.name in  (:roles)", nativeQuery = true)
     Integer countAdmins(List<String> roles);
 
-    List<User> findByTenancyId(Long tenancyId);
+    Boolean existsByTenancyId (Long tenancyId);
 }
