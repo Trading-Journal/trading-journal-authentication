@@ -16,7 +16,7 @@ public class OrganisationTenancyController implements OrganisationTenancyApi {
     private final TenancyService tenancyService;
 
     @Override
-    public ResponseEntity<Tenancy> getById(AccessTokenInfo accessTokenInfo, Long id) {
-        return ok(tenancyService.getById(id));
+    public ResponseEntity<Tenancy> getById(AccessTokenInfo accessTokenInfo) {
+        return ok(tenancyService.getById(accessTokenInfo.tenancyId()));
     }
 }

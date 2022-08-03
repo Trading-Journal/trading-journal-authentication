@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 @WithCustomMockUser(authorities = {"ROLE_ADMIN"})
 class OrganisationTenancyControllerTest {
 
-    public static final String PATH_WITH_ID = "/organisation/tenancy/{id}";
+    public static final String PATH = "/organisation/tenancy";
 
     @MockBean
     TenancyService tenancyService;
@@ -72,9 +72,7 @@ class OrganisationTenancyControllerTest {
 
         webTestClient
                 .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(PATH_WITH_ID)
-                        .build(tenancy.getId()))
+                .uri(PATH)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -88,15 +86,11 @@ class OrganisationTenancyControllerTest {
     @DisplayName("Get tenancy info not found")
     @Test
     void getTenancyNotFound() {
-        Tenancy tenancy = Tenancy.builder().id(1L).name("admin-user").userLimit(10).userUsage(0).enabled(true).build();
-
         when(tenancyService.getById(1L)).thenThrow(new ApplicationException(HttpStatus.NOT_FOUND, "Tenancy id not found"));
 
         webTestClient
                 .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(PATH_WITH_ID)
-                        .build(tenancy.getId()))
+                .uri(PATH)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
