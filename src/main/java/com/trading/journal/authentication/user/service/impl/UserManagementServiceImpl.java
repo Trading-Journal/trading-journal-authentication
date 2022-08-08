@@ -15,7 +15,9 @@ import com.trading.journal.authentication.user.UserManagementRepository;
 import com.trading.journal.authentication.user.service.UserManagementService;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthorityResponse;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
+import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationService;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +27,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserManagementServiceImpl implements UserManagementService {
 
-    public static final String MESSAGE = "User id not found";
+    public static final String MESSAGE = "User not found";
     private final UserManagementRepository userManagementRepository;
 
     private final UserService userService;
@@ -99,15 +102,49 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public List<UserAuthority> addAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities) {
+    public List<UserAuthorityResponse> addAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities) {
         User user = getUser(tenancyId, id);
-        return userAuthorityService.addAuthorities(user, authorities);
+        List<UserAuthority> userAuthorities = userAuthorityService.addAuthorities(user, authorities);
+        return userAuthorities
+                .stream()
+                .map(auth -> new UserAuthorityResponse(auth.getId(), auth.getAuthority().getName(), auth.getAuthority().getCategory()))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<UserAuthority> deleteAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities) {
+    public List<UserAuthorityResponse> deleteAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities) {
         User user = getUser(tenancyId, id);
-        return userAuthorityService.deleteAuthorities(user, authorities);
+        List<UserAuthority> userAuthorities = userAuthorityService.deleteAuthorities(user, authorities);
+        return userAuthorities
+                .stream()
+                .map(auth -> new UserAuthorityResponse(auth.getId(), auth.getAuthority().getName(), auth.getAuthority().getCategory()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteMeRequest(Long tenancyId, String email) {
+        userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)
+                .ifPresentOrElse(user -> verificationService.send(VerificationType.DELETE_ME, user),
+                        () -> {
+                            throw new ApplicationException(HttpStatus.BAD_REQUEST, String.format("Email %s not found", email));
+                        });
+    }
+
+    @Override
+    public void deleteMe(Long tenancyId, String email, String hash) {
+        Verification verification = verificationService.retrieve(hash);
+        if (!Objects.equals(verification.getEmail(), email)) {
+            throw new ApplicationException(HttpStatus.BAD_REQUEST, "Verification does not exist or is invalid");
+        }
+        User user = userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)
+                .orElseThrow(() -> new ApplicationException(HttpStatus.BAD_REQUEST, String.format("Email %s not found", email)));
+
+        deleteUserById(tenancyId, user.getId());
+        verificationService.verify(verification);
+        Boolean thereIsUsers = userService.existsByTenancyId(tenancyId);
+        if (!thereIsUsers) {
+            tenancyService.delete(tenancyId);
+        }
     }
 
     private User getUser(Long tenancyId, Long id) {

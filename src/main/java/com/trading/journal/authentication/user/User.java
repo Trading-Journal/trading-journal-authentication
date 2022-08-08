@@ -42,7 +42,7 @@ public class User {
 
     private Boolean verified;
 
-    @OneToMany(mappedBy = "applicationUser")
+    @OneToMany(mappedBy = "user")
     private List<UserAuthority> authorities;
 
     private LocalDateTime createdAt;

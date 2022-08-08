@@ -3,8 +3,8 @@ package com.trading.journal.authentication.userauthority.service.impl;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.service.AuthorityService;
-import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.AuthoritiesChange;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
@@ -64,9 +64,8 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
                 .map(authority -> new UserAuthority(user, authority))
                 .toList();
 
-        return userAuthoritiesToAdd.stream()
-                .map(userAuthorityRepository::save)
-                .collect(Collectors.toList());
+        userAuthoritiesToAdd.forEach(userAuthorityRepository::save);
+        return userAuthorityRepository.findByUserId(user.getId());
     }
 
     @Override
@@ -81,7 +80,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
                 .filter(filterUserRolesToRemove(authorities)).toList();
 
         userAuthoritiesToRemove.forEach(userAuthorityRepository::delete);
-        return userAuthoritiesToRemove;
+        return userAuthorityRepository.findByUserId(user.getId());
     }
 
     private Predicate<Authority> filterOutEqualAuthorities(User user) {

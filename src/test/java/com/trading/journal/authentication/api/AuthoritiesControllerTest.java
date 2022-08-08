@@ -265,7 +265,7 @@ class AuthoritiesControllerTest {
         UserAuthority anotherRoleUserAuthority = userAuthorityRepository.save(
                 UserAuthority.builder()
                         .authority(anotherRole)
-                        .applicationUser(user)
+                        .user(user)
                         .build()
         );
 

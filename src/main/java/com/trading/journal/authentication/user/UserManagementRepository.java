@@ -12,4 +12,6 @@ public interface UserManagementRepository extends Repository<User, Long>, JpaSpe
     User save(User user);
 
     void delete(User user);
+
+    Optional<User> findByTenancyIdAndEmail(Long tenancyId, String email);
 }

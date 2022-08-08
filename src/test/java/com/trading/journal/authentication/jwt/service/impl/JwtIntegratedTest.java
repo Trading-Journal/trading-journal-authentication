@@ -143,8 +143,8 @@ public class JwtIntegratedTest {
         assertThat(refreshTokenClaims.getBody().getAudience()).isEqualTo("trade-journal");
         assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
         assertThat(refreshTokenClaims.getBody().getIssuer()).isEqualTo("https://tradejournal.biz");
-        Date start = Date.from(LocalDateTime.now().plusSeconds(890).atZone(ZoneId.systemDefault()).toInstant());
-        Date end = Date.from(LocalDateTime.now().plusSeconds(905).atZone(ZoneId.systemDefault()).toInstant());
+        Date start = Date.from(LocalDateTime.now().plusSeconds(604790).atZone(ZoneId.systemDefault()).toInstant());
+        Date end = Date.from(LocalDateTime.now().plusSeconds(604810).atZone(ZoneId.systemDefault()).toInstant());
         assertThat(refreshTokenClaims.getBody().getExpiration()).isBetween(start, end);
         List<String> scopes = ((List<?>) refreshTokenClaims.getBody().get(JwtConstants.SCOPES))
                 .stream()

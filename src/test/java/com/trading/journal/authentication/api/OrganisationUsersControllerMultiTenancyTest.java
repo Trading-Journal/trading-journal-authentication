@@ -207,7 +207,7 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .value(response ->
-                        assertThat(response.get("error")).isEqualTo("User id not found")
+                        assertThat(response.get("error")).isEqualTo("User not found")
                 );
     }
 
@@ -285,7 +285,7 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .value(response ->
-                        assertThat(response.get("error")).isEqualTo("User id not found")
+                        assertThat(response.get("error")).isEqualTo("User not found")
                 );
     }
 
@@ -363,7 +363,7 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .value(response ->
-                        assertThat(response.get("error")).isEqualTo("User id not found")
+                        assertThat(response.get("error")).isEqualTo("User not found")
                 );
     }
 
@@ -417,7 +417,7 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .value(response ->
-                        assertThat(response.get("error")).isEqualTo("User id not found")
+                        assertThat(response.get("error")).isEqualTo("User not found")
                 );
     }
 
@@ -478,7 +478,7 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .value(response ->
-                        assertThat(response.get("error")).isEqualTo("User id not found")
+                        assertThat(response.get("error")).isEqualTo("User not found")
                 );
     }
 
@@ -539,7 +539,7 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .value(response ->
-                        assertThat(response.get("error")).isEqualTo("User id not found")
+                        assertThat(response.get("error")).isEqualTo("User not found")
                 );
     }
 

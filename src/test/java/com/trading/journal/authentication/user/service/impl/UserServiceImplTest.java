@@ -6,7 +6,6 @@ import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
@@ -22,7 +21,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -137,11 +135,11 @@ public class UserServiceImplTest {
                 .email("mail@mail.com")
                 .enabled(false)
                 .verified(false)
-                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .createdAt(LocalDateTime.of(2022, 2, 1, 10, 30, 50))
                 .authorities(emptyList())
                 .build();
 
-        User enabledUser =  User.builder()
+        User enabledUser = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("password_secret")
@@ -150,7 +148,7 @@ public class UserServiceImplTest {
                 .email("mail@mail.com")
                 .enabled(true)
                 .verified(true)
-                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .createdAt(LocalDateTime.of(2022, 2, 1, 10, 30, 50))
                 .authorities(emptyList())
                 .build();
 
@@ -165,7 +163,7 @@ public class UserServiceImplTest {
     @DisplayName("Enable and verify user that does not exist, return an exception")
     void enableAndVerifyException() {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.verifyUser("mail@mail.com"), "User mail@mail.com does not exist");
+        assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.verifyUser("mail@mail.com"), "User not found");
     }
 
     @Test
@@ -180,7 +178,7 @@ public class UserServiceImplTest {
                 .email("mail@mail.com")
                 .enabled(true)
                 .verified(true)
-                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .createdAt(LocalDateTime.of(2022, 2, 1, 10, 30, 50))
                 .authorities(emptyList())
                 .build();
 
@@ -193,7 +191,7 @@ public class UserServiceImplTest {
                 .email("mail@mail.com")
                 .enabled(true)
                 .verified(false)
-                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .createdAt(LocalDateTime.of(2022, 2, 1, 10, 30, 50))
                 .authorities(emptyList())
                 .build();
 
@@ -207,7 +205,7 @@ public class UserServiceImplTest {
     @DisplayName("Unproven user that does not exist, return an exception")
     void unprovenUserException() {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.unprovenUser("mail@mail.com"), "User mail@mail.com does not exist");
+        assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.unprovenUser("mail@mail.com"), "User not found");
     }
 
     @Test
@@ -340,7 +338,7 @@ public class UserServiceImplTest {
                 .email("mail@mail.com")
                 .enabled(true)
                 .verified(true)
-                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .createdAt(LocalDateTime.of(2022, 2, 1, 10, 30, 50))
                 .authorities(emptyList())
                 .build();
 
@@ -356,7 +354,7 @@ public class UserServiceImplTest {
                 .email("mail@mail.com")
                 .enabled(true)
                 .verified(true)
-                .createdAt( LocalDateTime.of(2022, 2, 1, 10, 30, 50))
+                .createdAt(LocalDateTime.of(2022, 2, 1, 10, 30, 50))
                 .authorities(emptyList())
                 .build();
         when(userRepository.save(userWithNewPassword)).thenReturn(userWithNewPassword);
@@ -368,38 +366,6 @@ public class UserServiceImplTest {
     @DisplayName("Change password when user email does not exist return exception")
     void changePasswordException() {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        assertThrows(UsernameNotFoundException.class, () -> applicationUserServiceImpl.changePassword("mail@mail.com", "password"), "User email@mail.com does not exist");
-    }
-
-    @Test
-    @DisplayName("Given an email load user info")
-    void userInfo() {
-        User applicationUser = User.builder()
-                .id(1L)
-                .userName("UserName")
-                .password("password")
-                .firstName("firstName")
-                .lastName("lastName")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.of(2022, 2, 1, 10, 30, 50))
-                .authorities(asList(
-                        new UserAuthority(new User(), new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER")),
-                        new UserAuthority(new User(), new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN"))
-                ))
-                .build();
-
-        when(userRepository.findByEmail("mail@mail.com")).thenReturn(Optional.of(applicationUser));
-
-        UserInfo info = applicationUserServiceImpl.getUserInfo("mail@mail.com");
-        assertThat(info.getId()).isEqualTo(1L);
-        assertThat(info.getUserName()).isEqualTo("UserName");
-        assertThat(info.getFirstName()).isEqualTo("firstName");
-        assertThat(info.getLastName()).isEqualTo("lastName");
-        assertThat(info.getEmail()).isEqualTo("mail@mail.com");
-        assertThat(info.getEnabled()).isEqualTo(true);
-        assertThat(info.getVerified()).isEqualTo(true);
-        assertThat(info.getAuthorities()).containsExactly("ROLE_USER", "ROLE_ADMIN");
+        assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.changePassword("mail@mail.com", "password"), "User not found");
     }
 }

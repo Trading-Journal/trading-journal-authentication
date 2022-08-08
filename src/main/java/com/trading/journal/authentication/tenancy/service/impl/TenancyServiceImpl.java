@@ -7,17 +7,23 @@ import com.trading.journal.authentication.pageable.specifications.FilterLike;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
+import com.trading.journal.authentication.user.User;
+import com.trading.journal.authentication.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Service
 public class TenancyServiceImpl implements TenancyService {
 
     private final TenancyRepository tenancyRepository;
+
+    private final UserService userService;
 
     @Override
     public PageResponse<Tenancy> getAll(PageableRequest pageRequest) {
@@ -60,7 +66,7 @@ public class TenancyServiceImpl implements TenancyService {
     @Override
     public Tenancy newLimit(Long id, Integer limit) {
         Tenancy tenancy = getById(id);
-        if(tenancy.getUserUsage() > limit) {
+        if (tenancy.getUserUsage() > limit) {
             throw new ApplicationException(HttpStatus.BAD_REQUEST, "New tenancy limit is lower than the current usage");
         }
         tenancy.newLimit(limit);
@@ -77,7 +83,7 @@ public class TenancyServiceImpl implements TenancyService {
     @Override
     public Tenancy increaseUsage(Long id) {
         Tenancy tenancy = getById(id);
-        if(tenancy.increaseUsageAllowed()){
+        if (tenancy.increaseUsageAllowed()) {
             tenancy.increaseUsage();
             return tenancyRepository.save(tenancy);
         }
@@ -88,6 +94,22 @@ public class TenancyServiceImpl implements TenancyService {
     public boolean increaseUsageAllowed(Long id) {
         Tenancy tenancy = getById(id);
         return tenancy.increaseUsageAllowed();
+    }
+
+    @Override
+    public Optional<Tenancy> getByEmail(String email) {
+        return userService.getUserByEmail(email)
+                .map(User::getTenancy);
+    }
+
+    @Override
+    public void delete(Long id) {
+        Boolean userInTenancy = userService.existsByTenancyId(id);
+        if (userInTenancy) {
+            throw new ApplicationException(HttpStatus.CONFLICT, "Delete this tenancy not allowed because there are users using it");
+        } else {
+            tenancyRepository.deleteById(id);
+        }
     }
 
     private static class Columns {

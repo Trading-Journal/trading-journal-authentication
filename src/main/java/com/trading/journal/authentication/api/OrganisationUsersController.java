@@ -7,7 +7,7 @@ import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.UserManagementService;
-import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthorityResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -64,14 +64,14 @@ public class OrganisationUsersController implements OrganisationUsersApi {
     }
 
     @Override
-    public ResponseEntity<List<UserAuthority>> addAuthorities(AccessTokenInfo accessTokenInfo, Long id, AuthoritiesChange authorities) {
-        userManagementService.addAuthorities(accessTokenInfo.tenancyId(), id, authorities);
-        return ok().build();
+    public ResponseEntity<List<UserAuthorityResponse>> addAuthorities(AccessTokenInfo accessTokenInfo, Long id, AuthoritiesChange authorities) {
+        List<UserAuthorityResponse> userAuthorities = userManagementService.addAuthorities(accessTokenInfo.tenancyId(), id, authorities);
+        return ok(userAuthorities);
     }
 
     @Override
-    public ResponseEntity<List<UserAuthority>> deleteAuthorities(AccessTokenInfo accessTokenInfo, Long id, AuthoritiesChange authorities) {
-        userManagementService.deleteAuthorities(accessTokenInfo.tenancyId(), id, authorities);
-        return ok().build();
+    public ResponseEntity<List<UserAuthorityResponse>> deleteAuthorities(AccessTokenInfo accessTokenInfo, Long id, AuthoritiesChange authorities) {
+        List<UserAuthorityResponse> userAuthorities = userManagementService.deleteAuthorities(accessTokenInfo.tenancyId(), id, authorities);
+        return ok(userAuthorities);
     }
 }

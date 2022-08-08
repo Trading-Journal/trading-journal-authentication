@@ -6,24 +6,25 @@ import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
-import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    public static final String USER_NOT_FOUND = "User not found";
     private final UserRepository userRepository;
 
     private final UserAuthorityService userAuthorityService;
@@ -33,9 +34,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordService passwordService;
 
     @Override
-    public User getUserByEmail(@NotBlank String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s does not exist", email)));
+    public Optional<User> getUserByEmail(@NotBlank String email) {
+        return userRepository.findByEmail(email);
     }
 
     @Override
@@ -69,32 +69,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserInfo getUserInfo(@NotBlank String email) {
-        User applicationUser = this.getUserByEmail(email);
-        return new UserInfo(applicationUser);
-    }
-
-    @Override
     public void verifyUser(@NotBlank String email) {
-        User applicationUser = this.getUserByEmail(email);
-        applicationUser.enable();
-        applicationUser.verify();
-        userRepository.save(applicationUser);
+        User user = this.getUserByEmail(email)
+                .orElseThrow(() -> new ApplicationException(HttpStatus.BAD_REQUEST, USER_NOT_FOUND));
+        user.enable();
+        user.verify();
+        userRepository.save(user);
     }
 
     @Override
     public void unprovenUser(String email) {
-        User applicationUser = this.getUserByEmail(email);
-        applicationUser.unproven();
-        userRepository.save(applicationUser);
+        User user = this.getUserByEmail(email)
+                .orElseThrow(() -> new ApplicationException(HttpStatus.BAD_REQUEST, USER_NOT_FOUND));
+        user.unproven();
+        userRepository.save(user);
     }
 
 
     @Override
     public User changePassword(@NotBlank String email, @NotBlank String password) {
-        User applicationUser = this.getUserByEmail(email);
-        applicationUser.changePassword(passwordService.encodePassword(password));
-        return userRepository.save(applicationUser);
+        User user = this.getUserByEmail(email)
+                .orElseThrow(() -> new ApplicationException(HttpStatus.BAD_REQUEST, USER_NOT_FOUND));
+        user.changePassword(passwordService.encodePassword(password));
+        return userRepository.save(user);
+    }
+
+    @Override
+    public Boolean existsByTenancyId(Long tenancyId) {
+        return userRepository.existsByTenancyId(tenancyId);
     }
 
     private User buildUser(UserRegistration userRegistration, Tenancy tenancy) {

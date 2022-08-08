@@ -198,4 +198,44 @@ class VerificationEmailServiceImplTest {
 
         verificationEmailService.sendEmail(verification, applicationUser);
     }
+
+    @DisplayName("Given verification DELETE_ME and application user end and email with correct URL")
+    @Test
+    void sendDeleteMe() {
+        String hash = UUID.randomUUID().toString();
+
+        when(hostProperties.getFrontEnd()).thenReturn("http://site.com");
+        when(hostProperties.getVerificationPage()).thenReturn("auth/email-verified");
+        Verification verification = new Verification(1L, "mail@mail.com", VerificationType.DELETE_ME, VerificationStatus.PENDING, hash, LocalDateTime.now());
+
+        User applicationUser = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mail@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(List.of(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
+                .build();
+
+        String url = String.format("http://site.com/auth/email-verified?hash=%s", hash);
+        List<EmailField> fields = Arrays.asList(
+                new EmailField("$NAME", "User Admin"),
+                new EmailField("$URL", url)
+        );
+
+        EmailRequest emailRequest = new EmailRequest(
+                "Voçê solicitou para ser removido como usuário do sistema\"",
+                "mail/delete-me.html",
+                fields,
+                singletonList("mail@mail.com")
+        );
+
+        doNothing().when(emailSender).send(emailRequest);
+
+        verificationEmailService.sendEmail(verification, applicationUser);
+    }
 }

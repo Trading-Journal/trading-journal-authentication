@@ -5,7 +5,7 @@ import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthorityResponse;
 
 import java.util.List;
 
@@ -22,7 +22,11 @@ public interface UserManagementService {
 
     void deleteUserById(Long tenancyId, Long id);
 
-    List<UserAuthority> addAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities);
+    List<UserAuthorityResponse> addAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities);
 
-    List<UserAuthority> deleteAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities);
+    List<UserAuthorityResponse> deleteAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities);
+
+    void deleteMeRequest(Long tenancyId, String email);
+
+    void deleteMe(Long tenancyId, String email, String hash);
 }

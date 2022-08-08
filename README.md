@@ -2,20 +2,15 @@
 
 ## Pending
 
-* Postman Collection with tests for all endpoints
 * Change me endpoint to update user data
 * Authorities endpoints
   * Enable access to  ORGANISATION user
   * Do not manage system admin when category when it is an ORGANISATION user
   * Manage all when logged user id ADMINISTRATOR
-* Delete account
-  * Delete common user
-  * Delete tenancy (Company) admin user:
-    * Set another user as admin
-    * Or remove the whole tenancy (Company)
+  * Change the add authorities (Users and Tenancy users) to use Authority Id, instead of name (Patch with param for id)
 * Set and document environment variables and properties
 * Test Container/Kubernetes deploy with adding keys files
-* Postman Test run
+* Postman Test run on pipeline
 * One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
 * Lib for token validation to be used in other projects
   * ApplicationUser Interface, ContextUser and Token Provider, JwtTokenAuthenticationFilter and All JWT package must be here

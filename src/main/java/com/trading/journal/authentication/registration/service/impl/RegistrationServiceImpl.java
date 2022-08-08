@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final UserService userService;
 
     private final TenancyService tenancyService;
-    
+
     private final UserAuthorityService userAuthorityService;
 
     private final VerificationService verificationService;
@@ -50,9 +51,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     public SignUpResponse sendVerification(String email) {
         SignUpResponse signUpResponse = new SignUpResponse(email, true);
         if (verificationProperties.isEnabled()) {
-            User user = userService.getUserByEmail(email);
-            if (!user.getEnabled()) {
-                verificationService.send(VerificationType.REGISTRATION, user);
+            Optional<User> userByEmail = userService.getUserByEmail(email);
+            if (userByEmail.isPresent() && !userByEmail.get().getEnabled()) {
+                verificationService.send(VerificationType.REGISTRATION, userByEmail.get());
                 signUpResponse = new SignUpResponse(email, false);
             }
         }

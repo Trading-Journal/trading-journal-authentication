@@ -4,6 +4,7 @@ import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.WithCustomMockUser;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -19,9 +21,12 @@ import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -36,6 +41,9 @@ class TenanciesControllerTest {
 
     @Autowired
     TenancyRepository tenancyRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     private static WebTestClient webTestClient;
 
@@ -252,5 +260,121 @@ class TenanciesControllerTest {
                 .value(response ->
                         assertThat(response.get("error")).isEqualTo("New tenancy limit is lower than the current usage")
                 );
+    }
+
+    @DisplayName("Get tenancy by user email")
+    @Test
+    void getByEmail() {
+        Tenancy tenancy = tenancyRepository.findByName("cecilperkins").orElse(Tenancy.builder().build());
+
+        String email = "mailWick@mail.com";
+
+        User user = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .tenancy(tenancy)
+                .build();
+
+        userRepository.save(user);
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/tenancies/by-email/{email}")
+                        .build(email))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Tenancy.class)
+                .value(response -> {
+                            assertThat(response.getId()).isEqualTo(tenancy.getId());
+                            assertThat(response.getName()).isEqualTo(tenancy.getName());
+                        }
+                );
+    }
+
+    @DisplayName("Get tenancy by user email not found")
+    @Test
+    void getByEmailNotFound() {
+        String email = "mailmail@mail.com";
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/tenancies/by-email/{email}")
+                        .build(email))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @DisplayName("Delete tenancy by id")
+    @Test
+    void deleteTenancy() {
+        Tenancy tenancy = tenancyRepository.save(Tenancy.builder().name("to-delete").userLimit(10).userUsage(1).build());
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_ID)
+                        .build(tenancy.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        Optional<Tenancy> byId = tenancyRepository.findById(tenancy.getId());
+        assertThat(byId).isNotPresent();
+    }
+
+    @DisplayName("Delete tenancy by id when there is a user return conflict exception")
+    @Test
+    void deleteTenancyError() {
+        Tenancy tenancy = tenancyRepository.save(Tenancy.builder().name("some-tenancy").userLimit(10).userUsage(1).build());
+
+        User user = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email("mailmail3@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .tenancy(tenancy)
+                .build();
+
+        userRepository.save(user);
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_ID)
+                        .build(tenancy.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT)
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("error")).isEqualTo("Delete this tenancy not allowed because there are users using it")
+                );
+
+
+        Optional<Tenancy> byId = tenancyRepository.findById(tenancy.getId());
+        assertThat(byId).isPresent();
     }
 }

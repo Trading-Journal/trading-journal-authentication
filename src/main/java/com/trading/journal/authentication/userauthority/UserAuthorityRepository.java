@@ -10,4 +10,6 @@ public interface UserAuthorityRepository extends CrudRepository<UserAuthority, L
     List<UserAuthority> findAll();
 
     Boolean existsByAuthorityId(Long authorityId);
+
+    List<UserAuthority> findByUserId(Long userId);
 }

@@ -22,7 +22,7 @@ public interface OrganisationTenancyApi {
 
     @ApiOperation(notes = "Get by id", value = "Get record by its id")
     @ApiResponses(@ApiResponse(code = 200, message = "Record retrieved"))
-    @GetMapping("/{id}")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Tenancy> getById(AccessTokenInfo accessTokenInfo, @PathVariable Long id);
+    ResponseEntity<Tenancy> getById(AccessTokenInfo accessTokenInfo);
 }

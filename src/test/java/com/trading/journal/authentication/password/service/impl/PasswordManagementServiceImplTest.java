@@ -24,6 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
@@ -51,7 +52,7 @@ class PasswordManagementServiceImplTest {
     @Test
     void passwordChangeRequest() {
         String email = "mail@mail.com";
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
@@ -64,8 +65,8 @@ class PasswordManagementServiceImplTest {
                 .authorities(Collections.singletonList(new UserAuthority(null, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))))
                 .build();
 
-        when(userService.getUserByEmail(email)).thenReturn(applicationUser);
-        doNothing().when(verificationService).send(VerificationType.CHANGE_PASSWORD, applicationUser);
+        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
+        doNothing().when(verificationService).send(VerificationType.CHANGE_PASSWORD, user);
 
         passwordService.requestPasswordChange(email);
 
@@ -136,7 +137,7 @@ class PasswordManagementServiceImplTest {
     void passwordChange() {
         String email = "mail@email.com";
         String hash = UUID.randomUUID().toString();
-        User applicationUser = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .userName("UserName")
                 .password("encoded_password")
@@ -153,14 +154,14 @@ class PasswordManagementServiceImplTest {
                 "Confirmação de alteração senha",
                 "mail/change-password-confirmation.html",
                 singletonList(new EmailField("$NAME", "firstName lastName")),
-                singletonList(applicationUser.getEmail()));
+                singletonList(user.getEmail()));
 
         ChangePassword changePassword = new ChangePassword(email, hash, "dad231#$#4", "dad231#$#4123");
         Verification verification = new Verification(1L, email, VerificationType.CHANGE_PASSWORD, VerificationStatus.PENDING, hash, LocalDateTime.now());
 
         when(verificationService.retrieve(changePassword.hash())).thenReturn(verification);
-        when(userService.changePassword(email, "dad231#$#4")).thenReturn(applicationUser);
-        when(userService.getUserByEmail(changePassword.email())).thenReturn(applicationUser);
+        when(userService.changePassword(email, "dad231#$#4")).thenReturn(user);
+        when(userService.getUserByEmail(changePassword.email())).thenReturn(Optional.of(user));
         doNothing().when(emailSender).send(emailRequest);
         doNothing().when(verificationService).verify(verification);
 
