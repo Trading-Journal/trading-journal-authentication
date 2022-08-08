@@ -458,9 +458,7 @@ public class SecurityConfigurationTest {
 
         webTestClient
                 .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/organisation/tenancy/{id}")
-                        .build(tenancy.getId()))
+                .uri("/organisation/tenancy")
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()

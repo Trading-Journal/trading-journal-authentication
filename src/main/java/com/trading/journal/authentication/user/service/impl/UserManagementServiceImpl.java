@@ -15,6 +15,7 @@ import com.trading.journal.authentication.user.UserManagementRepository;
 import com.trading.journal.authentication.user.service.UserManagementService;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthorityResponse;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
@@ -101,15 +102,23 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public List<UserAuthority> addAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities) {
+    public List<UserAuthorityResponse> addAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities) {
         User user = getUser(tenancyId, id);
-        return userAuthorityService.addAuthorities(user, authorities);
+        List<UserAuthority> userAuthorities = userAuthorityService.addAuthorities(user, authorities);
+        return userAuthorities
+                .stream()
+                .map(auth -> new UserAuthorityResponse(auth.getId(), auth.getAuthority().getName(), auth.getAuthority().getCategory()))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<UserAuthority> deleteAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities) {
+    public List<UserAuthorityResponse> deleteAuthorities(Long tenancyId, Long id, AuthoritiesChange authorities) {
         User user = getUser(tenancyId, id);
-        return userAuthorityService.deleteAuthorities(user, authorities);
+        List<UserAuthority> userAuthorities = userAuthorityService.deleteAuthorities(user, authorities);
+        return userAuthorities
+                .stream()
+                .map(auth -> new UserAuthorityResponse(auth.getId(), auth.getAuthority().getName(), auth.getAuthority().getCategory()))
+                .collect(Collectors.toList());
     }
 
     @Override

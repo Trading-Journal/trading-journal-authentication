@@ -23,14 +23,14 @@ public class UserAuthority {
 
     @ManyToOne
     @JoinColumn(name = "userId")
-    private User applicationUser;
+    private User user;
 
     @OneToOne
     @JoinColumn(name = "authorityId")
     private Authority authority;
 
-    public UserAuthority(User applicationUser, Authority authority) {
-        this.applicationUser = applicationUser;
+    public UserAuthority(User user, Authority authority) {
+        this.user = user;
         this.authority = authority;
     }
 }

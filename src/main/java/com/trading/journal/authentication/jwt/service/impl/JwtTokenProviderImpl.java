@@ -104,7 +104,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .setAudience(properties.getAudience())
                 .setSubject(email)
                 .setIssuedAt(issuedAt)
-                .setExpiration(getExpirationDate(900L))
+                .setExpiration(getExpirationDate(604_800L))//expires in one week
                 .claim(JwtConstants.SCOPES, Collections.singletonList(JwtConstants.TEMPORARY_TOKEN))
                 .compact();
 

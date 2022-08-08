@@ -14,6 +14,7 @@ import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.user.UserManagementRepository;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
+import com.trading.journal.authentication.userauthority.UserAuthorityResponse;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.VerificationType;
@@ -284,7 +285,7 @@ class UserManagementServiceImplTest {
         when(userAuthorityService.addAuthorities(applicationUser, change))
                 .thenReturn(userAuthorities);
 
-        List<UserAuthority> actualAuthorities = userManagementService.addAuthorities(10L, userId, change);
+        List<UserAuthorityResponse> actualAuthorities = userManagementService.addAuthorities(10L, userId, change);
         assertThat(actualAuthorities).hasSize(2);
     }
 
@@ -330,7 +331,7 @@ class UserManagementServiceImplTest {
         when(userAuthorityService.deleteAuthorities(applicationUser, change))
                 .thenReturn(userAuthorities);
 
-        List<UserAuthority> actualAuthorities = userManagementService.deleteAuthorities(10L, userId, change);
+        List<UserAuthorityResponse> actualAuthorities = userManagementService.deleteAuthorities(10L, userId, change);
         assertThat(actualAuthorities).hasSize(1);
     }
 

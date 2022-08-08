@@ -2,17 +2,12 @@
 
 ## Pending
 
-* Postman Collection with tests for all endpoints
-  * LIST WHAT TO DO
-    * ENDPOINTS TO CALL IN ORDER
-      * VALIDATIONS AND VARIATIONS FOR EACH ENDPOINT
-
-
 * Change me endpoint to update user data
 * Authorities endpoints
   * Enable access to  ORGANISATION user
   * Do not manage system admin when category when it is an ORGANISATION user
   * Manage all when logged user id ADMINISTRATOR
+  * Change the add authorities (Users and Tenancy users) to use Authority Id, instead of name (Patch with param for id)
 * Set and document environment variables and properties
 * Test Container/Kubernetes deploy with adding keys files
 * Postman Test run on pipeline
