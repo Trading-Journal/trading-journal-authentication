@@ -1,6 +1,7 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
+import com.trading.journal.authentication.user.MeUpdate;
 import com.trading.journal.authentication.user.UserInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,12 +25,18 @@ public interface MeApi {
     @ApiResponses(@ApiResponse(code = 200, message = "Delete request sent"))
     @PostMapping("/delete")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo);
+    ResponseEntity<Void> deleteRequest(AccessTokenInfo accessTokenInfo);
 
     @ApiOperation(notes = "Verification for delete user", value = "Delete verification")
     @ApiResponses({
             @ApiResponse(code = 200, message = "User deleted"),
             @ApiResponse(code = 400, message = "Verification does not exist or is invalid")})
     @DeleteMapping("/delete")
-    ResponseEntity<Void> verify(AccessTokenInfo accessTokenInfo, @RequestParam("hash") String hash);
+    ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, @RequestParam("hash") String hash);
+
+    @ApiOperation(notes = "Update my user information", value = "Update user information")
+    @ApiResponses(@ApiResponse(code = 200, message = "My information updated"))
+    @PostMapping
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<UserInfo> update(AccessTokenInfo accessTokenInfo, @RequestBody MeUpdate meUpdate);
 }

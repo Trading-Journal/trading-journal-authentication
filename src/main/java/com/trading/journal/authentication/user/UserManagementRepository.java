@@ -14,4 +14,6 @@ public interface UserManagementRepository extends Repository<User, Long>, JpaSpe
     void delete(User user);
 
     Optional<User> findByTenancyIdAndEmail(Long tenancyId, String email);
+
+    Boolean existsByTenancyIdAndUserNameAndIdNot(Long tenancyId, String userName, Long id);
 }
