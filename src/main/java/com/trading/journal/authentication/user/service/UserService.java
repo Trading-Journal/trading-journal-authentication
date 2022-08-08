@@ -3,7 +3,6 @@ package com.trading.journal.authentication.user.service;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserInfo;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
