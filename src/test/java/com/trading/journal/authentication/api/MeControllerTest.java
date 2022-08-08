@@ -9,10 +9,7 @@ import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
-import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.UserManagementRepository;
-import com.trading.journal.authentication.user.UserRepository;
+import com.trading.journal.authentication.user.*;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.verification.Verification;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
@@ -32,14 +29,15 @@ import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -84,7 +82,7 @@ public class MeControllerTest {
         when(resolveToken.resolve(any())).thenReturn("token");
         when(tokenReader.getAccessTokenInfo(anyString())).thenReturn(new AccessTokenInfo("user", 1L, "tenancy", singletonList("ROLE_USER")));
 
-        when(userRepository.findByEmail("user")).thenReturn(
+        when(userManagementRepository.findByTenancyIdAndEmail(1L, "user")).thenReturn(
                 Optional.of(User.builder()
                         .userName(user.getUserName())
                         .firstName(user.getFirstName())
@@ -169,6 +167,63 @@ public class MeControllerTest {
 
         verifications = verificationService.getByEmail(email);
         assertThat(verifications).hasSize(0);
+    }
+
+    @DisplayName("Update user information of logged user")
+    @Test
+    @WithCustomMockUser
+    void meUpdate() {
+        when(resolveToken.resolve(any())).thenReturn("token");
+        when(tokenReader.getAccessTokenInfo(anyString())).thenReturn(new AccessTokenInfo("email@mail.com", 1L, "tenancy", singletonList("ROLE_USER")));
+
+        User user = User.builder()
+                .id(1L)
+                .userName("userName")
+                .password("password")
+                .firstName("firstName")
+                .lastName("lastName")
+                .email("email@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+        when(userManagementRepository.findByTenancyIdAndEmail(1L, "email@mail.com")).thenReturn(Optional.of(user));
+
+        when(userManagementRepository.existsByTenancyIdAndUserNameAndIdNot(1L, "userName-updated", 1L)).thenReturn(false);
+
+        when(userManagementRepository.save(argThat(u ->
+                u.getUserName().equals("userName-updated")
+                        && u.getFirstName().equals("firstName-Updated")
+                        && u.getLastName().equals("lastName-Updated")
+        ))).thenReturn(User.builder()
+                .id(1L)
+                .userName("userName-updated")
+                .password("password")
+                .firstName("firstName-Updated")
+                .lastName("lastName-Updated")
+                .email("email@mail.com")
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build());
+
+        MeUpdate meUpdate = new MeUpdate("userName-updated", "firstName-Updated", "lastName-Updated");
+        webTestClient
+                .post()
+                .uri("/me")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(meUpdate)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserInfo.class)
+                .value(response -> {
+                    assertThat(response.getUserName()).isEqualTo("userName-updated");
+                    assertThat(response.getFirstName()).isEqualTo("firstName-Updated");
+                    assertThat(response.getLastName()).isEqualTo("lastName-Updated");
+                });
     }
 
     private static Stream<UserRegistration> feedUsers() {

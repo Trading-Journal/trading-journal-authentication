@@ -70,4 +70,10 @@ public class User {
     public void setUserAuthorities(List<UserAuthority> authorities){
         this.authorities = authorities;
     }
+
+    public void update(String userName, String firstName, String lastName){
+        this.userName = userName;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
 }

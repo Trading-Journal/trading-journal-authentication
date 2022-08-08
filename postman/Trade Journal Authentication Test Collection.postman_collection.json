@@ -5733,6 +5733,1057 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Me Update",
+			"item": [
+				{
+					"name": "Success SignUp",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"company-name\", getCompanyName());\r",
+									"pm.collectionVariables.set(\"first-name\", pm.collectionVariables.replaceIn(\"{{$randomFirstName}}\"));\r",
+									"pm.collectionVariables.set(\"last-name\", pm.collectionVariables.replaceIn(\"{{$randomLastName}}\"));\r",
+									"pm.collectionVariables.set(\"user-name\", gerUserName());\r",
+									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
+									"\r",
+									"function getCompanyName() {\r",
+									"     const companyName = pm.collectionVariables.replaceIn(\"{{$randomCompanyName}}\");\r",
+									"     const companySuffix = pm.collectionVariables.replaceIn(\"{{$randomCompanySuffix}}\");\r",
+									"     return companyName + ' ' + companySuffix;\r",
+									"}\r",
+									"\r",
+									"function gerUserName() {\r",
+									"    const firstName = pm.collectionVariables.get(\"first-name\");\r",
+									"    const lastName = pm.collectionVariables.get(\"last-name\");\r",
+									"    return (firstName + lastName).toLowerCase();\r",
+									"}\r",
+									"\r",
+									"function gerUserEmail() {\r",
+									"    const userName = gerUserName();\r",
+									"    return userName + '@mail.com';\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.email).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
+									"\r",
+									"\tpm.expect(response.enabled).to.equal(false);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"userName\": \"{{user-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authentication-api}}/authentication/signup",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"authentication",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tenancy by User email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\r",
+									"\tpm.expect(response.id).not.equal(null);\r",
+									"\tpm.expect(response.name).not.equal(null);\r",
+									"\tpm.expect(response.userLimit).to.equal(1);\r",
+									"\tpm.expect(response.userUsage).to.equal(1);\r",
+									"\tpm.expect(response.enabled).to.equal(true);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"tenancy-id\", response.id);\r",
+									"\tpm.collectionVariables.set(\"tenancy-name\", response.name);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token-admin}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/admin/tenancies/by-email/{{user-email}}",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"admin",
+								"tenancies",
+								"by-email",
+								"{{user-email}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set new tenancy Limits",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\r",
+									"\tpm.expect(response.id).not.equal(null);\r",
+									"\tpm.expect(response.name).not.equal(null);\r",
+									"\tpm.expect(response.userLimit).to.equal(3);\r",
+									"\tpm.expect(response.userUsage).to.equal(1);\r",
+									"\tpm.expect(response.enabled).to.equal(true);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token-admin}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/admin/tenancies/{{tenancy-id}}/limit/3",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"admin",
+								"tenancies",
+								"{{tenancy-id}}",
+								"limit",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Verification hash for Registration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json()[0];\r",
+									"\r",
+									"    pm.expect(response.email).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
+									"\r",
+									"\tpm.expect(response.type).to.equal(\"REGISTRATION\");\r",
+									"\r",
+									"\tpm.expect(response.status).to.equal(\"PENDING\");\r",
+									"\r",
+									"\tpm.expect(response.hash).not.equal(null);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"user-verification-hash\", response.hash)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token-admin}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/admin/verifications/{{user-email}}",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"admin",
+								"verifications",
+								"{{user-email}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify new user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{authentication-api}}/authentication/verify?hash={{user-verification-hash}}",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"authentication",
+								"verify"
+							],
+							"query": [
+								{
+									"key": "hash",
+									"value": "{{user-verification-hash}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Success SignIn",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\r",
+									"    pm.collectionVariables.set(\"access-token\", response.accessToken);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"refresh-token\", response.refreshToken);\r",
+									"    \r",
+									"\tpm.expect(response.accessToken).not.equal(null);\r",
+									"\r",
+									"\tpm.expect(response.refreshToken).not.equal(null);\r",
+									"\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"{{user-email}}\",\r\n  \"password\": \"{{user-password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authentication-api}}/authentication/signin",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"authentication",
+								"signin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create First user for Tenancy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\r",
+									"\tpm.expect(response.userName).to.eql(\"user1\");\r",
+									"\tpm.expect(response.firstName).to.eql(\"user1\");\r",
+									"\tpm.expect(response.email).to.eql(\"user1@mail.com\");\r",
+									"\tpm.expect(response.lastName).to.eql(pm.collectionVariables.get(\"tenancy-name\"));\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"tenancy-user-1-id\", response.id);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"user1\",\r\n    \"lastName\": \"{{tenancy-name}}\",\r\n    \"userName\": \"user1\",\r\n    \"email\": \"user1@mail.com\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authentication-api}}/organisation/users",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"organisation",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Second user for Tenancy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\r",
+									"\tpm.expect(response.userName).to.eql(\"user2\");\r",
+									"\tpm.expect(response.firstName).to.eql(\"user2\");\r",
+									"\tpm.expect(response.email).to.eql(\"user2@mail.com\");\r",
+									"\tpm.expect(response.lastName).to.eql(pm.collectionVariables.get(\"tenancy-name\"));\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"tenancy-user-2-id\", response.id);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"user2\",\r\n    \"lastName\": \"{{tenancy-name}}\",\r\n    \"userName\": \"user2\",\r\n    \"email\": \"user2@mail.com\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authentication-api}}/organisation/users",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"organisation",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Verification hash for Registration User 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json()[0];\r",
+									"\r",
+									"    pm.expect(response.email).to.equal(\"user1@mail.com\");\r",
+									"\r",
+									"\tpm.expect(response.type).to.equal(\"NEW_ORGANISATION_USER\");\r",
+									"\r",
+									"\tpm.expect(response.status).to.equal(\"PENDING\");\r",
+									"\r",
+									"\tpm.expect(response.hash).not.equal(null);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"tenancy-user1-verification-hash\", response.hash)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token-admin}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/admin/verifications/user1@mail.com",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"admin",
+								"verifications",
+								"user1@mail.com"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Tenancy User1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{authentication-api}}/authentication/verify?hash={{tenancy-user1-verification-hash}}",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"authentication",
+								"verify"
+							],
+							"query": [
+								{
+									"key": "hash",
+									"value": "{{tenancy-user1-verification-hash}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Verification hash for Change Password User 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json()[0];\r",
+									"\r",
+									"    pm.expect(response.email).to.equal(\"user1@mail.com\");\r",
+									"\r",
+									"\tpm.expect(response.type).to.equal(\"CHANGE_PASSWORD\");\r",
+									"\r",
+									"\tpm.expect(response.status).to.equal(\"PENDING\");\r",
+									"\r",
+									"\tpm.expect(response.hash).not.equal(null);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"tenancy-user1-verification-hash\", response.hash)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token-admin}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/admin/verifications/user1@mail.com",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"admin",
+								"verifications",
+								"user1@mail.com"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password User 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"email\": \"user1@mail.com\",\r\n\t\"hash\": \"{{tenancy-user1-verification-hash}}\",\r\n\t\"password\": \"{{user-password}}\",\r\n\t\"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authentication-api}}/authentication/change-password",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"authentication",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Success SignIn As User1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.accessToken).not.equal(null);\r",
+									"\r",
+									"\tpm.expect(response.refreshToken).not.equal(null);\r",
+									"\r",
+									"    pm.expect(response.user).to.equal(\"user1\");\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"tenancy-user1-token\", response.accessToken)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"user1@mail.com\",\r\n  \"password\": \"{{user-password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authentication-api}}/authentication/signin",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"authentication",
+								"signin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User 1 Me Info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\r",
+									"\tpm.expect(response.userName).to.equal(\"user1\");\r",
+									"\tpm.expect(response.firstName).to.equal(\"user1\");\r",
+									"\tpm.expect(response.email).to.equal(\"user1@mail.com\");\r",
+									"\tpm.expect(response.lastName).to.equal(pm.collectionVariables.get(\"tenancy-name\"));\r",
+									"\r",
+									"\tpm.expect(response.authorities.length).to.equal(1);\r",
+									"\tpm.expect(response.authorities).to.contains(\"ROLE_USER\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenancy-user1-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/me",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User 1 info fail because of user name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409\", function () {\r",
+									"  pm.response.to.have.status(409);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\r",
+									"\tpm.expect(response.error).to.equal(\"User name already exists for another user\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenancy-user1-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"userName\": \"user2\",\r\n\t\"firstName\": \"First\",\r\n\t\"lastName\": \"Last\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authentication-api}}/me",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User 1 info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\r",
+									"\tpm.expect(response.userName).to.equal(\"User1Name\");\r",
+									"\tpm.expect(response.firstName).to.equal(\"First\");\r",
+									"\tpm.expect(response.email).to.equal(\"user1@mail.com\");\r",
+									"\tpm.expect(response.lastName).to.equal(\"Last\");\r",
+									"\r",
+									"\tpm.expect(response.authorities.length).to.equal(1);\r",
+									"\tpm.expect(response.authorities).to.contains(\"ROLE_USER\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenancy-user1-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"userName\": \"User1Name\",\r\n\t\"firstName\": \"First\",\r\n\t\"lastName\": \"Last\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authentication-api}}/me",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Tenancy User1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/organisation/users/{{tenancy-user-1-id}}",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"organisation",
+								"users",
+								"{{tenancy-user-1-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Tenancy User2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/organisation/users/{{tenancy-user-2-id}}",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"organisation",
+								"users",
+								"{{tenancy-user-2-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\tpm.expect(response.totalItems).to.eql(1);\r",
+									"\tpm.collectionVariables.set(\"user-id\", response.items[0].id);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token-admin}}",
+								"type": "text"
+							},
+							{
+								"key": "tenancy",
+								"value": "{{tenancy-id}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/admin/users",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "Allan",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token-admin}}",
+								"type": "text"
+							},
+							{
+								"key": "tenancy",
+								"value": "{{tenancy-id}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/admin/users/{{user-id}}",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								"{{user-id}}"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "Allan",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Tenancy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token-admin}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/admin/tenancies/{{tenancy-id}}",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"admin",
+								"tenancies",
+								"{{tenancy-id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
@@ -5830,6 +6881,10 @@
 		},
 		{
 			"key": "user-id",
+			"value": ""
+		},
+		{
+			"key": "tenancy-user1-token",
 			"value": ""
 		}
 	]

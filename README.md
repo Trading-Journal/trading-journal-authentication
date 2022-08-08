@@ -2,10 +2,9 @@
 
 ## Pending
 
-* Change me endpoint to update user data
 * Authorities endpoints
-  * Enable access to  ORGANISATION user
-  * Do not manage system admin when category when it is an ORGANISATION user
+  * Enable access to ORGANISATION user for listing
+  * Do not list ADMIN when it is ORGANISATION ADMIN
   * Manage all when logged user id ADMINISTRATOR
   * Change the add authorities (Users and Tenancy users) to use Authority Id, instead of name (Patch with param for id)
 * Set and document environment variables and properties
@@ -31,7 +30,7 @@
     * Evict this cache when delete user session
   * JWT lib will have a new version to validate JWT against some API
     * Use configuration for that
-    * The API must receive the JWT and check if session is still valis
+    * The API must receive the JWT and check if session is still valid
 
 ## Swagger
 

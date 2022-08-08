@@ -8,10 +8,7 @@ import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
-import com.trading.journal.authentication.user.AuthoritiesChange;
-import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.UserManagementRepository;
+import com.trading.journal.authentication.user.*;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityResponse;
@@ -577,5 +574,140 @@ class UserManagementServiceImplTest {
         doNothing().when(tenancyService).delete(tenancyId);
 
         userManagementService.deleteMe(tenancyId, email, "hash");
+    }
+
+    @DisplayName("Get user by Tenancy and Email")
+    @Test
+    void getUserByEmail() {
+        String email = "mail@mail.com";
+        Long tenancyId = 10L;
+        User user = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+
+        when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.of(user));
+
+        UserInfo userInfo = userManagementService.getUserByEmail(tenancyId, email);
+        assertThat(userInfo.getEmail()).isEqualTo(user.getEmail());
+        assertThat(userInfo.getUserName()).isEqualTo(user.getUserName());
+        assertThat(userInfo.getFirstName()).isEqualTo(user.getFirstName());
+        assertThat(userInfo.getLastName()).isEqualTo(user.getLastName());
+    }
+
+    @DisplayName("Get user by Tenancy and Email not found")
+    @Test
+    void getUserByEmailNotFound() {
+        String email = "mail@mail.com";
+        Long tenancyId = 10L;
+        when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.empty());
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> userManagementService.getUserByEmail(tenancyId, email));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("User not found");
+    }
+
+    @DisplayName("Update me same user name exists")
+    @Test
+    void updateNotFound() {
+        String email = "mail@mail.com";
+        Long tenancyId = 10L;
+
+        MeUpdate meUpdate = new MeUpdate("userName-updated", "firstName-Updated", "lastName-Updated");
+
+        when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.empty());
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> userManagementService.update(tenancyId, email, meUpdate));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatusText()).isEqualTo("User not found");
+
+        verify(userManagementRepository, never()).existsByTenancyIdAndUserNameAndIdNot(anyLong(), anyString(), anyLong());
+        verify(userManagementRepository, never()).save(any());
+    }
+
+    @DisplayName("Update me not found")
+    @Test
+    void updateSameUserName() {
+        String email = "mail@mail.com";
+        Long tenancyId = 10L;
+        MeUpdate meUpdate = new MeUpdate("userName-updated", "firstName-Updated", "lastName-Updated");
+
+        User user = User.builder()
+                .id(1L)
+                .userName("UserName")
+                .password("password")
+                .firstName("lastName")
+                .lastName("Wick")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+
+        when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.of(user));
+
+        when(userManagementRepository.existsByTenancyIdAndUserNameAndIdNot(tenancyId, meUpdate.userName(), 1L)).thenReturn(true);
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> userManagementService.update(tenancyId, email, meUpdate));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(exception.getStatusText()).isEqualTo("User name already exists for another user");
+
+        verify(userManagementRepository, never()).save(any());
+    }
+
+    @DisplayName("Update me")
+    @Test
+    void update() {
+        String email = "mail@mail.com";
+        Long tenancyId = 10L;
+        MeUpdate meUpdate = new MeUpdate("userName-updated", "firstName-Updated", "lastName-Updated");
+
+        User user = User.builder()
+                .id(1L)
+                .userName("userName")
+                .password("password")
+                .firstName("firstName")
+                .lastName("lastName")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build();
+
+        when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.of(user));
+
+        when(userManagementRepository.existsByTenancyIdAndUserNameAndIdNot(tenancyId, meUpdate.userName(), 1L)).thenReturn(false);
+
+        when(userManagementRepository.save(argThat(u ->
+                u.getUserName().equals("userName-updated")
+                && u.getFirstName().equals("firstName-Updated")
+                && u.getLastName().equals("lastName-Updated")
+                ))).thenReturn(User.builder()
+                .id(1L)
+                .userName("userName-updated")
+                .password("password")
+                .firstName("firstName-Updated")
+                .lastName("lastName-Updated")
+                .email(email)
+                .enabled(true)
+                .verified(true)
+                .createdAt(LocalDateTime.now())
+                .authorities(emptyList())
+                .build());
+
+        UserInfo userInfo = userManagementService.update(tenancyId, email, meUpdate);
+        assertThat(userInfo.getUserName()).isEqualTo("userName-updated");
+        assertThat(userInfo.getFirstName()).isEqualTo("firstName-Updated");
+        assertThat(userInfo.getLastName()).isEqualTo("lastName-Updated");
     }
 }

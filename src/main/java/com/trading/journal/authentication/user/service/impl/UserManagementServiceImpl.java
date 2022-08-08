@@ -8,10 +8,7 @@ import com.trading.journal.authentication.pageable.specifications.FilterTenancy;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
-import com.trading.journal.authentication.user.AuthoritiesChange;
-import com.trading.journal.authentication.user.User;
-import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.user.UserManagementRepository;
+import com.trading.journal.authentication.user.*;
 import com.trading.journal.authentication.user.service.UserManagementService;
 import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
@@ -65,6 +62,13 @@ public class UserManagementServiceImpl implements UserManagementService {
     public UserInfo getUserById(Long tenancyId, Long id) {
         User user = getUser(tenancyId, id);
         return new UserInfo(user);
+    }
+
+    @Override
+    public UserInfo getUserByEmail(Long tenancyId, String email) {
+        return userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)
+                .map(UserInfo::new)
+                .orElseThrow(() -> new ApplicationException("User not found"));
     }
 
     @Override
@@ -145,6 +149,21 @@ public class UserManagementServiceImpl implements UserManagementService {
         if (!thereIsUsers) {
             tenancyService.delete(tenancyId);
         }
+    }
+
+    @Override
+    public UserInfo update(Long tenancyId, String email, MeUpdate meUpdate) {
+        User user = userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)
+                .orElseThrow(() -> new ApplicationException(HttpStatus.BAD_REQUEST, "User not found"));
+
+        Boolean exists = userManagementRepository.existsByTenancyIdAndUserNameAndIdNot(tenancyId, meUpdate.userName(), user.getId());
+        if (exists) {
+            throw new ApplicationException(HttpStatus.CONFLICT, "User name already exists for another user");
+        }
+
+        user.update(meUpdate.userName(), meUpdate.firstName(), meUpdate.lastName());
+        user = userManagementRepository.save(user);
+        return new UserInfo(user);
     }
 
     private User getUser(Long tenancyId, Long id) {

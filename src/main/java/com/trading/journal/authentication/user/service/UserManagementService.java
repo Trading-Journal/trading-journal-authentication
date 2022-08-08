@@ -4,6 +4,7 @@ import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.AuthoritiesChange;
+import com.trading.journal.authentication.user.MeUpdate;
 import com.trading.journal.authentication.user.UserInfo;
 import com.trading.journal.authentication.userauthority.UserAuthorityResponse;
 
@@ -13,6 +14,8 @@ public interface UserManagementService {
     PageResponse<UserInfo> getAll(Long tenancyId, PageableRequest pageRequest);
 
     UserInfo getUserById(Long tenancyId, Long id);
+
+    UserInfo getUserByEmail(Long tenancyId, String email);
 
     UserInfo create(Long tenancyId, UserRegistration userRegistration);
 
@@ -29,4 +32,6 @@ public interface UserManagementService {
     void deleteMeRequest(Long tenancyId, String email);
 
     void deleteMe(Long tenancyId, String email, String hash);
+
+    UserInfo update(Long tenancyId, String email, MeUpdate meUpdate);
 }
