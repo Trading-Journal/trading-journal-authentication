@@ -2,11 +2,6 @@
 
 ## Pending
 
-* Authorities endpoints
-  * Enable access to ORGANISATION user for listing
-  * Do not list ADMIN when it is ORGANISATION ADMIN
-  * Manage all when logged user id ADMINISTRATOR
-  * Change the add authorities (Users and Tenancy users) to use Authority Id, instead of name (Patch with param for id)
 * Set and document environment variables and properties
 * Test Container/Kubernetes deploy with adding keys files
 * Postman Test run on pipeline

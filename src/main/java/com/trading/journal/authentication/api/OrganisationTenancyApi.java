@@ -1,5 +1,6 @@
 package com.trading.journal.authentication.api;
 
+import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.tenancy.Tenancy;
@@ -25,4 +26,10 @@ public interface OrganisationTenancyApi {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Tenancy> getById(AccessTokenInfo accessTokenInfo);
+
+    @ApiOperation(notes = "Get Authorities", value = "Get Authorities")
+    @ApiResponses(@ApiResponse(code = 200, message = "Records retrieved"))
+    @GetMapping("/authorities")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<List<Authority>> getAuthorities(AccessTokenInfo accessTokenInfo);
 }

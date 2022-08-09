@@ -18,4 +18,6 @@ public interface AuthorityRepository extends CrudRepository<Authority, Long> {
     Optional<Authority> getByName(String name);
 
     Optional<Authority> getByNameAndIdNot(String name, Long id);
+
+    List<Authority> getByCategoryNot(AuthorityCategory category);
 }
