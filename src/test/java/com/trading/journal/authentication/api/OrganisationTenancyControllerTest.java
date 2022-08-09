@@ -3,6 +3,9 @@ package com.trading.journal.authentication.api;
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.MySqlTestContainerInitializer;
 import com.trading.journal.authentication.WithCustomMockUser;
+import com.trading.journal.authentication.authority.Authority;
+import com.trading.journal.authentication.authority.AuthorityCategory;
+import com.trading.journal.authentication.authority.service.OrganisationAuthorityService;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.service.JwtResolveToken;
 import com.trading.journal.authentication.jwt.service.JwtTokenReader;
@@ -24,6 +27,7 @@ import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
@@ -35,13 +39,16 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
-@WithCustomMockUser(authorities = {"ROLE_ADMIN"})
+@WithCustomMockUser(authorities = {"TENANCY_ADMIN"})
 class OrganisationTenancyControllerTest {
 
     public static final String PATH = "/organisation/tenancy";
 
     @MockBean
     TenancyService tenancyService;
+
+    @MockBean
+    OrganisationAuthorityService organisationAuthorityService;
 
     @MockBean
     JwtTokenReader tokenReader;
@@ -100,5 +107,26 @@ class OrganisationTenancyControllerTest {
                 .value(response ->
                         assertThat(response.get("error")).isEqualTo("Tenancy id not found")
                 );
+    }
+
+    @DisplayName("Get Non Admin authorities")
+    @Test
+    void getAuthorities() {
+        when(organisationAuthorityService.getAllNonAdmin()).thenReturn(
+                singletonList(Authority.builder().name("USER").category(AuthorityCategory.COMMON_USER).id(1L).build())
+        );
+
+        webTestClient
+                .get()
+                .uri(PATH + "/authorities")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Authority>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(1);
+                });
     }
 }
