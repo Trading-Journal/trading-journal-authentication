@@ -2,8 +2,11 @@
 
 ## Pending
 
-* Set and document environment variables and properties
+* Docker file
+  * Test docker running with postman
+  * Create command templates
 * Test Container/Kubernetes deploy with adding keys files
+  * Create commands templates
 * Postman Test run on pipeline
 * One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
 * Lib for token validation to be used in other projects
@@ -33,6 +36,44 @@
 Or just [http://localhost:8080](http://localhost:8080)
 
 ## Running
+
+### Locally
+
+Set the active profile as local:
+
+```bash
+-Dspring.active.profiles=local
+```
+
+### Environment Variables
+
+Default application properties used on deployed/container run require a set of Environment Variables:
+
+* Generic
+  * **PORT**: default is 8080
+* Email
+  * **EMAIL_HOST**: email host address 
+  * **EMAIL_PASSWORD**: password to connect SMTP server
+  * **EMAIL_USERNAME**: username to connect SMTP server
+  * **EMAIL_PORT**: SMTP port
+* Database
+  * **DATASOURCE_URL**: datasource/server location url with database name
+  * **DATASOURCE_USERNAME**: Username to connect database (read and write)
+  * **DATASOURCE_PASSWORD**: Password of the username to connect database
+  * **DATASOURCE_DRIVER**: Driver of the database, default is _com.mysql.cj.jdbc.Driver_
+* Reference for email links
+  * **WEB_APP_URL**: Web app url where email links will be redirected to
+  * **VERIFICATION_PATH**: Users verification page where email links will be redirected to, default is _auth/email-verified_
+  * **CHANGE_PASSWORD_PAGE**: Change password page where email links will be redirected to, default is _auth/change-password_
+* Properties using during application startup and first run
+  * **ADMIN_EMAIL**: Email of application admin, this user will be created at the first run if there is no other ADMIN available
+* JWT Properties
+  * **JWT_PRIVATE_KEY**: Private key file used to sign access tokens
+  * **JWT_PUBLIC_KEY**: public key file based on private key used to read access tokens
+  * **JWT_ACCESS_TOKEN_EXPIRATION**: time to expire access token, default is 3600 seconds
+  * **JWT_REFRESH_TOKEN_EXPIRATION**: time to expire refresh token, default is 86400 seconds
+  * **JWT_ISSUER**: Access token issuer
+  * **JWT_AUDIENCE**: Access token audience
 
 ### Container Dependencies
 
