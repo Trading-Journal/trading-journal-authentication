@@ -51,6 +51,7 @@ Default application properties used on deployed/container run require a set of E
 
 * Generic
   * **PORT**: default is 8080
+  * **ENVIRONMENT**: Environment name, mostly used for logging in logback file, default is DEFAULT
 * Email
   * **EMAIL_HOST**: email host address 
   * **EMAIL_PASSWORD**: password to connect SMTP server
