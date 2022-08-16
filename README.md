@@ -2,9 +2,6 @@
 
 ## Pending
 
-* Docker file
-  * Test docker running with postman
-  * Create command templates
 * Test Container/Kubernetes deploy with adding keys files
   * Create commands templates
 * Postman Test run on pipeline
@@ -51,6 +48,7 @@ Default application properties used on deployed/container run require a set of E
 
 * Generic
   * **PORT**: default is 8080
+  * **ENVIRONMENT**: Environment name, mostly used for logging in logback file, default is DEFAULT
 * Email
   * **EMAIL_HOST**: email host address 
   * **EMAIL_PASSWORD**: password to connect SMTP server
@@ -158,6 +156,44 @@ CREATE TABLE `Verifications` (
 INSERT INTO Authorities (category, name) VALUES ('COMMON_USER','ROLE_USER');
 INSERT INTO Authorities (category, name) VALUES ('ADMINISTRATOR','ROLE_ADMIN');
 INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN');
+```
+
+## Docker
+
+### Build Locally
+
+This docker file copies the sample private and public keys in **/src/main/resources/** to the image, so you can refer each keys from **/etc/ssl/private_key.pem** and **/etc/ssl/public.pem**
+
+```docker build -t allanweber/authentication:1.0.0 -f docker/DockerfileLocal .```
+
+### Build for deployment
+
+For this option, you must provide your own private and public keys, add it to the image and configure the proper environment variables to read those files
+
+```docker build -t allanweber/authentication:1.0.0 -f docker/Dockerfile .```
+
+### Run it with env variables
+
+* Get mysql container ip: ```docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' CONTAINER_ID```
+
+```bash
+docker run -p 8080:8080 --name authentication \
+-e ADMIN_EMAIL= \
+-e DATASOURCE_URL= \
+-e DATASOURCE_PASSWORD= \
+-e DATASOURCE_USERNAME= \
+-e EMAIL_HOST= \
+-e EMAIL_PORT= \
+-e EMAIL_USERNAME= \
+-e EMAIL_PASSWORD= \
+-e JWT_ACCESS_TOKEN_EXPIRATION=3600 \
+-e JWT_REFRESH_TOKEN_EXPIRATION= \
+-e JWT_AUDIENCE= \
+-e JWT_ISSUER= \
+-e JWT_PRIVATE_KEY= \
+-e JWT_PUBLIC_KEY= \
+-e WEB_APP_URL= \
+allanweber/authentication:VERSION
 ```
 
 ## Configurations
