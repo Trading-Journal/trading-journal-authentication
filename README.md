@@ -2,9 +2,6 @@
 
 ## Pending
 
-* Docker file
-  * Test docker running with postman
-  * Create command templates
 * Test Container/Kubernetes deploy with adding keys files
   * Create commands templates
 * Postman Test run on pipeline
