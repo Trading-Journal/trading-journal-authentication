@@ -6,18 +6,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 
 import static java.lang.String.format;
 
-public class MySqlTestContainerInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class PostgresTestContainerInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static final Logger logger = LoggerFactory.getLogger(MySqlTestContainerInitializer.class);
-    protected static final MySQLContainer<?> container;
+    private static final Logger logger = LoggerFactory.getLogger(PostgresTestContainerInitializer.class);
+    protected static final PostgreSQLContainer<?> container;
 
     static {
-        container = new MySQLContainer<>("mysql:5.6.51")
+        container = new PostgreSQLContainer<>("postgres:9.6.12")
                 .withUrlParam("allowMultiQueries", "true")
                 .withDatabaseName("trade-journal")
                 .withUsername("trade-journal")
@@ -30,7 +30,7 @@ public class MySqlTestContainerInitializer implements ApplicationContextInitiali
     @Override
     public void initialize(@NotNull ConfigurableApplicationContext configurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
-                format("spring.datasource.url=jdbc:mysql://%s:%s/trade-journal", container.getHost(), container.getMappedPort(3306)));
+                format("spring.datasource.url=jdbc:postgresql://%s:%s/trade-journal", container.getHost(), container.getMappedPort(5432)));
 
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
                 "spring.datasource.username=trade-journal");
@@ -38,6 +38,10 @@ public class MySqlTestContainerInitializer implements ApplicationContextInitiali
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
                 "spring.datasource.password=trade-journal");
 
-        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, "spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver");
+        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
+                "spring.datasource.driver-class-name=org.postgresql.Driver");
+
+        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext,
+                "spring.datasource.hikari.minimum-idle=5");
     }
 }

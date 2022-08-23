@@ -11,7 +11,7 @@ ENV JAVA_OPTS "$Xmx \
 
 ADD target/authentication*.jar authentication.jar
 
-COPY /src/main/resources/private_key.pem /etc/ssl/private_key.pem
-COPY /src/main/resources/public_key.pem /etc/ssl/public_key.pem
+COPY /src/main/resources/private_key.pem /etc/ssl/certs/private_key.pem
+COPY /src/main/resources/public_key.pem /etc/ssl/certs/public_key.pem
 
 CMD [ "sh", "-c", "java $JAVA_OPTS -jar authentication.jar" ]

@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.api;
 
-import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.PostgresTestContainerInitializer;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@ContextConfiguration(initializers = PostgresTestContainerInitializer.class)
 @TestPropertySource(properties = {"journal.authentication.verification.enabled=true"})
 public class AuthenticationControllerWithVerificationTest {
 

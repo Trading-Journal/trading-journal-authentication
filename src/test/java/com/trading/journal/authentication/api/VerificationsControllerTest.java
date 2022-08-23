@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.api;
 
-import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.PostgresTestContainerInitializer;
 import com.trading.journal.authentication.WithCustomMockUser;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@ContextConfiguration(initializers = PostgresTestContainerInitializer.class)
 @WithCustomMockUser(authorities = {"ROLE_ADMIN"})
 class VerificationsControllerTest {
 

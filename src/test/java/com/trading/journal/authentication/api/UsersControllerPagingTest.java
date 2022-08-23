@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.api;
 
-import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.PostgresTestContainerInitializer;
 import com.trading.journal.authentication.WithCustomMockUser;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.tenancy.Tenancy;
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@ContextConfiguration(initializers = PostgresTestContainerInitializer.class)
 @WithCustomMockUser(authorities = {"ROLE_ADMIN"})
 class UsersControllerPagingTest {
 

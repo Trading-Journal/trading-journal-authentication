@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.api;
 
-import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.PostgresTestContainerInitializer;
 import com.trading.journal.authentication.WithCustomMockUser;
 import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.jwt.service.JwtResolveToken;
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@ContextConfiguration(initializers = PostgresTestContainerInitializer.class)
 class OrganisationUsersControllerMultiTenancyTest {
 
     public static final String PATH = "/organisation/users";
