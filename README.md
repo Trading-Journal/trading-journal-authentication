@@ -2,12 +2,9 @@
 
 ## Pending
 
-* Test Container/Kubernetes deploy with adding keys files
-  * Create commands templates
-  * Test locally with minikube or something
-  * Find cheap could provider and deploy there
-  * Deploy via pipeline
 * Postman Test run on pipeline
+  * on branch deploy send to Heroku and run postman against it
+  * Define new trading-journal-database-test
 * One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
 * Lib for token validation to be used in other projects
   * ApplicationUser Interface, ContextUser and Token Provider, JwtTokenAuthenticationFilter and All JWT package must be here
