@@ -8,7 +8,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
 @Testcontainers
-@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@ContextConfiguration(initializers = PostgresTestContainerInitializer.class)
 class AuthenticationApplicationTests {
 
     @DisplayName("Test the spring context load for all beans, with they are correctly configured")

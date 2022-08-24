@@ -2,9 +2,9 @@
 
 ## Pending
 
-* Test Container/Kubernetes deploy with adding keys files
-  * Create commands templates
 * Postman Test run on pipeline
+  * on branch deploy send to Heroku and run postman against it
+  * Define new trading-journal-database-test
 * One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
 * Lib for token validation to be used in other projects
   * ApplicationUser Interface, ContextUser and Token Provider, JwtTokenAuthenticationFilter and All JWT package must be here
@@ -58,7 +58,6 @@ Default application properties used on deployed/container run require a set of E
   * **DATASOURCE_URL**: datasource/server location url with database name
   * **DATASOURCE_USERNAME**: Username to connect database (read and write)
   * **DATASOURCE_PASSWORD**: Password of the username to connect database
-  * **DATASOURCE_DRIVER**: Driver of the database, default is _com.mysql.cj.jdbc.Driver_
 * Reference for email links
   * **WEB_APP_URL**: Web app url where email links will be redirected to
   * **VERIFICATION_PATH**: Users verification page where email links will be redirected to, default is _auth/email-verified_
@@ -75,10 +74,10 @@ Default application properties used on deployed/container run require a set of E
 
 ### Container Dependencies
 
-#### MySql
+#### Postgres
 
 ```bash
-docker run -d -e MYSQL_USER=trade-journal -e MYSQL_PASSWORD=trade-journal -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=trade-journal -p 3306:3306 mysql:latest
+docker run -d --name postgres -e POSTGRES_PASSWORD=trade-journal -e POSTGRES_USER=trade-journal -e POSTGRES_DB=trade-journal -p 5432:5432 postgres
 ```
 
 ### Keys Dependencies
@@ -95,58 +94,56 @@ openssl rsa -in secret_key.pem -pubout -outform PEM -out public_key.pem
 ### Database Schema
 
 ```
-CREATE TABLE `Tenancy` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(254) NOT NULL,
-  `userLimit` int NOT NULL DEFAULT 1,
-  `userUsage` int NOT NULL DEFAULT 0,
-  `enabled` tinyint(1) NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name_UNIQUE` (`name`)
+CREATE TABLE Tenancy (
+  id SERIAL NOT NULL,
+  name VARCHAR(254) NOT NULL,
+  userLimit int NOT NULL DEFAULT 1,
+  userUsage int NOT NULL DEFAULT 0,
+  enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (id),
+  UNIQUE(name)
 );
 
-CREATE TABLE `Users` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `tenancyId` int NULL,
-  `userName` varchar(45) NOT NULL,
-  `password` varchar(2000) NOT NULL,
-  `firstName` varchar(45) NOT NULL,
-  `lastName` varchar(45) NOT NULL,
-  `email` varchar(150) NOT NULL,
-  `enabled` tinyint(1) NOT NULL,
-  `verified` tinyint(1) NOT NULL,
-  `createdAt` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `tenancyIdFk` FOREIGN KEY (`tenancyId`) REFERENCES `Tenancy` (`id`)
+CREATE TABLE Users (
+  id SERIAL NOT NULL,
+  tenancyId int NULL,
+  userName VARCHAR(45) NOT NULL,
+  password VARCHAR(2000) NOT NULL,
+  firstName VARCHAR(45) NOT NULL,
+  lastName VARCHAR(45) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  enabled BOOLEAN NOT NULL,
+  verified BOOLEAN NOT NULL,
+  createdAt TIMESTAMP NOT NULL,
+  PRIMARY KEY (id),
+  CONSTRAINT tenancyIdFk FOREIGN KEY (tenancyId) REFERENCES Tenancy (id)
 );
 
-CREATE TABLE `Authorities` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `category` varchar(50) NOT NULL,
-  `name` varchar(45) NOT NULL,
-  PRIMARY KEY (`id`,`category`,`name`),
-  UNIQUE KEY `name_UNIQUE` (`name`)
+CREATE TABLE Authorities (
+  id SERIAL NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  name VARCHAR(45) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE(name)
 );
 
-CREATE TABLE `UserAuthorities` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `userId` int NOT NULL,
-  `authorityId` int NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `userIdFk_idx` (`userId`),
-  KEY `authorityIdFk_idx` (`authorityId`),
-  CONSTRAINT `authorityIdFk` FOREIGN KEY (`authorityId`) REFERENCES `Authorities` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `userIdFk` FOREIGN KEY (`userId`) REFERENCES `Users` (`id`) ON DELETE CASCADE
+CREATE TABLE UserAuthorities (
+  id SERIAL NOT NULL,
+  userId int NOT NULL,
+  authorityId int NOT NULL,
+  PRIMARY KEY (id),
+  CONSTRAINT authorityIdFk FOREIGN KEY (authorityId) REFERENCES Authorities (id) ON DELETE CASCADE,
+  CONSTRAINT userIdFk FOREIGN KEY (userId) REFERENCES Users (id) ON DELETE CASCADE
 );
 
-CREATE TABLE `Verifications` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `email` varchar(150) NOT NULL,
-  `type` varchar(45) NOT NULL,
-  `status` varchar(45) NOT NULL,
-  `hash` varchar(2000) NOT NULL,
-  `lastChange` datetime NOT NULL,
-  PRIMARY KEY (`id`)
+CREATE TABLE Verifications (
+  id SERIAL NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  type VARCHAR(45) NOT NULL,
+  status VARCHAR(45) NOT NULL,
+  hash VARCHAR(2000) NOT NULL,
+  lastChange TIMESTAMP NOT NULL,
+  PRIMARY KEY (id)
 );
 ```
 
@@ -162,19 +159,23 @@ INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN')
 
 ### Build Locally
 
-This docker file copies the sample private and public keys in **/src/main/resources/** to the image, so you can refer each keys from **/etc/ssl/private_key.pem** and **/etc/ssl/public.pem**
+This docker file copies the sample private and public keys in **/src/main/resources/** to the image, so you can refer each keys from **/etc/ssl/certs/private_key.pem** and **/etc/ssl/certs/public.pem**
 
-```docker build -t allanweber/authentication:1.0.0 -f docker/DockerfileLocal .```
+```docker build -t allanweber/trading-journal-authentication:1.0.0 -f docker/DockerfileLocal .```
 
 ### Build for deployment
 
 For this option, you must provide your own private and public keys, add it to the image and configure the proper environment variables to read those files
 
-```docker build -t allanweber/authentication:1.0.0 -f docker/Dockerfile .```
+```docker build -t allanweber/trading-journal-authentication:1.0.0 -f docker/Dockerfile .```
+
+Tag your image to latest: ```docker tag allanweber/trading-journal-authentication:1.0.0 allanweber/trading-journal-authentication:latest``` 
+
+Push image to registry: ```docker push allanweber/trading-journal-authentication:latest```
 
 ### Run it with env variables
 
-* Get mysql container ip: ```docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' CONTAINER_ID```
+* Get postgres container ip: ```docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' CONTAINER_ID```
 
 ```bash
 docker run -p 8080:8080 --name authentication \
@@ -186,7 +187,7 @@ docker run -p 8080:8080 --name authentication \
 -e EMAIL_PORT= \
 -e EMAIL_USERNAME= \
 -e EMAIL_PASSWORD= \
--e JWT_ACCESS_TOKEN_EXPIRATION=3600 \
+-e JWT_ACCESS_TOKEN_EXPIRATION= \
 -e JWT_REFRESH_TOKEN_EXPIRATION= \
 -e JWT_AUDIENCE= \
 -e JWT_ISSUER= \
@@ -195,6 +196,106 @@ docker run -p 8080:8080 --name authentication \
 -e WEB_APP_URL= \
 allanweber/authentication:VERSION
 ```
+
+## Kubernetes
+
+### Enable Kubernetes on local Docker
+
+![](imgs/enable-docker-kubernetes.png)
+
+The scripts for Kubernetes are inside the folder **k8s**, remember to change the names, labels etc. as you like.
+
+Also, remember to replace where you find placeholders for you own values, such as _<SECRET>_, for example
+
+### Create a namespace
+
+This step is not required, if you do not want a namespace, change all other files where the namespace is referred.
+
+Create namespace: ```kubectl apply -f k8s/namespace.yml```
+
+Check namespace created: ```kubectl get namespace```
+
+### Config Maps
+
+Create config map: ```kubectl apply -f k8s/config-maps.yml```
+
+Get config map: ```kubectl get cm -n trading-journal trading-journal-authentication-prd -o yaml```
+
+Delete config map: ```kubectl delete cm -n trading-journal trading-journal-authentication-prd```
+
+### Secrets
+
+Create the secrets: ```kubectl apply -f  k8s/secrets.yml```
+
+Check created secrets: ```kubectl get secret -n trading-journal trading-journal-authentication-prd -o yaml```
+
+Delete secrets if you like: ```kubectl delete secrets -n trading-journal trading-journal-authentication-prd```
+
+### Public and Private Keys
+
+Change the <FILE_LOCATION> placeholder with the location of your private and public **.pem**
+
+Run the command: ```./k8s/import-keys.sh```
+
+Get Keys
+
+```kubectl get cm -n trading-journal trading-journal-private-key -o yaml```
+
+```kubectl get cm -n trading-journal trading-journal-public-key -o yaml```
+
+Delete secrets if you like
+
+```kubectl cm secrets -n trading-journal trading-journal-private-key```
+
+```kubectl cm secrets -n trading-journal trading-journal-public-key```
+
+### Deployment
+
+Create deployment: ```kubectl apply -f ./k8s/deployment.yml```
+
+Check deployment: ```kubectl logs -n trading-journal deployment/trading-journal-authentication```
+
+Get deployment: ```kubectl get deploy -n trading-journal```
+
+Delete deployment: ```kubectl delete deploy -n trading-journal trading-journal-authentication```
+
+Get pods: ```kubectl get pods -n trading-journal```
+
+Describe pods: ```kubectl describe pod -n trading-journal trading-journal-authentication```
+
+## Deploys
+
+### Create completely new
+
+```kubectl apply -f k8s/namespace.yml```
+
+```kubectl apply -f  k8s/secrets.yml```
+
+```./k8s/import-keys.sh```
+
+```kubectl apply -f k8s/config-maps.yml```
+
+```kubectl apply -f ./k8s/deployment.yml```
+
+```kubectl logs -n trading-journal deployment/trading-journal-authentication```
+
+### Delete all (except namespace)
+
+```kubectl delete deploy -n trading-journal trading-journal-authentication```
+
+```kubectl delete cm -n trading-journal trading-journal-authentication-prd```
+
+```kubectl cm secrets -n trading-journal trading-journal-private-key```
+
+```kubectl cm secrets -n trading-journal trading-journal-public-key```
+
+```kubectl delete secrets -n trading-journal trading-journal-authentication-prd```
+
+## Access application
+
+### From local to trading-journal-authentication
+
+```kubectl port-forward  -n trading-journal $POD 8080```
 
 ## Configurations
 

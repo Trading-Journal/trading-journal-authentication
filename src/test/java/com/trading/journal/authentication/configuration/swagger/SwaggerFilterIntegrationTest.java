@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.configuration.swagger;
 
-import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.PostgresTestContainerInitializer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@ContextConfiguration(initializers = PostgresTestContainerInitializer.class)
 class SwaggerFilterIntegrationTest {
     @Autowired
     private WebTestClient webTestClient;

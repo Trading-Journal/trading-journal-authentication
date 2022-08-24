@@ -1,9 +1,8 @@
 package com.trading.journal.authentication.user.service.impl;
 
-import com.trading.journal.authentication.MySqlTestContainerInitializer;
+import com.trading.journal.authentication.PostgresTestContainerInitializer;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.registration.UserRegistration;
-import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.properties.AdminUserProperties;
@@ -30,7 +29,7 @@ import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest
 @Testcontainers
-@ContextConfiguration(initializers = MySqlTestContainerInitializer.class)
+@ContextConfiguration(initializers = PostgresTestContainerInitializer.class)
 @TestPropertySource(properties = {"journal.authentication.admin-user.email=admin@email.com", "journal.authentication.verification.enabled=true"})
 class AdminUserServiceImplIntegratedTest {
 
