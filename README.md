@@ -157,11 +157,11 @@ INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN')
 
 ## Docker
 
-### Build Locally
+### Build Locally or for Pipeline test
 
 This docker file copies the sample private and public keys in **/src/main/resources/** to the image, so you can refer each keys from **/etc/ssl/certs/private_key.pem** and **/etc/ssl/certs/public.pem**
 
-```docker build -t allanweber/trading-journal-authentication:1.0.0 -f docker/DockerfileLocal .```
+```docker build -t allanweber/trading-journal-authentication:1.0.0 -f docker/DockerfileTest .```
 
 ### Build for deployment
 
