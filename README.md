@@ -296,25 +296,18 @@ Describe pods: ```kubectl describe pod -n trading-journal trading-journal-authen
 
 ## Configurations
 
-### Database connection
+### Start up application the first time
+* **journal.authentication.admin-user.email**: email of the application admin, this will be used to generate a nre Admin user, and send the confirmations like user registration, change password etc.
 
-* **journal.authentication.datasource.host** *e.g. localhost*
-* **journal.authentication.datasource.port** *e.g. 3306*
-* **journal.authentication.datasource.database** *e.g. dbname*
-* **journal.authentication.datasource.username** *e.g. user*
-* **journal.authentication.datasource.password** *e.g. root*
-
-### Email Verification
+### Verifications
 In case there is need for new users confirm their emails, then enable the configuration property:
-* **journal.authentication.verification.enabled** *e.g. true*
 
-### Generic Properties
+* **journal.authentication.verification.enabled** *e.g. true*
 * **journal.authentication.hosts.front-end** *e.g. http://localhost:8080* to be able to proper redirect the user to the page of confirm registration or change password
-* **journal.authentication.hosts.back-end** *e.g. http://localhost:8080* to be able to proper redirect the user confirmation of registration check
+* **journal.authentication.hosts.verification-page** *e.g. auth/email-verified* the web page user will be redirected to confirm the email
+* **journal.authentication.hosts.change-password-page** *e.g. auth/change-password* the web page user will be redirected to change password
 
 ## Metrics
-
-### Retrieve reactive metrics
 
 * http://localhost:8080/metrics/signup_user - Amount of time create a new user via signup
 * http://localhost:8080/metrics/signin_use - Amount of time to authenticate a user
