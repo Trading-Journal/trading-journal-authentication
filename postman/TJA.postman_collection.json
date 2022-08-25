@@ -2691,6 +2691,53 @@
 					"response": []
 				},
 				{
+					"name": "Get Authorities as Tenancy Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\r",
+									"\tpm.expect(response.id).to.equal(pm.collectionVariables.get(\"tenancy-id\"));\r",
+									"\tpm.expect(response.name).to.equal(pm.collectionVariables.get(\"tenancy-name\"));\r",
+									"\tpm.expect(response.userLimit).to.equal(3);\r",
+									"\tpm.expect(response.userUsage).to.equal(1);\r",
+									"\tpm.expect(response.enabled).to.equal(true);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{authentication-api}}/organisation/tenancy",
+							"host": [
+								"{{authentication-api}}"
+							],
+							"path": [
+								"organisation",
+								"tenancy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get Me Info",
 					"event": [
 						{
@@ -2976,20 +3023,27 @@
 									"\r",
 									"    pm.expect(response.length).to.eql(3);\r",
 									"\r",
-									"\tpm.collectionVariables.set(\"authority-id\", response[1].id);\r",
+									"\tvar index = indexByName('ROLE_ADMIN', response);\r",
+									"\tpm.expect(response[index].name).to.eql(\"ROLE_ADMIN\");\r",
+									"\tpm.expect(response[index].category).to.eql(\"ADMINISTRATOR\");\r",
 									"\r",
-									"\tlet auth = response[0];\r",
-									"\tpm.expect(auth.name).to.eql(\"ROLE_ADMIN\");\r",
-									"\tpm.expect(auth.category).to.eql(\"ADMINISTRATOR\");\r",
-									"\t\r",
-									"\tauth = response[1];\r",
-									"\tpm.expect(auth.name).to.eql(\"ROLE_USER\");\r",
-									"\tpm.expect(auth.category).to.eql(\"COMMON_USER\");\r",
+									"\tindex = indexByName('ROLE_USER', response);\r",
+									"\tpm.expect(response[index].name).to.eql(\"ROLE_USER\");\r",
+									"\tpm.expect(response[index].category).to.eql(\"COMMON_USER\");\r",
+									"\tpm.collectionVariables.set(\"authority-id\", response[index].id);\r",
 									"\r",
-									"\tauth = response[2];\r",
-									"\tpm.expect(auth.name).to.eql(\"TENANCY_ADMIN\");\r",
-									"\tpm.expect(auth.category).to.eql(\"ORGANISATION\");\r",
-									"});"
+									"\tindex = indexByName('TENANCY_ADMIN', response);\r",
+									"\tpm.expect(response[index].name).to.eql(\"TENANCY_ADMIN\");\r",
+									"\tpm.expect(response[index].category).to.eql(\"ORGANISATION\");\r",
+									"});\r",
+									"\r",
+									"function indexByName(name, response) {\r",
+									"\treturn response.map(\r",
+									"            function(filter) {\r",
+									"                return filter.name;\r",
+									"            }\r",
+									"        ).indexOf(name);\r",
+									"}"
 								],
 								"type": "text/javascript"
 							}
@@ -3179,22 +3233,30 @@
 									"\r",
 									"    pm.expect(response.length).to.eql(4);\r",
 									"\r",
-									"\tlet auth = response[0];\r",
-									"\tpm.expect(auth.name).to.eql(\"ROLE_ADMIN\");\r",
-									"\tpm.expect(auth.category).to.eql(\"ADMINISTRATOR\");\r",
-									"\t\r",
-									"\tauth = response[1];\r",
-									"\tpm.expect(auth.name).to.eql(\"ROLE_USER\");\r",
-									"\tpm.expect(auth.category).to.eql(\"COMMON_USER\");\r",
+									"\tvar index = indexByName('ROLE_ADMIN', response);\r",
+									"\tpm.expect(response[index].name).to.eql(\"ROLE_ADMIN\");\r",
+									"\tpm.expect(response[index].category).to.eql(\"ADMINISTRATOR\");\r",
 									"\r",
-									"\tauth = response[2];\r",
-									"\tpm.expect(auth.name).to.eql(\"SAMPLE_USER\");\r",
-									"\tpm.expect(auth.category).to.eql(\"COMMON_USER\");\r",
+									"\tindex = indexByName('ROLE_USER', response);\r",
+									"\tpm.expect(response[index].name).to.eql(\"ROLE_USER\");\r",
+									"\tpm.expect(response[index].category).to.eql(\"COMMON_USER\");\r",
 									"\r",
-									"\tauth = response[3];\r",
-									"\tpm.expect(auth.name).to.eql(\"TENANCY_ADMIN\");\r",
-									"\tpm.expect(auth.category).to.eql(\"ORGANISATION\");\r",
-									"});"
+									"\tindex = indexByName('TENANCY_ADMIN', response);\r",
+									"\tpm.expect(response[index].name).to.eql(\"TENANCY_ADMIN\");\r",
+									"\tpm.expect(response[index].category).to.eql(\"ORGANISATION\");\r",
+									"\r",
+									"\tindex = indexByName('SAMPLE_USER', response);\r",
+									"\tpm.expect(response[index].name).to.eql(\"SAMPLE_USER\");\r",
+									"\tpm.expect(response[index].category).to.eql(\"COMMON_USER\");\r",
+									"});\r",
+									"\r",
+									"function indexByName(name, response) {\r",
+									"\treturn response.map(\r",
+									"            function(filter) {\r",
+									"                return filter.name;\r",
+									"            }\r",
+									"        ).indexOf(name);\r",
+									"}"
 								],
 								"type": "text/javascript"
 							}
@@ -3376,18 +3438,26 @@
 									"\r",
 									"    pm.expect(response.length).to.eql(3);\r",
 									"\r",
-									"\tlet auth = response[0];\r",
-									"\tpm.expect(auth.name).to.eql(\"ROLE_ADMIN\");\r",
-									"\tpm.expect(auth.category).to.eql(\"ADMINISTRATOR\");\r",
-									"\t\r",
-									"\tauth = response[1];\r",
-									"\tpm.expect(auth.name).to.eql(\"ROLE_USER\");\r",
-									"\tpm.expect(auth.category).to.eql(\"COMMON_USER\");\r",
+									"\tvar index = indexByName('ROLE_ADMIN', response);\r",
+									"\tpm.expect(response[index].name).to.eql(\"ROLE_ADMIN\");\r",
+									"\tpm.expect(response[index].category).to.eql(\"ADMINISTRATOR\");\r",
 									"\r",
-									"\tauth = response[2];\r",
-									"\tpm.expect(auth.name).to.eql(\"TENANCY_ADMIN\");\r",
-									"\tpm.expect(auth.category).to.eql(\"ORGANISATION\");\r",
-									"});"
+									"\tindex = indexByName('ROLE_USER', response);\r",
+									"\tpm.expect(response[index].name).to.eql(\"ROLE_USER\");\r",
+									"\tpm.expect(response[index].category).to.eql(\"COMMON_USER\");\r",
+									"\r",
+									"\tindex = indexByName('TENANCY_ADMIN', response);\r",
+									"\tpm.expect(response[index].name).to.eql(\"TENANCY_ADMIN\");\r",
+									"\tpm.expect(response[index].category).to.eql(\"ORGANISATION\");\r",
+									"});\r",
+									"\r",
+									"function indexByName(name, response) {\r",
+									"\treturn response.map(\r",
+									"            function(filter) {\r",
+									"                return filter.name;\r",
+									"            }\r",
+									"        ).indexOf(name);\r",
+									"}"
 								],
 								"type": "text/javascript"
 							}

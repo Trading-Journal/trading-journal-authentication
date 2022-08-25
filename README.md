@@ -2,10 +2,6 @@
 
 ## Pending
 
-* Postman Test run on pipeline
-  * on branch deploy send to Heroku and run postman against it
-  * Define new trading-journal-database-test
-* One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
 * Lib for token validation to be used in other projects
   * ApplicationUser Interface, ContextUser and Token Provider, JwtTokenAuthenticationFilter and All JWT package must be here
   * Consider:
@@ -26,6 +22,7 @@
   * JWT lib will have a new version to validate JWT against some API
     * Use configuration for that
     * The API must receive the JWT and check if session is still valid
+* * One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
 
 ## Swagger
 
@@ -157,11 +154,11 @@ INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN')
 
 ## Docker
 
-### Build Locally
+### Build Locally or for Pipeline test
 
 This docker file copies the sample private and public keys in **/src/main/resources/** to the image, so you can refer each keys from **/etc/ssl/certs/private_key.pem** and **/etc/ssl/certs/public.pem**
 
-```docker build -t allanweber/trading-journal-authentication:1.0.0 -f docker/DockerfileLocal .```
+```docker build -t allanweber/trading-journal-authentication:1.0.0 -f docker/DockerfileTest .```
 
 ### Build for deployment
 
