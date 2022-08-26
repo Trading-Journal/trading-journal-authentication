@@ -8,13 +8,6 @@ Fully functional authentication with JWT generation and interpretation made in t
 
 ## Pending
 
-* Lib for token validation to be used in other projects
-  * ApplicationUser Interface, ContextUser and Token Provider, JwtTokenAuthenticationFilter and All JWT package must be here
-  * Consider:
-    * Token validation
-    * Token reader
-    * With Private key/certificate
-    * etc
 * Use token generated here in another project to validate flow and Lib (above)
 * Create version 1.0.0
 * Create TAG with current code for reuse in other projects
