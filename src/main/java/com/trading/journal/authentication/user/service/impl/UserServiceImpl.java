@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
         if (validUser) {
             User user = userRepository.save(buildUser(userRegistration, tenancy));
             List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(user);
-            user.setUserAuthorities(userAuthorities);
+            user.setAuthorities(userAuthorities);
             return user;
         } else {
             throw new ApplicationException("User name or email already exist");

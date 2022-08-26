@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.api;
 
-import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
+import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.registration.UserRegistration;

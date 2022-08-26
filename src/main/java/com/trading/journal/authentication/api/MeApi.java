@@ -1,6 +1,6 @@
 package com.trading.journal.authentication.api;
 
-import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
+import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.authentication.user.MeUpdate;
 import com.trading.journal.authentication.user.UserInfo;
 import io.swagger.annotations.Api;

@@ -1,8 +1,8 @@
 package com.trading.journal.authentication.api;
 
+import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.service.OrganisationAuthorityService;
-import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
 import lombok.RequiredArgsConstructor;

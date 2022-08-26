@@ -1,15 +1,15 @@
 package com.trading.journal.authentication.authentication.service.impl;
 
+import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.allanweber.jwttoken.data.ContextUser;
+import com.allanweber.jwttoken.data.TokenData;
+import com.allanweber.jwttoken.helper.JwtConstants;
+import com.allanweber.jwttoken.service.JwtTokenProvider;
+import com.allanweber.jwttoken.service.JwtTokenReader;
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
-import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
-import com.trading.journal.authentication.jwt.data.ContextUser;
-import com.trading.journal.authentication.jwt.data.TokenData;
-import com.trading.journal.authentication.jwt.helper.JwtConstants;
-import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
-import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.service.UserService;
 import lombok.RequiredArgsConstructor;

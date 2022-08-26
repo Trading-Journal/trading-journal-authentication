@@ -1,7 +1,7 @@
 package com.trading.journal.authentication.verification;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.trading.journal.authentication.jwt.helper.DateHelper;
+import com.trading.journal.authentication.helper.DateHelper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

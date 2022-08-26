@@ -1,8 +1,8 @@
 package com.trading.journal.authentication.authentication.service.impl;
 
+import com.allanweber.jwttoken.data.ContextUser;
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authentication.service.UserPasswordAuthenticationManager;
-import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.user.User;
@@ -38,7 +38,9 @@ public class UserPasswordAuthenticationManagerImpl implements UserPasswordAuthen
 
         ofNullable(user.getTenancy())
                 .filter(tenancy -> tenancy.getEnabled().equals(false))
-                .ifPresent(unused -> {throw new ApplicationException(HttpStatus.FORBIDDEN, "Your tenancy is disabled by the system admin");});
+                .ifPresent(unused -> {
+                    throw new ApplicationException(HttpStatus.FORBIDDEN, "Your tenancy is disabled by the system admin");
+                });
 
         String password = (String) authentication.getCredentials();
         if (!passwordService.matches(password, user.getPassword())) {

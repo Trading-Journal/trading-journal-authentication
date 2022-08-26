@@ -1,4 +1,4 @@
-package com.trading.journal.authentication.jwt.helper;
+package com.trading.journal.authentication.helper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

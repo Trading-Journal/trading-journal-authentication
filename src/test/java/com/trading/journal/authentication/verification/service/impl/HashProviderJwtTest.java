@@ -1,10 +1,10 @@
 package com.trading.journal.authentication.verification.service.impl;
 
+import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.allanweber.jwttoken.data.TokenData;
+import com.allanweber.jwttoken.service.JwtTokenProvider;
+import com.allanweber.jwttoken.service.JwtTokenReader;
 import com.trading.journal.authentication.ApplicationException;
-import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
-import com.trading.journal.authentication.jwt.data.TokenData;
-import com.trading.journal.authentication.jwt.service.JwtTokenProvider;
-import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

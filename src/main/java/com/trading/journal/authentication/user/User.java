@@ -1,5 +1,7 @@
 package com.trading.journal.authentication.user;
 
+import com.allanweber.jwttoken.contract.JwtUserData;
+import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import lombok.AllArgsConstructor;
@@ -11,6 +13,10 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,7 +24,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "Users")
-public class User {
+public class User implements JwtUserData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,13 +73,36 @@ public class User {
         this.password = newPassword;
     }
 
-    public void setUserAuthorities(List<UserAuthority> authorities){
+    public void setAuthorities(List<UserAuthority> authorities) {
         this.authorities = authorities;
     }
 
-    public void update(String userName, String firstName, String lastName){
+    public void update(String userName, String firstName, String lastName) {
         this.userName = userName;
         this.firstName = firstName;
         this.lastName = lastName;
+    }
+
+    @Override
+    public List<String> getUserAuthoritiesName() {
+        return ofNullable(getAuthorities()).orElse(emptyList())
+                .stream().map(UserAuthority::getAuthority)
+                .map(Authority::getName)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getUserEmail() {
+        return getEmail();
+    }
+
+    @Override
+    public Long getUserTenancyId() {
+        return ofNullable(getTenancy()).map(Tenancy::getId).orElse(null);
+    }
+
+    @Override
+    public String getUserTenancyName() {
+        return ofNullable(getTenancy()).map(Tenancy::getName).orElse(null);
     }
 }

@@ -1,9 +1,9 @@
 package com.trading.journal.authentication.authentication.service.impl;
 
+import com.allanweber.jwttoken.data.ContextUser;
 import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
-import com.trading.journal.authentication.jwt.data.ContextUser;
 import com.trading.journal.authentication.password.service.PasswordService;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.user.User;
