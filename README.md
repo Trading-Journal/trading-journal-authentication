@@ -1,5 +1,11 @@
 # Trading Journal Authentication
 
+## Change Log
+
+### 1.0.0
+
+Fully functional authentication with JWT generation and interpretation made in this project code
+
 ## Pending
 
 * Lib for token validation to be used in other projects
