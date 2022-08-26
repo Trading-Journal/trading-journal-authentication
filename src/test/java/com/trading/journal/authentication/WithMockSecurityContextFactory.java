@@ -1,6 +1,6 @@
 package com.trading.journal.authentication;
 
-import com.trading.journal.authentication.jwt.data.ContextUser;
+import com.allanweber.jwttoken.data.ContextUser;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

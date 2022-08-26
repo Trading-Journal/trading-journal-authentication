@@ -2,7 +2,7 @@ package com.trading.journal.authentication.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.trading.journal.authentication.authority.Authority;
-import com.trading.journal.authentication.jwt.helper.DateHelper;
+import com.trading.journal.authentication.helper.DateHelper;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import lombok.*;
 

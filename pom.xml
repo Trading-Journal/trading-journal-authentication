@@ -119,8 +119,6 @@
             <version>${io.jsonwebtoken}</version>
             <scope>runtime</scope>
         </dependency>
-
-        <!-- Extra -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>

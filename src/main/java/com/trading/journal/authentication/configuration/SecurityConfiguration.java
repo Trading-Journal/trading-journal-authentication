@@ -1,9 +1,8 @@
 package com.trading.journal.authentication.configuration;
 
+import com.allanweber.jwttoken.service.JwtTokenAuthenticationCheck;
 import com.trading.journal.authentication.authentication.service.UserPasswordAuthenticationManager;
 import com.trading.journal.authentication.authority.AuthorityCategory;
-import com.trading.journal.authentication.jwt.JwtTokenAuthenticationFilter;
-import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +23,7 @@ public class SecurityConfiguration {
 
     private final UserPasswordAuthenticationManager authenticationManager;
     private final ServerAuthenticationExceptionEntryPoint serverAuthenticationExceptionEntryPoint;
-    private final JwtTokenReader tokenReader;
+    private final JwtTokenAuthenticationCheck jwtTokenAuthenticationCheck;
 
     private final LoadAuthorities loadAuthorities;
 
@@ -37,7 +36,7 @@ public class SecurityConfiguration {
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers(getPublicPath()).permitAll()
                 .and()
-                .addFilterBefore(new JwtTokenAuthenticationFilter(tokenReader), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtTokenAuthenticationFilter(jwtTokenAuthenticationCheck), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         httpSecurity.cors();

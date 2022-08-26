@@ -1,10 +1,9 @@
 package com.trading.journal.authentication.api;
 
-import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
+import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.AuthoritiesChange;
 import com.trading.journal.authentication.user.UserInfo;
-import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

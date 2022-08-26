@@ -1,11 +1,11 @@
 package com.trading.journal.authentication.api;
 
+import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.allanweber.jwttoken.service.JwtResolveToken;
+import com.allanweber.jwttoken.service.JwtTokenReader;
 import com.trading.journal.authentication.PostgresTestContainerInitializer;
 import com.trading.journal.authentication.WithCustomMockUser;
 import com.trading.journal.authentication.authority.Authority;
-import com.trading.journal.authentication.jwt.data.AccessTokenInfo;
-import com.trading.journal.authentication.jwt.service.JwtResolveToken;
-import com.trading.journal.authentication.jwt.service.JwtTokenReader;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.service.TenancyService;

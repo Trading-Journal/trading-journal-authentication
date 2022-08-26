@@ -1,14 +1,14 @@
 package com.trading.journal.authentication.api;
 
+import com.allanweber.jwttoken.data.JwtProperties;
+import com.allanweber.jwttoken.helper.JwtConstants;
+import com.allanweber.jwttoken.service.PrivateKeyProvider;
 import com.trading.journal.authentication.PostgresTestContainerInitializer;
 import com.trading.journal.authentication.authentication.Login;
 import com.trading.journal.authentication.authentication.LoginResponse;
 import com.trading.journal.authentication.authentication.service.AuthenticationService;
 import com.trading.journal.authentication.email.service.EmailSender;
-import com.trading.journal.authentication.jwt.data.JwtProperties;
-import com.trading.journal.authentication.jwt.helper.DateHelper;
-import com.trading.journal.authentication.jwt.helper.JwtConstants;
-import com.trading.journal.authentication.jwt.service.PrivateKeyProvider;
+import com.trading.journal.authentication.helper.DateHelper;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.user.service.UserService;
