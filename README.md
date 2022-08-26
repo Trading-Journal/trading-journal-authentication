@@ -6,11 +6,9 @@
 
 Fully functional authentication with JWT generation and interpretation made in this project code
 
-## Pending
+### 1.1.0
 
-* Use token generated here in another project to validate flow and Lib (above)
-* Create version 1.0.0
-* Create TAG with current code for reuse in other projects
+Fully functional authentication with JWT library
 
 ## Pending for the future
 * Manage user session
