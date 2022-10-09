@@ -172,7 +172,7 @@ Push image to registry: ```docker push allanweber/trading-journal-authentication
 * Get postgres container ip: ```docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' CONTAINER_ID```
 
 ```bash
-docker run -p 8080:8080 --name authentication \
+docker run -p 8080:8080 --name trading-journal-authentication \
 -e ADMIN_EMAIL= \
 -e DATASOURCE_URL= \
 -e DATASOURCE_PASSWORD= \
@@ -188,7 +188,7 @@ docker run -p 8080:8080 --name authentication \
 -e JWT_PRIVATE_KEY= \
 -e JWT_PUBLIC_KEY= \
 -e WEB_APP_URL= \
-allanweber/authentication:VERSION
+allanweber/trading-journal-authentication:VERSION
 ```
 
 ## Kubernetes
@@ -256,6 +256,8 @@ Delete deployment: ```kubectl delete deploy -n trading-journal trading-journal-a
 Get pods: ```kubectl get pods -n trading-journal```
 
 Describe pods: ```kubectl describe pod -n trading-journal trading-journal-authentication```
+
+Set a variable with pod generated name: ```POD=$(kubectl get pod -n trading-journal -l app=trading-journal-authentication -o jsonpath="{.items[0].metadata.name}")```
 
 ## Deploys
 
