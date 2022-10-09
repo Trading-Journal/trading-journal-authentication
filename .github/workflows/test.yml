@@ -8,7 +8,7 @@ on:
         required: true
       iterations:
         description: Number of iterations
-        default: 1
+        default: "1"
         required: true
 jobs:
   test:
@@ -37,7 +37,5 @@ jobs:
         with:
           name: Report
           path: testResults/htmlreport.html
-
-
           collection: postman/TJA.postman_collection.json
           environment: postman/TJA_test.postman_environment.json
