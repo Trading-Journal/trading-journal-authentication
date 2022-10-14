@@ -58,7 +58,9 @@ public class AuthenticationControllerTest {
                 "UserName5",
                 "mail5@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
 
         webTestClient
                 .post()

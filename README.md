@@ -109,6 +109,7 @@ CREATE TABLE Users (
   enabled BOOLEAN NOT NULL,
   verified BOOLEAN NOT NULL,
   createdAt TIMESTAMP NOT NULL,
+  newsletter BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (id),
   CONSTRAINT tenancyIdFk FOREIGN KEY (tenancyId) REFERENCES Tenancy (id)
 );

@@ -111,6 +111,7 @@ public class UserServiceImpl implements UserService {
                 .enabled(enabledAndVerified)
                 .verified(enabledAndVerified)
                 .createdAt(LocalDateTime.now())
+                .newsletter(userRegistration.getNewsletter())
                 .build();
     }
 }

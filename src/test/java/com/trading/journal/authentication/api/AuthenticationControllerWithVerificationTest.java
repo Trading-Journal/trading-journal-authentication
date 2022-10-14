@@ -69,7 +69,9 @@ public class AuthenticationControllerWithVerificationTest {
                 "UserName2",
                 "mail2@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );;
 
         webTestClient
                 .post()
@@ -104,7 +106,9 @@ public class AuthenticationControllerWithVerificationTest {
                 "UserName2",
                 "mail2@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
 
         webTestClient
                 .post()
@@ -150,7 +154,9 @@ public class AuthenticationControllerWithVerificationTest {
                 "UserName2",
                 "mail2@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
 
         webTestClient
                 .post()

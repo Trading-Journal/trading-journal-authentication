@@ -17,7 +17,7 @@ class PasswordConfirmedValidatorTest {
     @Test
     @DisplayName("Validation of password format for user registration is successfully")
     void passwordsAreValid() {
-        UserRegistration userRegistration = new UserRegistration(null,"name", "last", "user", "mail", "123", "123");
+        UserRegistration userRegistration = new UserRegistration(null,"name", "last", "user", "mail", "123", "123", false);
         boolean valid = passwordConfirmedValidator.isValid(userRegistration, null);
         assertTrue(valid);
     }
@@ -25,7 +25,7 @@ class PasswordConfirmedValidatorTest {
     @Test
     @DisplayName("Validation of password format for user registration is invalid because are not equal")
     void passwordsAreInvalid() {
-        UserRegistration userRegistration = new UserRegistration(null,"name", "last", "user", "mail", "123", "1234");
+        UserRegistration userRegistration = new UserRegistration(null,"name", "last", "user", "mail", "123", "1234", false);
         boolean valid = passwordConfirmedValidator.isValid(userRegistration, null);
         assertFalse(valid);
     }
@@ -33,7 +33,7 @@ class PasswordConfirmedValidatorTest {
     @Test
     @DisplayName("Validation of password for user registration is invalid because password is null")
     void invalidNullPassword() {
-        UserRegistration userRegistration = new UserRegistration(null,"name", "last", "user", "mail", null, "1234");
+        UserRegistration userRegistration = new UserRegistration(null,"name", "last", "user", "mail", null, "1234", false);
         boolean valid = passwordConfirmedValidator.isValid(userRegistration, null);
         assertFalse(valid);
     }
@@ -41,7 +41,7 @@ class PasswordConfirmedValidatorTest {
     @Test
     @DisplayName("Validation of password for user registration is invalid because password confirmation is null")
     void invalidNullConfirmation() {
-        UserRegistration userRegistration = new UserRegistration(null,"name", "last", "user", "mail", "123", null);
+        UserRegistration userRegistration = new UserRegistration(null,"name", "last", "user", "mail", "123", null, false);
         boolean valid = passwordConfirmedValidator.isValid(userRegistration, null);
         assertFalse(valid);
     }

@@ -234,7 +234,9 @@ public class MeControllerTest {
                         "johnwick",
                         "johnwick@mail.com",
                         "dad231#$#4",
-                        "dad231#$#4"),
+                        "dad231#$#4",
+                        false
+                ),
                 new UserRegistration(
                         null,
                         "John",
@@ -242,7 +244,9 @@ public class MeControllerTest {
                         "johnrambo",
                         "johnrambo@mail.com",
                         "dad231#$#4",
-                        "dad231#$#4"),
+                        "dad231#$#4",
+                        false
+                ),
                 new UserRegistration(
                         null,
                         "Han",
@@ -250,6 +254,8 @@ public class MeControllerTest {
                         "hansolo",
                         "hansolo@mail.com",
                         "dad231#$#4",
-                        "dad231#$#4"));
+                        "dad231#$#4",
+                        false
+                ));
     }
 }
