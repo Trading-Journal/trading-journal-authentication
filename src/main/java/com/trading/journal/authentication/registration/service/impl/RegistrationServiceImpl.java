@@ -1,9 +1,11 @@
 package com.trading.journal.authentication.registration.service.impl;
 
+import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.registration.service.RegistrationService;
 import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.tenancy.TenancyException;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.service.UserService;
@@ -34,8 +36,21 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public SignUpResponse signUp(@Valid UserRegistration userRegistration) {
-        Tenancy tenancy = tenancyService.create(Tenancy.builder().name(userRegistration.getCompanyName()).userUsage(1).build());
-        User user = userService.createNewUser(userRegistration, tenancy);
+        Tenancy tenancy;
+        try {
+            tenancy = tenancyService.create(Tenancy.builder().name(userRegistration.getCompanyName()).userUsage(1).build());
+        } catch (TenancyException e) {
+            throw (ApplicationException) new ApplicationException(e.getStatusCode(), "Organisation already exist").initCause(e);
+        }
+
+        User user;
+        try {
+            user = userService.createNewUser(userRegistration, tenancy);
+        } catch (ApplicationException e) {
+            tenancyService.delete(tenancy.getId());
+            throw e;
+        }
+
         userAuthorityService.saveOrganisationAdminUserAuthorities(user);
         return sendVerification(user.getEmail());
     }

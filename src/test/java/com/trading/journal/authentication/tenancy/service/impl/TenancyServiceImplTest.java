@@ -1,9 +1,9 @@
 package com.trading.journal.authentication.tenancy.service.impl;
 
-import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.tenancy.TenancyException;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.service.UserService;
@@ -78,7 +78,7 @@ class TenancyServiceImplTest {
     void findByIdNotFund() {
         when(tenancyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.getById(1L));
+        TenancyException exception = assertThrows(TenancyException.class, () -> tenancyService.getById(1L));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Tenancy id not found");
     }
@@ -104,7 +104,7 @@ class TenancyServiceImplTest {
 
         when(tenancyRepository.findByName("tenancy1")).thenReturn(Optional.of(tenancySaved));
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.create(tenancyToSave));
+        TenancyException exception = assertThrows(TenancyException.class, () -> tenancyService.create(tenancyToSave));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(exception.getStatusText()).isEqualTo("Tenancy name 'tenancy1' already exist");
 
@@ -125,7 +125,7 @@ class TenancyServiceImplTest {
     void disableError() {
         when(tenancyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.disable(1L));
+        TenancyException exception = assertThrows(TenancyException.class, () -> tenancyService.disable(1L));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Tenancy id not found");
 
@@ -146,7 +146,7 @@ class TenancyServiceImplTest {
     void enableError() {
         when(tenancyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.enable(1L));
+        TenancyException exception = assertThrows(TenancyException.class, () -> tenancyService.enable(1L));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Tenancy id not found");
 
@@ -170,7 +170,7 @@ class TenancyServiceImplTest {
     void limitNotFoundError() {
         when(tenancyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.newLimit(1L, 10));
+        TenancyException exception = assertThrows(TenancyException.class, () -> tenancyService.newLimit(1L, 10));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Tenancy id not found");
 
@@ -183,7 +183,7 @@ class TenancyServiceImplTest {
         Tenancy tenancy = Tenancy.builder().id(1L).name("tenancy1").userLimit(15).userUsage(11).build();
         when(tenancyRepository.findById(1L)).thenReturn(Optional.of(tenancy));
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.newLimit(1L, 10));
+        TenancyException exception = assertThrows(TenancyException.class, () -> tenancyService.newLimit(1L, 10));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("New tenancy limit is lower than the current usage");
 
@@ -221,7 +221,7 @@ class TenancyServiceImplTest {
     void lowerUsageNotFoundError() {
         when(tenancyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.lowerUsage(1L));
+        TenancyException exception = assertThrows(TenancyException.class, () -> tenancyService.lowerUsage(1L));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Tenancy id not found");
 
@@ -246,7 +246,7 @@ class TenancyServiceImplTest {
     void increaseNotFoundError() {
         when(tenancyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.increaseUsage(1L));
+        TenancyException exception = assertThrows(TenancyException.class, () -> tenancyService.increaseUsage(1L));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Tenancy id not found");
 
@@ -259,7 +259,7 @@ class TenancyServiceImplTest {
         Tenancy savedTenancy = Tenancy.builder().id(1L).name("tenancy1").userLimit(10).userUsage(10).build();
         when(tenancyRepository.findById(1L)).thenReturn(Optional.of(savedTenancy));
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.increaseUsage(1L));
+        TenancyException exception = assertThrows(TenancyException.class, () -> tenancyService.increaseUsage(1L));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("Tenancy has reach its user limit");
 
@@ -291,7 +291,7 @@ class TenancyServiceImplTest {
     void increaseAllowedNotFoundError() {
         when(tenancyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.increaseUsageAllowed(1L));
+        TenancyException exception = assertThrows(TenancyException.class, () -> tenancyService.increaseUsageAllowed(1L));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Tenancy id not found");
 
@@ -340,7 +340,7 @@ class TenancyServiceImplTest {
 
         when(userService.existsByTenancyId(tenancyId)).thenReturn(true);
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> tenancyService.delete(tenancyId));
+        TenancyException exception = assertThrows(TenancyException.class, () -> tenancyService.delete(tenancyId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(exception.getStatusText()).isEqualTo("Delete this tenancy not allowed because there are users using it");
 
