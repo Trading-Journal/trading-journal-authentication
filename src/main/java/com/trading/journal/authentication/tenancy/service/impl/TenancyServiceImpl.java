@@ -1,10 +1,10 @@
 package com.trading.journal.authentication.tenancy.service.impl;
 
-import com.trading.journal.authentication.ApplicationException;
 import com.trading.journal.authentication.pageable.PageResponse;
 import com.trading.journal.authentication.pageable.PageableRequest;
 import com.trading.journal.authentication.pageable.specifications.FilterLike;
 import com.trading.journal.authentication.tenancy.Tenancy;
+import com.trading.journal.authentication.tenancy.TenancyException;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.tenancy.service.TenancyService;
 import com.trading.journal.authentication.user.User;
@@ -38,13 +38,13 @@ public class TenancyServiceImpl implements TenancyService {
     @Override
     public Tenancy getById(Long id) {
         return tenancyRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Tenancy id not found"));
+                .orElseThrow(() -> new TenancyException(HttpStatus.NOT_FOUND, "Tenancy id not found"));
     }
 
     @Override
     public Tenancy create(Tenancy tenancy) {
         if (tenancyRepository.findByName(tenancy.getName()).isPresent()) {
-            throw new ApplicationException(HttpStatus.CONFLICT, String.format("Tenancy name '%s' already exist", tenancy.getName()));
+            throw new TenancyException(HttpStatus.CONFLICT, String.format("Tenancy name '%s' already exist", tenancy.getName()));
         }
         return tenancyRepository.save(tenancy);
     }
@@ -67,7 +67,7 @@ public class TenancyServiceImpl implements TenancyService {
     public Tenancy newLimit(Long id, Integer limit) {
         Tenancy tenancy = getById(id);
         if (tenancy.getUserUsage() > limit) {
-            throw new ApplicationException(HttpStatus.BAD_REQUEST, "New tenancy limit is lower than the current usage");
+            throw new TenancyException(HttpStatus.BAD_REQUEST, "New tenancy limit is lower than the current usage");
         }
         tenancy.newLimit(limit);
         return tenancyRepository.save(tenancy);
@@ -87,7 +87,7 @@ public class TenancyServiceImpl implements TenancyService {
             tenancy.increaseUsage();
             return tenancyRepository.save(tenancy);
         }
-        throw new ApplicationException("Tenancy has reach its user limit");
+        throw new TenancyException("Tenancy has reach its user limit");
     }
 
     @Override
@@ -106,7 +106,7 @@ public class TenancyServiceImpl implements TenancyService {
     public void delete(Long id) {
         Boolean userInTenancy = userService.existsByTenancyId(id);
         if (userInTenancy) {
-            throw new ApplicationException(HttpStatus.CONFLICT, "Delete this tenancy not allowed because there are users using it");
+            throw new TenancyException(HttpStatus.CONFLICT, "Delete this tenancy not allowed because there are users using it");
         } else {
             tenancyRepository.deleteById(id);
         }
