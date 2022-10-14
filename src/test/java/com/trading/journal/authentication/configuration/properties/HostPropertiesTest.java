@@ -22,8 +22,8 @@ class HostPropertiesTest {
     @Test
     void host() {
         assertThat(hostProperties.getFrontEnd()).isEqualTo("http://site.com:8081");
-        assertThat(hostProperties.getVerificationPage()).isEqualTo("auth/email-verified");
-        assertThat(hostProperties.getChangePasswordPage()).isEqualTo("auth/change-password");
+        assertThat(hostProperties.getVerificationPage()).isEqualTo("email-verified");
+        assertThat(hostProperties.getChangePasswordPage()).isEqualTo("change-password");
     }
 
 }

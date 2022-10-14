@@ -19,6 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -138,9 +139,9 @@ public class AuthenticationControllerSignInIntegratedTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
-                .value(response -> assertThat(response.get("email")).isEqualTo("Email is required"));
+                .value(response -> assertThat(response.get("errors")).contains("Email is required"));
 
         Login loginNullPassword = new Login("mail@mail.com", null);
         webTestClient
@@ -151,9 +152,9 @@ public class AuthenticationControllerSignInIntegratedTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
-                .value(response -> assertThat(response.get("password")).isEqualTo("Password is required"));
+                .value(response -> assertThat(response.get("errors")).contains("Password is required"));
 
         Login loginInvalidEmail = new Login("password", "dad231#$#4");
         webTestClient
@@ -164,8 +165,8 @@ public class AuthenticationControllerSignInIntegratedTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
-                .value(response -> assertThat(response.get("email")).isEqualTo("Email is invalid"));
+                .value(response -> assertThat(response.get("errors")).contains("Email is invalid"));
     }
 }

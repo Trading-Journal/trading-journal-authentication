@@ -82,9 +82,9 @@
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
-									"     const companyName = pm.collectionVariables.replaceIn(\"{{$randomCompanyName}}\");\r",
-									"     const companySuffix = pm.collectionVariables.replaceIn(\"{{$randomCompanySuffix}}\");\r",
-									"     return companyName + ' ' + companySuffix;\r",
+									"     const companyName = pm.collectionVariables.replaceIn(\"{{$randomLastName}}\");\r",
+									"\t const companyName2 = pm.collectionVariables.replaceIn(\"{{$randomLastName}}\");\r",
+									"     return (companyName + companyName2).toUpperCase();\r",
 									"}\r",
 									"\r",
 									"function gerUserName() {\r",
@@ -3504,9 +3504,9 @@
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
-									"     const companyName = pm.collectionVariables.replaceIn(\"{{$randomCompanyName}}\");\r",
-									"     const companySuffix = pm.collectionVariables.replaceIn(\"{{$randomCompanySuffix}}\");\r",
-									"     return companyName + ' ' + companySuffix;\r",
+									"     const companyName = pm.collectionVariables.replaceIn(\"{{$randomLastName}}\");\r",
+									"\t const companyName2 = pm.collectionVariables.replaceIn(\"{{$randomLastName}}\");\r",
+									"     return (companyName + companyName2).toUpperCase();\r",
 									"}\r",
 									"\r",
 									"function gerUserName() {\r",
@@ -3725,13 +3725,13 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"    pm.expect(response.totalItems).to.eql(1);\r",
+									"    const tenancy = response.items.filter(tenancy => tenancy.name === pm.collectionVariables.get(\"company-name\"))[0];\r",
 									"\r",
-									"\tpm.collectionVariables.set(\"tenancy-id\", response.items[0].id);\r",
+									"\tpm.collectionVariables.set(\"tenancy-id\", tenancy.id);\r",
 									"\r",
-									"\tpm.expect(response.items[0].userLimit).to.eql(1);\r",
-									"\tpm.expect(response.items[0].userUsage).to.eql(1);\r",
-									"\tpm.expect(response.items[0].enabled).to.eql(true);\r",
+									"\tpm.expect(tenancy.userLimit).to.eql(1);\r",
+									"\tpm.expect(tenancy.userUsage).to.eql(1);\r",
+									"\tpm.expect(tenancy.enabled).to.eql(true);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -3748,13 +3748,19 @@
 							}
 						],
 						"url": {
-							"raw": "{{authentication-api}}/admin/tenancies",
+							"raw": "{{authentication-api}}/admin/tenancies?size=100",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
 								"admin",
 								"tenancies"
+							],
+							"query": [
+								{
+									"key": "size",
+									"value": "100"
+								}
 							]
 						}
 					},
@@ -4315,7 +4321,9 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"    pm.expect(response.totalItems).to.eql(0);\r",
+									"    const tenancy = response.items.filter(tenancy => tenancy.name === pm.collectionVariables.get(\"company-name\"))[0];\r",
+									"\r",
+									"\tpm.expect(tenancy).to.eql(undefined);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4363,9 +4371,9 @@
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
-									"     const companyName = pm.collectionVariables.replaceIn(\"{{$randomCompanyName}}\");\r",
-									"     const companySuffix = pm.collectionVariables.replaceIn(\"{{$randomCompanySuffix}}\");\r",
-									"     return companyName + ' ' + companySuffix;\r",
+									"     const companyName = pm.collectionVariables.replaceIn(\"{{$randomLastName}}\");\r",
+									"\t const companyName2 = pm.collectionVariables.replaceIn(\"{{$randomLastName}}\");\r",
+									"     return (companyName + companyName2).toUpperCase();\r",
 									"}\r",
 									"\r",
 									"function gerUserName() {\r",
@@ -4584,13 +4592,13 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"    pm.expect(response.totalItems).to.eql(1);\r",
+									"\tconst tenancy = response.items.filter(tenancy => tenancy.name === pm.collectionVariables.get(\"company-name\"))[0];\r",
 									"\r",
-									"\tpm.collectionVariables.set(\"tenancy-id\", response.items[0].id);\r",
+									"\tpm.collectionVariables.set(\"tenancy-id\", tenancy.id);\r",
 									"\r",
-									"\tpm.expect(response.items[0].userLimit).to.eql(1);\r",
-									"\tpm.expect(response.items[0].userUsage).to.eql(1);\r",
-									"\tpm.expect(response.items[0].enabled).to.eql(true);\r",
+									"\tpm.expect(tenancy.userLimit).to.eql(1);\r",
+									"\tpm.expect(tenancy.userUsage).to.eql(1);\r",
+									"\tpm.expect(tenancy.enabled).to.eql(true);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4607,13 +4615,19 @@
 							}
 						],
 						"url": {
-							"raw": "{{authentication-api}}/admin/tenancies",
+							"raw": "{{authentication-api}}/admin/tenancies?size=100",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
 								"admin",
 								"tenancies"
+							],
+							"query": [
+								{
+									"key": "size",
+									"value": "100"
+								}
 							]
 						}
 					},
@@ -5342,9 +5356,9 @@
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
-									"     const companyName = pm.collectionVariables.replaceIn(\"{{$randomCompanyName}}\");\r",
-									"     const companySuffix = pm.collectionVariables.replaceIn(\"{{$randomCompanySuffix}}\");\r",
-									"     return companyName + ' ' + companySuffix;\r",
+									"     const companyName = pm.collectionVariables.replaceIn(\"{{$randomLastName}}\");\r",
+									"\t const companyName2 = pm.collectionVariables.replaceIn(\"{{$randomLastName}}\");\r",
+									"     return (companyName + companyName2).toUpperCase();\r",
 									"}\r",
 									"\r",
 									"function gerUserName() {\r",
@@ -5623,13 +5637,13 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"    pm.expect(response.totalItems).to.eql(1);\r",
+									"    const tenancy = response.items.filter(tenancy => tenancy.name === pm.collectionVariables.get(\"company-name\"))[0];\r",
 									"\r",
-									"\tpm.collectionVariables.set(\"tenancy-id\", response.items[0].id);\r",
+									"\tpm.collectionVariables.set(\"tenancy-id\", tenancy.id);\r",
 									"\r",
-									"\tpm.expect(response.items[0].userLimit).to.eql(1);\r",
-									"\tpm.expect(response.items[0].userUsage).to.eql(1);\r",
-									"\tpm.expect(response.items[0].enabled).to.eql(true);\r",
+									"\tpm.expect(tenancy.userLimit).to.eql(1);\r",
+									"\tpm.expect(tenancy.userUsage).to.eql(1);\r",
+									"\tpm.expect(tenancy.enabled).to.eql(true);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -5646,13 +5660,19 @@
 							}
 						],
 						"url": {
-							"raw": "{{authentication-api}}/admin/tenancies",
+							"raw": "{{authentication-api}}/admin/tenancies?size=100",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
 								"admin",
 								"tenancies"
+							],
+							"query": [
+								{
+									"key": "size",
+									"value": "100"
+								}
 							]
 						}
 					},
@@ -5821,9 +5841,9 @@
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
-									"     const companyName = pm.collectionVariables.replaceIn(\"{{$randomCompanyName}}\");\r",
-									"     const companySuffix = pm.collectionVariables.replaceIn(\"{{$randomCompanySuffix}}\");\r",
-									"     return companyName + ' ' + companySuffix;\r",
+									"     const companyName = pm.collectionVariables.replaceIn(\"{{$randomLastName}}\");\r",
+									"\t const companyName2 = pm.collectionVariables.replaceIn(\"{{$randomLastName}}\");\r",
+									"     return (companyName + companyName2).toUpperCase();\r",
 									"}\r",
 									"\r",
 									"function gerUserName() {\r",

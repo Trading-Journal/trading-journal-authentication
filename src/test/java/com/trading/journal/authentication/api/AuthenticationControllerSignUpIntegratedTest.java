@@ -18,6 +18,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -95,15 +96,15 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String,  List<String>>>() {
                 })
                 .value(response -> {
-                    assertThat(response.get("firstName")).isEqualTo("First name is required");
-                    assertThat(response.get("lastName")).isEqualTo("Last name is required");
-                    assertThat(response.get("password")).matches(message -> message.equals("Password is required") || message.equals("Password is not valid"));
-                    assertThat(response.get("confirmPassword")).isEqualTo("Password confirmation is required");
-                    assertThat(response.get("userName")).isEqualTo("User name is required");
-                    assertThat(response.get("email")).isEqualTo("Email is required");
+                    assertThat(response.get("errors")).contains("First name is required");
+                    assertThat(response.get("errors")).contains("Last name is required");
+                    assertThat(response.get("errors")).matches(message -> message.contains("Password is required") || message.contains("Password is not valid"));
+                    assertThat(response.get("errors")).contains("Password confirmation is required");
+                    assertThat(response.get("errors")).contains("User name is required");
+                    assertThat(response.get("errors")).contains("Email is required");
                 });
     }
 
@@ -127,10 +128,10 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String,  List<String>>>() {
                 })
                 .value(response ->
-                        assertThat(response.get("email")).isEqualTo("Email is invalid")
+                        assertThat(response.get("errors")).contains("Email is invalid")
                 );
     }
 
@@ -154,10 +155,10 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
                 .value(response ->
-                        assertThat(response.get("userRegistration")).isEqualTo("Password and confirmation must be equal")
+                        assertThat(response.get("errors")).contains("Password and confirmation must be equal")
                 );
     }
 }
