@@ -56,7 +56,9 @@ public class UserServiceImplTest {
                 "UserName",
                 "mail@mail.com",
                 "123456",
-                "123456");
+                "123456",
+                false
+        );
 
         User applicationUser = User.builder()
                 .id(1L)
@@ -94,7 +96,9 @@ public class UserServiceImplTest {
                 "UserName",
                 "mail@mail.com",
                 "123456",
-                "123456");
+                "123456",
+                false
+        );
 
         User applicationUser = User.builder()
                 .id(1L)
@@ -217,7 +221,9 @@ public class UserServiceImplTest {
                 "UserName",
                 "mail@mail.com",
                 "123456",
-                "123456");
+                "123456",
+                false
+        );;
 
         when(userRepository.existsByUserName(anyString())).thenReturn(true);
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
@@ -239,7 +245,9 @@ public class UserServiceImplTest {
                 "UserName",
                 "mail@mail.com",
                 "123456",
-                "123456");
+                "123456",
+                false
+        );
 
         when(userRepository.existsByUserName(anyString())).thenReturn(false);
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
@@ -261,7 +269,9 @@ public class UserServiceImplTest {
                 "UserName",
                 "mail@mail.com",
                 "123456",
-                "123456");
+                "123456",
+                false
+        );
 
         when(userRepository.existsByUserName(anyString())).thenReturn(true);
         when(userRepository.existsByEmail(anyString())).thenReturn(true);

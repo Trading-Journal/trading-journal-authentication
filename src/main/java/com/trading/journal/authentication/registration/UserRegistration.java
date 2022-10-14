@@ -48,6 +48,9 @@ public class UserRegistration implements PasswordAndConfirmation {
     @Size(max = 128, min = 10, message = "Password confirmation size is invalid")
     private String confirmPassword;
 
+    @Builder.Default
+    private Boolean newsletter = false;
+
     public String getCompanyName() {
         String name = companyName;
         if (!StringUtils.hasText(name)) {

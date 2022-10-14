@@ -80,7 +80,9 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
                 "johntravolta",
                 "johntravolta@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
 
         userService.createNewUser(user, null);
 
@@ -114,7 +116,9 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
                 "allanweber",
                 "allanweber@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
 
         userService.createNewUser(user, null);
 

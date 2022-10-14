@@ -144,7 +144,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         userService.createNewUser(userRegistration, null);
         User user = userRepository.findByEmail("johnwick@mail.com").get();
         user.enable();
@@ -176,7 +179,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         adminUserService.createAdmin(userRegistration);
 
         User applicationUser = userRepository.findByEmail("johnwick@mail.com").get();
@@ -210,7 +216,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         userService.createNewUser(userRegistration, null);
         User user = userRepository.findByEmail("johnwick@mail.com").get();
         user.enable();
@@ -242,7 +251,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         adminUserService.createAdmin(userRegistration);
 
         User applicationUser = userRepository.findByEmail("johnwick@mail.com").get();
@@ -275,7 +287,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         adminUserService.createAdmin(userRegistration);
 
         User applicationUser = userRepository.findByEmail("johnwick@mail.com").get();
@@ -308,7 +323,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         userService.createNewUser(userRegistration, null);
         User user = userRepository.findByEmail("johnwick@mail.com").get();
         user.enable();
@@ -340,7 +358,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         userService.createNewUser(userRegistration, null);
         User user = userRepository.findByEmail("johnwick@mail.com").get();
         user.enable();
@@ -372,7 +393,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         userService.createNewUser(userRegistration, null);
         User user = userRepository.findByEmail("johnwick@mail.com").get();
         user.enable();
@@ -406,7 +430,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         userService.createNewUser(userRegistration, null);
         User user = userRepository.findByEmail("johnwick@mail.com").get();
         user.enable();
@@ -442,7 +469,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         userService.createNewUser(userRegistration, tenancy);
         User user = userRepository.findByEmail("johnwick@mail.com").get();
         user.enable();
@@ -478,7 +508,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         userService.createNewUser(userRegistration, tenancy);
         User user = userRepository.findByEmail("johnwick@mail.com").get();
         user.enable();
@@ -512,7 +545,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         adminUserService.createAdmin(userRegistration);
 
         User applicationUser = userRepository.findByEmail("johnwick@mail.com").get();
@@ -559,7 +595,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         userService.createNewUser(userRegistration, tenancy);
         User user = userRepository.findByEmail("johnwick@mail.com").get();
         user.enable();
@@ -596,7 +635,10 @@ public class SecurityConfigurationTest {
                 "johnwick",
                 "johnwick@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
+
         userService.createNewUser(userRegistration, tenancy);
         User user = userRepository.findByEmail("johnwick@mail.com").get();
         user.enable();

@@ -64,7 +64,9 @@ public class RegistrationServiceImplTest {
                 "UserName",
                 "mail@mail.com",
                 "123456",
-                "123456");
+                "123456",
+                false
+        );
 
         User user = User.builder()
                 .id(1L)
@@ -101,7 +103,9 @@ public class RegistrationServiceImplTest {
                 "UserName",
                 "mail@mail.com",
                 "123456",
-                "123456");
+                "123456",
+                false
+        );
 
         User user = User.builder()
                 .id(1L)

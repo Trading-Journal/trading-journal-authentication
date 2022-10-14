@@ -53,6 +53,9 @@ public class User implements JwtUserData {
 
     private LocalDateTime createdAt;
 
+    @Builder.Default
+    private Boolean newsletter = false;
+
     public void enable() {
         this.enabled = true;
     }

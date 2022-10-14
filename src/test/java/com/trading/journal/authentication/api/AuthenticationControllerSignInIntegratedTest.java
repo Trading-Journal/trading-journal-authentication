@@ -59,7 +59,9 @@ public class AuthenticationControllerSignInIntegratedTest {
                 "UserName",
                 "mail@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
 
         userService.createNewUser(userRegistration, null);
 
@@ -108,7 +110,9 @@ public class AuthenticationControllerSignInIntegratedTest {
                 "UserName4",
                 "mail4@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
 
         userService.createNewUser(userRegistration, null);
 

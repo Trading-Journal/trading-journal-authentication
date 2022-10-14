@@ -59,7 +59,9 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 "UserName2",
                 "mail2@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
 
         webTestClient
                 .post()
@@ -86,7 +88,9 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 null,
                 null,
                 null,
-                null);
+                null,
+                false
+        );
 
         webTestClient
                 .post()
@@ -118,7 +122,9 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 "UserName2",
                 "mail2",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
 
         webTestClient
                 .post()
@@ -145,7 +151,9 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 "UserName2",
                 "mail2@email.com",
                 "dad231#$#4",
-                "dad231#$#4xxx");
+                "dad231#$#4xxx",
+                false
+        );
 
         webTestClient
                 .post()

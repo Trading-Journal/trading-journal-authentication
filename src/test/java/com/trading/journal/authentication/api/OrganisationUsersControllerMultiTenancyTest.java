@@ -560,7 +560,9 @@ class OrganisationUsersControllerMultiTenancyTest {
                 "UserName5",
                 "mail@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
 
         User user = User.builder()
                 .id(1L)
@@ -612,7 +614,9 @@ class OrganisationUsersControllerMultiTenancyTest {
                 "UserName5",
                 "mail@mail.com",
                 "dad231#$#4",
-                "dad231#$#4");
+                "dad231#$#4",
+                false
+        );
 
         webTestClient
                 .post()
