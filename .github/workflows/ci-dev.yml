@@ -21,20 +21,15 @@ jobs:
          PASSWORD: ${{ secrets.PACKAGE_TOKEN }}
         run: |
          mvn -B clean package --file pom.xml --settings settings.xml
-         echo "APP_VERSION=$(mvn --file pom.xml --settings settings.xml  -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_OUTPUT
+         echo "APP_VERSION=$(mvn --file pom.xml --settings settings.xml  -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> "$GITHUB_ENV"
         id: build-version
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: $APP_NAME
           path: target/*.jar
-      - name: Save version
-        uses: noobly314/share-data@v1
-        with:
-          share-id: app_version
-          mode: set
-          key: version
-          value: ${{ steps.build-version.outputs.APP_VERSION }}-test
+      - name: Echo version
+        run: echo "${env.APP_VERSION}"
 
   docker:
     name: Docker Build and Push
@@ -47,8 +42,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
       - name: Get Version
-        run: |
-          echo "${{ steps.build-version.outputs.APP_VERSION }}"
+        run: echo "${env.APP_VERSION}"
 #      - name: Download Artifact
 #        uses: actions/download-artifact@v2
 #        with:
