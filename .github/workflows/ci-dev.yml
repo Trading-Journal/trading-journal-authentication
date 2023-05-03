@@ -29,7 +29,7 @@ jobs:
           name: $APP_NAME
           path: target/*.jar
       - name: Echo version
-        run: echo "${env.APP_VERSION}"
+        run: echo "${{env.APP_VERSION}}"
 
   docker:
     name: Docker Build and Push
@@ -42,7 +42,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
       - name: Get Version
-        run: echo "${env.APP_VERSION}"
+        run: echo "${{env.APP_VERSION}}"
 #      - name: Download Artifact
 #        uses: actions/download-artifact@v2
 #        with:
