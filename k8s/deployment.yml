@@ -51,11 +51,11 @@ spec:
             periodSeconds: 60
           resources:
             limits:
-              cpu: '2'
-              memory: '2048Mi'
+              cpu: '0.5'
+              memory: '512Mi'
             requests:
-              cpu: '1'
-              memory: '1024Mi'
+              cpu: '0.5'
+              memory: '512Mi'
           ports:
             - containerPort: 8080
           volumeMounts:
@@ -69,17 +69,17 @@ spec:
               subPath: public_key.pem
           env:
             - name: ES_JAVA_OPTS
-              value: '-Xmx2048m -Xms2048m'
+              value: '-Xmx512m -Xms512m'
             - name: EMAIL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: trading-journal-authentication-prd
+                  name: trading-journal-authentication
                   key: EMAIL_PASSWORD
             - name: DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: trading-journal-authentication-prd
+                  name: trading-journal-authentication
                   key: DATASOURCE_PASSWORD
           envFrom:
             - configMapRef:
-                name: trading-journal-authentication-prd
+                name: trading-journal-authentication
