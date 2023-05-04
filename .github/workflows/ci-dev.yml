@@ -67,12 +67,14 @@ jobs:
        uses: actions-hub/kubectl@master
        env:
          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+         KUBE_CONTEXT: do-ams3-trading-journal-staging
        with:
          args: set image deployment ${{ env.APP_NAME }} ${{ env.APP_NAME }}=allanweber/${{ env.APP_NAME }}:${{needs.build.outputs.app-version}} -n ${{ env. NAMESPACE }} --record=true
      - name: Check Image Rollout
        uses: actions-hub/kubectl@master
        env:
          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+         KUBE_CONTEXT: do-ams3-trading-journal-staging
        with:
          args: rollout status deployment/$APP_NAME -n $NAMESPACE
 #
