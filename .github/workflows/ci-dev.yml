@@ -21,10 +21,9 @@ jobs:
       - name: Build with Maven
         env:
          PASSWORD: ${{ secrets.PACKAGE_TOKEN }}
-         run: echo "APP_VERSION=1.2.3" >> "$GITHUB_OUTPUT"
-#        run: |
-#         mvn -B clean package --file pom.xml --settings settings.xml
-#         echo "APP_VERSION=$(mvn --file pom.xml --settings settings.xml  -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> "$GITHUB_OUTPUT"
+        run: |
+         mvn -B clean package --file pom.xml --settings settings.xml
+         echo "APP_VERSION=$(mvn --file pom.xml --settings settings.xml  -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> "$GITHUB_OUTPUT"
         id: build-version
 #      - name: Upload Artifact
 #        uses: actions/upload-artifact@v3
