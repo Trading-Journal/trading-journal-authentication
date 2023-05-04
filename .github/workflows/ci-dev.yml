@@ -68,7 +68,7 @@ jobs:
        env:
          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
        with:
-         args: set image deployment $APP_NAME $APP_NAME=allanweber/$APP_NAME:${{needs.build.outputs.app-version}} -n $NAMESPACE --record=true
+         args: set image deployment ${{ env.APP_NAME }} ${{ env.APP_NAME }}=allanweber/${{ env.APP_NAME }}:${{needs.build.outputs.app-version}} -n ${{ env. NAMESPACE }} --record=true
      - name: Check Image Rollout
        uses: actions-hub/kubectl@master
        env:
