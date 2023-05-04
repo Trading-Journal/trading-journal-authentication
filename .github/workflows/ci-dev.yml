@@ -25,13 +25,11 @@ jobs:
          mvn -B clean package --file pom.xml --settings settings.xml
          echo "APP_VERSION=$(mvn --file pom.xml --settings settings.xml  -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> "$GITHUB_OUTPUT"
         id: build-version
-#      - name: Upload Artifact
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: $APP_NAME
-#          path: target/*.jar
-      - name: Echo version
-        run: echo "${{ steps.build-version.outputs.APP_VERSION }}-test"
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: $APP_NAME
+          path: target/*.jar
 
   docker:
     name: Docker Build and Push
@@ -43,23 +41,21 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-      - name: Get Version
-        run: echo ${{needs.build.outputs.app-version}}
-#      - name: Download Artifact
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: $APP_NAME
-#          path: target
-#      - name: Docker Login
-#        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
-#      - name: Docker Build Version DEV
-#        run: docker build -t allanweber/$APP_NAME:${{ steps.get-version.outputs.data }} -f docker/DockerfileTest .
-#      - name: Build and Push Version
-#        run: docker push allanweber/$APP_NAME:${{ steps.get-version.outputs.data }}
-#      - name: Delete Artifact
-#        uses: geekyeggo/delete-artifact@v1
-#        with:
-#          name: $APP_NAME
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: $APP_NAME
+          path: target
+      - name: Docker Login
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
+      - name: Docker Build Version DEV
+        run: docker build -t allanweber/$APP_NAME:${{needs.build.outputs.app-version}} -f docker/DockerfileTest .
+      - name: Build and Push Version
+        run: docker push allanweber/$APP_NAME:${{needs.build.outputs.app-version}}
+      - name: Delete Artifact
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: $APP_NAME
 
 #  deploy:
 #   name: Deploy a new version in DEV (Heroku)
