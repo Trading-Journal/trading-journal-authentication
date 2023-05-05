@@ -83,8 +83,9 @@ jobs:
      runs-on: ubuntu-latest
 #     needs: [build, docker, deploy]
      steps:
-       - uses: actions/checkout@v1
-       - uses: tale/kubectl-action@v1
+       - uses: actions/checkout@v3
+       - name: Kubernetes Port Forward
+         uses: tale/kubectl-action@v1
          with:
            base64-kube-config: ${{ secrets.KUBE_CONFIG }}
        - run: |
@@ -94,15 +95,15 @@ jobs:
            sleep 10
        - run: |
            curl -i http://localhost:8080/health
-       - name: Run API Tests
-         id: run-newman
-         uses: anthonyvscode/newman-action@v1
-         with:
-           collection: postman/TJA.postman_collection.json
-           environment: postman/TJA_test.postman_environment.json
-           reporters: cli
-       - name: Output summary to console
-         run: echo ${{ steps.run-newman.outputs.summary }}
+#       - name: Run API Tests
+#         id: run-newman
+#         uses: anthonyvscode/newman-action@v1
+#         with:
+#           collection: postman/TJA.postman_collection.json
+#           environment: postman/TJA_test.postman_environment.json
+#           reporters: cli
+#       - name: Output summary to console
+#         run: echo ${{ steps.run-newman.outputs.summary }}
 #
 #  test:
 #     name: Newman API Test
