@@ -89,7 +89,9 @@ jobs:
        - run: |
            kubectl get pods -n trading-journal-tst
            POD=$(kubectl get pod -n trading-journal-tst -l app=trading-journal-authentication -o jsonpath="{.items[0].metadata.name}")
-           echo $POD
+           kubectl port-forward -n trading-journal-tst $POD 8080
+       - run: |
+           curl -i http://localhost:8080/health
 #
 #  test:
 #     name: Newman API Test
