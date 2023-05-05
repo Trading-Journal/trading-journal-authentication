@@ -6,6 +6,10 @@ on:
         description: Number of iterations
         default: "1"
         required: true
+env:
+  APP_NAME: trading-journal-authentication
+  NAMESPACE: trading-journal-tst
+
 jobs:
   test:
     name: Test Latest Deploy
