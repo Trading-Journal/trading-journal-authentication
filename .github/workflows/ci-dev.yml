@@ -33,13 +33,9 @@ jobs:
           name: $APP_NAME
           path: target/*.jar
       - name: Create Tag
-        uses: rickstaa/action-create-tag@v1
-        id: "tag_create"
-        with:
-          tag: ${{ steps.build-version.outputs.APP_VERSION }}
-          tag_exists_error: false
-          github_token: ${{ secrets.PACKAGE_TOKEN }}
-          message: "Latest release"
+        run: |
+          git tag -a ${{ steps.build-version.outputs.APP_VERSION }} -m "Latest Version"
+          git push --tags
 #
 #  docker:
 #    name: Docker Build and Push
