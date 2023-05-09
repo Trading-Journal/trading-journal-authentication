@@ -6,7 +6,7 @@ on:
 
 env:
   APP_NAME: trading-journal-authentication
-  NAMESPACE: trading-journal-tst
+  NAMESPACE: trading-journal
   CONTEXT: admin@trading-journal
 
 jobs:
@@ -33,10 +33,10 @@ jobs:
           name: $APP_NAME
           path: target/*.jar
       - name: Create Tag
-        uses: negz/create-tag@v1
+      - uses: actions/checkout@v3
         with:
-          version: ${{ steps.build-version.outputs.APP_VERSION }}
-          token: ${{ secrets.PACKAGE_TOKEN }}
+          fetch-depth: 0
+        run: git tag ${{ steps.build-version.outputs.APP_VERSION }}
 
   docker:
     name: Docker Build and Push
@@ -69,7 +69,7 @@ jobs:
         name: $APP_NAME
 
   deploy:
-    name: Deploy on TST
+    name: Deploy on PRD
     runs-on: ubuntu-latest
     needs: [build, docker]
     steps:
