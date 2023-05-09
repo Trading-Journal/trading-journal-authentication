@@ -7,7 +7,7 @@ on:
 env:
   APP_NAME: trading-journal-authentication
   NAMESPACE: trading-journal-tst
-  CONTEXT: do-ams3-trading-journal-staging
+  CONTEXT: admin@trading-journal
 
 jobs:
   build:
