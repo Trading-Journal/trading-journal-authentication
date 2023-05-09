@@ -34,6 +34,8 @@ jobs:
           path: target/*.jar
       - name: Create Tag
         run: |
+          git config --global user.email "$GITHUB_ACTOR@noreply.github.com"
+          git config --global user.name "$GITHUB_ACTOR"
           git tag -a ${{ steps.build-version.outputs.APP_VERSION }} -m "Latest Version"
           git push --tags
 #
