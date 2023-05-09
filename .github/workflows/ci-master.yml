@@ -33,10 +33,10 @@ jobs:
           name: $APP_NAME
           path: target/*.jar
       - name: Create Tag
-        uses: actions/checkout@v3
+        uses: negz/create-tag@v1
         with:
-          fetch-depth: 0
-      - run: git tag ${{ steps.build-version.outputs.APP_VERSION }}
+          version: ${{ steps.build-version.outputs.APP_VERSION }}
+          token: ${{ secrets.PACKAGE_TOKEN }}
 
   docker:
     name: Docker Build and Push

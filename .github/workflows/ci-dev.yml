@@ -32,88 +32,82 @@ jobs:
         with:
           name: $APP_NAME
           path: target/*.jar
-      - name: Create Tag
+
+  docker:
+    name: Docker Build and Push
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: $APP_NAME
+          path: target
+      - name: Docker Login
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
+      - name: Docker Build Version DEV
+        run: docker build -t allanweber/$APP_NAME:${{needs.build.outputs.app-version}} -f docker/DockerfileTest .
+      - name: Build and Push Version
+        run: docker push allanweber/$APP_NAME:${{needs.build.outputs.app-version}}
+      - name: Delete Artifact
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: $APP_NAME
+
+  deploy:
+   name: Deploy on TST
+   runs-on: ubuntu-latest
+   needs: [build, docker]
+   steps:
+     - name: Deploy Image
+       uses: actions-hub/kubectl@master
+       env:
+         KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+         KUBE_CONTEXT: ${{ env.CONTEXT }}
+       with:
+         args: set image deployment ${{ env.APP_NAME }} ${{ env.APP_NAME }}=allanweber/${{ env.APP_NAME }}:${{needs.build.outputs.app-version}} -n ${{ env.NAMESPACE }} --record=true
+     - name: Check Image Rollout
+       uses: actions-hub/kubectl@master
+       env:
+         KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+         KUBE_CONTEXT: ${{ env.CONTEXT }}
+       with:
+         args: rollout status deployment/${{ env.APP_NAME }} -n ${{ env.NAMESPACE }}
+
+  test:
+    name: Test Latest Deploy
+    runs-on: ubuntu-latest
+    needs: [build, docker, deploy]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Kubernetes Port Forward
+        uses: tale/kubectl-action@v1
+        with:
+          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+      - run: |
+          POD=$(kubectl get pod -n ${{ env.NAMESPACE }} -l app=${{ env.APP_NAME }} -o jsonpath="{.items[0].metadata.name}")
+          kubectl port-forward -n ${{ env.NAMESPACE }} $POD 8080 &>/dev/null &
+          sleep 10
+      - run: |
+          curl -i http://localhost:8080/health
+      - name: Install Node
+        uses: actions/setup-node@v3
+      - name: Install Newman
         run: |
-          git config --global user.email "$GITHUB_ACTOR@noreply.github.com"
-          git config --global user.name "$GITHUB_ACTOR"
-          git tag -a ${{ steps.build-version.outputs.APP_VERSION }} -m "Latest Version"
-          git push --tags
-#
-#  docker:
-#    name: Docker Build and Push
-#    runs-on: ubuntu-latest
-#    needs: build
-#    steps:
-#      - uses: actions/checkout@v3
-#      - uses: actions/setup-java@v3
-#        with:
-#          distribution: 'zulu'
-#          java-version: '17'
-#      - name: Download Artifact
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: $APP_NAME
-#          path: target
-#      - name: Docker Login
-#        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
-#      - name: Docker Build Version DEV
-#        run: docker build -t allanweber/$APP_NAME:${{needs.build.outputs.app-version}} -f docker/DockerfileTest .
-#      - name: Build and Push Version
-#        run: docker push allanweber/$APP_NAME:${{needs.build.outputs.app-version}}
-#      - name: Delete Artifact
-#        uses: geekyeggo/delete-artifact@v2
-#        with:
-#          name: $APP_NAME
-#
-#  deploy:
-#   name: Deploy on TST
-#   runs-on: ubuntu-latest
-#   needs: [build, docker]
-#   steps:
-#     - name: Deploy Image
-#       uses: actions-hub/kubectl@master
-#       env:
-#         KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-#         KUBE_CONTEXT: ${{ env.CONTEXT }}
-#       with:
-#         args: set image deployment ${{ env.APP_NAME }} ${{ env.APP_NAME }}=allanweber/${{ env.APP_NAME }}:${{needs.build.outputs.app-version}} -n ${{ env.NAMESPACE }} --record=true
-#     - name: Check Image Rollout
-#       uses: actions-hub/kubectl@master
-#       env:
-#         KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-#         KUBE_CONTEXT: ${{ env.CONTEXT }}
-#       with:
-#         args: rollout status deployment/${{ env.APP_NAME }} -n ${{ env.NAMESPACE }}
-#
-#  test:
-#    name: Test Latest Deploy
-#    runs-on: ubuntu-latest
-#    needs: [build, docker, deploy]
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: Kubernetes Port Forward
-#        uses: tale/kubectl-action@v1
-#        with:
-#          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
-#      - run: |
-#          POD=$(kubectl get pod -n ${{ env.NAMESPACE }} -l app=${{ env.APP_NAME }} -o jsonpath="{.items[0].metadata.name}")
-#          kubectl port-forward -n ${{ env.NAMESPACE }} $POD 8080 &>/dev/null &
-#          sleep 10
-#      - run: |
-#          curl -i http://localhost:8080/health
-#      - name: Install Node
-#        uses: actions/setup-node@v3
-#      - name: Install Newman
-#        run: |
-#          npm install -g newman
-#          npm install -g newman-reporter-htmlextra
-#      - name: Make Directory for results
-#        run: mkdir -p testResults
-#      - name: Run Postman collection
-#        run: |
-#          newman run postman/TJA.postman_collection.json -e postman/TJA_test.postman_environment.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html
-#      - name: Output the run Details
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: RunReports
-#          path: testResults
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
+      - name: Make Directory for results
+        run: mkdir -p testResults
+      - name: Run Postman collection
+        run: |
+          newman run postman/TJA.postman_collection.json -e postman/TJA_test.postman_environment.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html
+      - name: Output the run Details
+        uses: actions/upload-artifact@v3
+        with:
+          name: RunReports
+          path: testResults
