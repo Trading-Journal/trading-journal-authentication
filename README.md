@@ -2,13 +2,14 @@
 
 ## Change Log
 
-### 1.0.0
-
-Fully functional authentication with JWT generation and interpretation made in this project code
+### 1.1.1
+Kubernetes deploy via CI with postman testing on Pull Request
 
 ### 1.1.0
-
 Fully functional authentication with JWT library
+
+### 1.0.0
+Fully functional authentication with JWT generation and interpretation made in this project code
 
 ## Pending for the future
 * Manage user session
@@ -88,6 +89,9 @@ openssl rsa -in secret_key.pem -pubout -outform PEM -out public_key.pem
 ### Database Schema
 
 ```
+CREATE USER trading_journal_user WITH ENCRYPTED PASSWORD '<PASSWORD>';
+GRANT ALL PRIVILEGES ON DATABASE trade_journal TO trading_journal_user;
+
 CREATE TABLE Tenancy (
   id SERIAL NOT NULL,
   name VARCHAR(254) NOT NULL,
@@ -140,11 +144,10 @@ CREATE TABLE Verifications (
   lastChange TIMESTAMP NOT NULL,
   PRIMARY KEY (id)
 );
-```
 
-### Database initial data
+GRANT ALL ON ALL TABLES IN SCHEMA public TO trading_journal_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO trading_journal_user;
 
-```
 INSERT INTO Authorities (category, name) VALUES ('COMMON_USER','ROLE_USER');
 INSERT INTO Authorities (category, name) VALUES ('ADMINISTRATOR','ROLE_ADMIN');
 INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN');
