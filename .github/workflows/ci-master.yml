@@ -7,7 +7,7 @@ on:
 env:
   APP_NAME: trading-journal-authentication
   NAMESPACE: trading-journal
-  CONTEXT: admin@trading-journal
+  CONTEXT: trading-journal
 
 jobs:
   build:
