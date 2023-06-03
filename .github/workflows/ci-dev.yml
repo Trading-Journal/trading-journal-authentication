@@ -51,7 +51,7 @@ jobs:
       - name: Docker Login
         run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
       - name: Docker Build Version DEV
-        run: docker build -t allanweber/$APP_NAME:${{needs.build.outputs.app-version}} -f docker/DockerfileTest .
+        run: docker build -t allanweber/$APP_NAME:${{needs.build.outputs.app-version}} -f docker/Dockerfile .
       - name: Build and Push Version
         run: docker push allanweber/$APP_NAME:${{needs.build.outputs.app-version}}
       - name: Delete Artifact
