@@ -1,8 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trading-journal-authentication
+  namespace: trading-journal-tst
+data:
+  ENVIRONMENT: test
+  ADMIN_EMAIL: '<EMAIL>'
+  EMAIL_HOST: '<HOST>'
+  EMAIL_USERNAME: '<LOGIN>'
+  EMAIL_PORT: '<PORT>'
+  DATASOURCE_URL: '<JDC_URL>'
+  DATASOURCE_USERNAME: '<DB_USER>'
+  JWT_ACCESS_TOKEN_EXPIRATION: '<SECONDS>'
+  JWT_AUDIENCE: '<AUDIENCE'
+  JWT_ISSUER: '<URL>'
+  JWT_REFRESH_TOKEN_EXPIRATION: '<SECONDS'
+  WEB_APP_URL: '<URL>'
+  JWT_PRIVATE_KEY: '<PATH_TO_PRIVATE_KEY>'
+  JWT_PUBLIC_KEY: '<PATH_TO_PUBLIC_KEY>'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trading-journal-authentication
+  namespace: trading-journal-tst
+  labels:
+    app: trading-journal-authentication
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: trading-journal-authentication
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: trading-journal-authentication
-  namespace: trading-journal
+  namespace: trading-journal-tst
   labels:
     app: trading-journal-authentication
 spec:
@@ -51,10 +87,7 @@ spec:
             periodSeconds: 60
           resources:
             limits:
-              cpu: '0.5'
-              memory: '512Mi'
-            requests:
-              cpu: '0.5'
+              cpu: '500m'
               memory: '512Mi'
           ports:
             - containerPort: 8080

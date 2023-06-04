@@ -7,7 +7,7 @@ on:
 env:
   APP_NAME: trading-journal-authentication
   NAMESPACE: trading-journal-tst
-  CONTEXT: admin@trading-journal
+  CONTEXT: trading-journal
 
 jobs:
   build:
@@ -51,7 +51,7 @@ jobs:
       - name: Docker Login
         run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
       - name: Docker Build Version DEV
-        run: docker build -t allanweber/$APP_NAME:${{needs.build.outputs.app-version}} -f docker/DockerfileTest .
+        run: docker build -t allanweber/$APP_NAME:${{needs.build.outputs.app-version}} -f docker/Dockerfile .
       - name: Build and Push Version
         run: docker push allanweber/$APP_NAME:${{needs.build.outputs.app-version}}
       - name: Delete Artifact
@@ -82,7 +82,7 @@ jobs:
   test:
     name: Test Latest Deploy
     runs-on: ubuntu-latest
-    needs: [build, docker, deploy]
+    needs: [ build, docker, deploy ]
     steps:
       - uses: actions/checkout@v3
       - name: Install Node
