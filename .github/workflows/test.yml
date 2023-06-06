@@ -16,16 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Kubernetes Port Forward
-        uses: tale/kubectl-action@v1
-        with:
-          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
-      - run: |
-          POD=$(kubectl get pod -n ${{ env.NAMESPACE }} -l app=${{ env.APP_NAME }} -o jsonpath="{.items[0].metadata.name}")
-          kubectl port-forward -n ${{ env.NAMESPACE }} $POD 8080 &>/dev/null &
-          sleep 10
-      - run: |
-          curl -i http://localhost:8080/health
       - name: Install Node
         uses: actions/setup-node@v3
       - name: Install Newman
@@ -36,7 +26,7 @@ jobs:
         run: mkdir -p testResults
       - name: Run Postman collection
         run: |
-          newman run postman/TJA.postman_collection.json -e postman/TJA_test.postman_environment.json n ${{ github.event.inputs.iterations }} -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html
+          newman run postman/TJA.postman_collection.json --insecure -e postman/TJA_test.postman_environment.json n ${{ github.event.inputs.iterations }} -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html
       - name: Output the run Details
         uses: actions/upload-artifact@v3
         with:
