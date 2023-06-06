@@ -64,7 +64,7 @@ public class AuthenticationControllerTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signup")
+                .uri("/auth/signup")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userRegistration)
                 .exchange()

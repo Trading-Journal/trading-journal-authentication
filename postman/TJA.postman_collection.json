@@ -51,12 +51,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -134,12 +134,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signup",
+							"raw": "{{authentication-api}}/auth/signup",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signup"
 							]
 						}
@@ -173,12 +173,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{authentication-api}}/authentication/verify/send?email={{user-email}}",
+							"raw": "{{authentication-api}}/auth/verify/send?email={{user-email}}",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"verify",
 								"send"
 							],
@@ -193,7 +193,7 @@
 					"response": []
 				},
 				{
-					"name": "Get Verification hash for Registration",
+					"name": "Get Verification hash for Registration Copy",
 					"event": [
 						{
 							"listen": "test",
@@ -263,12 +263,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{authentication-api}}/authentication/verify?hash={{user-verification-hash}}",
+							"raw": "{{authentication-api}}/auth/verify?hash={{user-verification-hash}}",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"verify"
 							],
 							"query": [
@@ -323,12 +323,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -379,12 +379,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{authentication-api}}/authentication/refresh-token",
+							"raw": "{{authentication-api}}/auth/refresh-token",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"refresh-token"
 							]
 						}
@@ -415,12 +415,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{authentication-api}}/authentication/change-password/request?email={{user-email}}",
+							"raw": "{{authentication-api}}/auth/change-password/request?email={{user-email}}",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"change-password",
 								"request"
 							],
@@ -468,12 +468,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -560,12 +560,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/change-password",
+							"raw": "{{authentication-api}}/auth/change-password",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"change-password"
 							]
 						}
@@ -614,12 +614,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -1135,12 +1135,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -1180,12 +1180,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -1263,12 +1263,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{authentication-api}}/authentication/verify?hash={{tenancy-user1-verification-hash}}",
+							"raw": "{{authentication-api}}/auth/verify?hash={{tenancy-user1-verification-hash}}",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"verify"
 							],
 							"query": [
@@ -1352,12 +1352,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{authentication-api}}/authentication/verify?hash={{tenancy-user2-verification-hash}}",
+							"raw": "{{authentication-api}}/auth/verify?hash={{tenancy-user2-verification-hash}}",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"verify"
 							],
 							"query": [
@@ -1403,12 +1403,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -1448,12 +1448,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -1540,12 +1540,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/change-password",
+							"raw": "{{authentication-api}}/auth/change-password",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"change-password"
 							]
 						}
@@ -1590,12 +1590,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -1682,12 +1682,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/change-password",
+							"raw": "{{authentication-api}}/auth/change-password",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"change-password"
 							]
 						}
@@ -1732,12 +1732,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -1817,12 +1817,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -1906,12 +1906,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -2120,12 +2120,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -2323,12 +2323,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -2450,12 +2450,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -2500,12 +2500,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -2584,12 +2584,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -2951,12 +2951,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -3556,12 +3556,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signup",
+							"raw": "{{authentication-api}}/auth/signup",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signup"
 							]
 						}
@@ -3639,12 +3639,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{authentication-api}}/authentication/verify?hash={{user-verification-hash}}",
+							"raw": "{{authentication-api}}/auth/verify?hash={{user-verification-hash}}",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"verify"
 							],
 							"query": [
@@ -3699,12 +3699,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -3929,12 +3929,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -4068,12 +4068,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -4423,12 +4423,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signup",
+							"raw": "{{authentication-api}}/auth/signup",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signup"
 							]
 						}
@@ -4506,12 +4506,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{authentication-api}}/authentication/verify?hash={{user-verification-hash}}",
+							"raw": "{{authentication-api}}/auth/verify?hash={{user-verification-hash}}",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"verify"
 							],
 							"query": [
@@ -4566,12 +4566,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -4773,12 +4773,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -4878,12 +4878,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -5408,12 +5408,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signup",
+							"raw": "{{authentication-api}}/auth/signup",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signup"
 							]
 						}
@@ -5551,12 +5551,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{authentication-api}}/authentication/verify?hash={{user-verification-hash}}",
+							"raw": "{{authentication-api}}/auth/verify?hash={{user-verification-hash}}",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"verify"
 							],
 							"query": [
@@ -5611,12 +5611,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -5893,12 +5893,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signup",
+							"raw": "{{authentication-api}}/auth/signup",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signup"
 							]
 						}
@@ -6078,12 +6078,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{authentication-api}}/authentication/verify?hash={{user-verification-hash}}",
+							"raw": "{{authentication-api}}/auth/verify?hash={{user-verification-hash}}",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"verify"
 							],
 							"query": [
@@ -6138,12 +6138,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}
@@ -6335,12 +6335,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{authentication-api}}/authentication/verify?hash={{tenancy-user1-verification-hash}}",
+							"raw": "{{authentication-api}}/auth/verify?hash={{tenancy-user1-verification-hash}}",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"verify"
 							],
 							"query": [
@@ -6433,12 +6433,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/change-password",
+							"raw": "{{authentication-api}}/auth/change-password",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"change-password"
 							]
 						}
@@ -6485,12 +6485,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{authentication-api}}/authentication/signin",
+							"raw": "{{authentication-api}}/auth/signin",
 							"host": [
 								"{{authentication-api}}"
 							],
 							"path": [
-								"authentication",
+								"auth",
 								"signin"
 							]
 						}

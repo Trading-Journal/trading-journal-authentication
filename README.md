@@ -2,6 +2,9 @@
 
 ## Change Log
 
+### 2.0.0
+* Change the /authentication/ endpoint to /auth/
+
 ### 1.1.1
 Kubernetes deploy via CI with postman testing on Pull Request
 
@@ -195,108 +198,6 @@ docker run -p 8080:8080 --name trading-journal-authentication \
 allanweber/trading-journal-authentication:VERSION
 ```
 
-## Kubernetes
-
-### Enable Kubernetes on local Docker
-
-![](imgs/enable-docker-kubernetes.png)
-
-The scripts for Kubernetes are inside the folder **k8s**, remember to change the names, labels etc. as you like.
-
-Also, remember to replace where you find placeholders for you own values, such as _<SECRET>_, for example
-
-### Create a namespace
-
-This step is not required, if you do not want a namespace, change all other files where the namespace is referred.
-
-Create namespace: ```kubectl apply -f k8s/namespace.yml```
-
-Check namespace created: ```kubectl get namespace```
-
-### Config Maps
-
-Create config map: ```kubectl apply -f k8s/config-maps.yml```
-
-Get config map: ```kubectl get cm -n trading-journal trading-journal-authentication-prd -o yaml```
-
-Delete config map: ```kubectl delete cm -n trading-journal trading-journal-authentication-prd```
-
-### Secrets
-
-Create the secrets: ```kubectl apply -f  k8s/secrets.yml```
-
-Check created secrets: ```kubectl get secret -n trading-journal trading-journal-authentication-prd -o yaml```
-
-Delete secrets if you like: ```kubectl delete secrets -n trading-journal trading-journal-authentication-prd```
-
-### Public and Private Keys
-
-Change the <FILE_LOCATION> placeholder with the location of your private and public **.pem**
-
-Run the command: ```./k8s/import-keys.sh```
-
-Get Keys
-
-```kubectl get cm -n trading-journal trading-journal-private-key -o yaml```
-
-```kubectl get cm -n trading-journal trading-journal-public-key -o yaml```
-
-Delete secrets if you like
-
-```kubectl cm secrets -n trading-journal trading-journal-private-key```
-
-```kubectl cm secrets -n trading-journal trading-journal-public-key```
-
-### Deployment
-
-Create deployment: ```kubectl apply -f ./k8s/deployment.yml```
-
-Check deployment: ```kubectl logs -n trading-journal deployment/trading-journal-authentication```
-
-Get deployment: ```kubectl get deploy -n trading-journal```
-
-Delete deployment: ```kubectl delete deploy -n trading-journal trading-journal-authentication```
-
-Get pods: ```kubectl get pods -n trading-journal```
-
-Describe pods: ```kubectl describe pod -n trading-journal trading-journal-authentication```
-
-Set a variable with pod generated name: ```POD=$(kubectl get pod -n trading-journal -l app=trading-journal-authentication -o jsonpath="{.items[0].metadata.name}")```
-
-## Deploys
-
-### Create completely new
-
-```kubectl apply -f k8s/namespace.yml```
-
-```kubectl apply -f  k8s/secrets.yml```
-
-```./k8s/import-keys.sh```
-
-```kubectl apply -f k8s/config-maps.yml```
-
-```kubectl apply -f ./k8s/deployment.yml```
-
-```kubectl logs -n trading-journal deployment/trading-journal-authentication```
-
-### Delete all (except namespace)
-
-```kubectl delete deploy -n trading-journal trading-journal-authentication```
-
-```kubectl delete cm -n trading-journal trading-journal-authentication-prd```
-
-```kubectl cm secrets -n trading-journal trading-journal-private-key```
-
-```kubectl cm secrets -n trading-journal trading-journal-public-key```
-
-```kubectl delete secrets -n trading-journal trading-journal-authentication-prd```
-
-## Access application
-
-### From local to trading-journal-authentication
-
-```kubectl port-forward  -n trading-journal $POD 8080```
-
 ## Configurations
 
 ### Start up application the first time
@@ -309,14 +210,3 @@ In case there is need for new users confirm their emails, then enable the config
 * **journal.authentication.hosts.front-end** *e.g. http://localhost:8080* to be able to proper redirect the user to the page of confirm registration or change password
 * **journal.authentication.hosts.verification-page** *e.g. auth/email-verified* the web page user will be redirected to confirm the email
 * **journal.authentication.hosts.change-password-page** *e.g. auth/change-password* the web page user will be redirected to change password
-
-## Metrics
-
-* http://localhost:8080/metrics/signup_user - Amount of time create a new user via signup
-* http://localhost:8080/metrics/signin_use - Amount of time to authenticate a user
-* http://localhost:8080/metrics/refresh_token - Amount of time to refresh the user token
-* http://localhost:8080/metrics/verify_new_user - Amount of time to verify a new user emails
-* http://localhost:8080/metrics/send_new_verification - Amount of time to send a new email verification to the user email
-* http://localhost:8080/metrics/request_password_change - Amount of time to request a password change
-* http://localhost:8080/metrics/password_change - Amount of time to apply a password change
-* http://localhost:8080/metrics/get_me_info - Amount of time to retrieve user information

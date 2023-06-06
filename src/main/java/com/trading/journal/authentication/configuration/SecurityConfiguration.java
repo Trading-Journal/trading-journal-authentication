@@ -53,7 +53,7 @@ public class SecurityConfiguration {
 
     private String[] getPublicPath() {
         String[] monitoring = {"/health/**", "/prometheus", "/metrics*/**"};
-        String[] authentication = {"/authentication*/**"};
+        String[] authentication = {"/auth/**"};
         String[] swagger = {"/", "/v2/api-docs", "/swagger*/**", "/webjars/**"};
         return Stream.of(monitoring, authentication, swagger).flatMap(Stream::of).toArray(String[]::new);
     }

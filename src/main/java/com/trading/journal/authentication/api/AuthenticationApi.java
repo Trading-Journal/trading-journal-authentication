@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "Authentication Api")
-@RequestMapping("/authentication")
+@RequestMapping("/auth")
 public interface AuthenticationApi {
 
     @ApiOperation(notes = "Sign up as a new user", value = "Sign up", response = SignUpResponse.class)

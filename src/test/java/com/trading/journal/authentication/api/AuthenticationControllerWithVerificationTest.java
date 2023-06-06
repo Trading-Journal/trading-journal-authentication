@@ -75,7 +75,7 @@ public class AuthenticationControllerWithVerificationTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signup")
+                .uri("/auth/signup")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userRegistration)
                 .exchange()
@@ -112,7 +112,7 @@ public class AuthenticationControllerWithVerificationTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signup")
+                .uri("/auth/signup")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userRegistration)
                 .exchange()
@@ -129,7 +129,7 @@ public class AuthenticationControllerWithVerificationTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/authentication/verify")
+                        .path("/auth/verify")
                         .queryParam("hash", verification.getHash())
                         .build())
                 .exchange()
@@ -160,7 +160,7 @@ public class AuthenticationControllerWithVerificationTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signup")
+                .uri("/auth/signup")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userRegistration)
                 .exchange()
@@ -182,7 +182,7 @@ public class AuthenticationControllerWithVerificationTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/authentication/verify/send")
+                        .path("/auth/verify/send")
                         .queryParam("email", "mail2@mail.com")
                         .build())
                 .exchange()
@@ -199,7 +199,7 @@ public class AuthenticationControllerWithVerificationTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/authentication/verify")
+                        .path("/auth/verify")
                         .queryParam("hash", secondHash)
                         .build())
                 .exchange()

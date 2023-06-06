@@ -98,7 +98,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/authentication/change-password/request")
+                        .path("/auth/change-password/request")
                         .queryParam("email", email)
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
@@ -124,7 +124,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/authentication/change-password/request")
+                        .path("/auth/change-password/request")
                         .queryParam("email", email)
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
@@ -150,7 +150,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/change-password")
+                .uri("/auth/change-password")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(changePassword)
                 .exchange()
@@ -173,7 +173,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/change-password")
+                .uri("/auth/change-password")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(changePassword)
                 .exchange()
@@ -193,7 +193,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/change-password")
+                .uri("/auth/change-password")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(changePassword)
                 .exchange()
@@ -214,7 +214,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/change-password")
+                .uri("/auth/change-password")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(changePassword)
                 .exchange()
@@ -245,7 +245,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/change-password")
+                .uri("/auth/change-password")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(changePassword)
                 .exchange()
@@ -306,7 +306,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/change-password")
+                .uri("/auth/change-password")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(changePassword)
                 .exchange()
