@@ -93,7 +93,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
         assert loginResponse != null;
         webTestClient
                 .post()
-                .uri("/authentication/refresh-token")
+                .uri("/auth/refresh-token")
                 .header("refresh-token", loginResponse.refreshToken())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -129,7 +129,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
         assert loginResponse != null;
         webTestClient
                 .post()
-                .uri("/authentication/refresh-token")
+                .uri("/auth/refresh-token")
                 .header("refresh-token", loginResponse.accessToken())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -164,7 +164,7 @@ public class AuthenticationControllerRefreshTokenIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/refresh-token")
+                .uri("/auth/refresh-token")
                 .header("refresh-token", refreshToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()

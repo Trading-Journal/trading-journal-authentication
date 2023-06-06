@@ -73,7 +73,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signup")
+                .uri("/auth/signup")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userRegistration)
                 .exchange()
@@ -102,7 +102,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signup")
+                .uri("/auth/signup")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userRegistration)
                 .exchange()
@@ -136,7 +136,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signup")
+                .uri("/auth/signup")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userRegistration)
                 .exchange()
@@ -165,7 +165,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signup")
+                .uri("/auth/signup")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userRegistration)
                 .exchange()
@@ -196,7 +196,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signup")
+                .uri("/auth/signup")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userRegistration)
                 .exchange()
@@ -236,7 +236,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signup")
+                .uri("/auth/signup")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userRegistration)
                 .exchange()

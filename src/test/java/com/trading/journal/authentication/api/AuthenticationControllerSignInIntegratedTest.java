@@ -69,7 +69,7 @@ public class AuthenticationControllerSignInIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signin")
+                .uri("/auth/signin")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(login)
                 .exchange()
@@ -89,7 +89,7 @@ public class AuthenticationControllerSignInIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signin")
+                .uri("/auth/signin")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(login)
                 .exchange()
@@ -120,7 +120,7 @@ public class AuthenticationControllerSignInIntegratedTest {
 
         webTestClient
                 .post()
-                .uri("/authentication/signin")
+                .uri("/auth/signin")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(login)
                 .exchange()
@@ -137,7 +137,7 @@ public class AuthenticationControllerSignInIntegratedTest {
         Login loginNullEmail = new Login(null, "dad231#$#4");
         webTestClient
                 .post()
-                .uri("/authentication/signin")
+                .uri("/auth/signin")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(loginNullEmail)
                 .exchange()
@@ -150,7 +150,7 @@ public class AuthenticationControllerSignInIntegratedTest {
         Login loginNullPassword = new Login("mail@mail.com", null);
         webTestClient
                 .post()
-                .uri("/authentication/signin")
+                .uri("/auth/signin")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(loginNullPassword)
                 .exchange()
@@ -163,7 +163,7 @@ public class AuthenticationControllerSignInIntegratedTest {
         Login loginInvalidEmail = new Login("password", "dad231#$#4");
         webTestClient
                 .post()
-                .uri("/authentication/signin")
+                .uri("/auth/signin")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(loginInvalidEmail)
                 .exchange()
