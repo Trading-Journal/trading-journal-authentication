@@ -18,8 +18,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
-
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
@@ -56,7 +54,7 @@ public class SecurityConfiguration {
 
     private CorsConfigurationSource configureCors() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(asList("http://localhost:3000/", "https://*.tradefastapp.com/"));
+        configuration.addAllowedOrigin("*");
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod(HttpMethod.GET);
         configuration.addAllowedMethod(HttpMethod.POST);
@@ -64,7 +62,6 @@ public class SecurityConfiguration {
         configuration.addAllowedMethod(HttpMethod.PUT);
         configuration.addAllowedMethod(HttpMethod.DELETE);
         configuration.addAllowedMethod(HttpMethod.OPTIONS);
-        configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
         return request -> configuration;
     }
