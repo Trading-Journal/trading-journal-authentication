@@ -56,7 +56,7 @@ public class SecurityConfiguration {
 
     private CorsConfigurationSource configureCors() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(asList("http://localhost:3000/", "https://*.tradefastapp.com/"));
+        configuration.setAllowedOriginPatterns(asList("http://localhost:3000", "https://*.tradefastapp.com"));
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod(HttpMethod.GET);
         configuration.addAllowedMethod(HttpMethod.POST);
