@@ -74,4 +74,9 @@ public class AuthenticationController implements AuthenticationApi {
         passwordManagementService.changePassword(changePassword);
         return ok().build();
     }
+
+    @Override
+    public ResponseEntity<String> test() {
+        return ok("2.0.1");
+    }
 }

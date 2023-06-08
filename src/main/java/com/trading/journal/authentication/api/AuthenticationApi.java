@@ -57,4 +57,7 @@ public interface AuthenticationApi {
     @PostMapping("/change-password")
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Void> changePassword(@RequestBody ChangePassword changePassword);
+
+    @GetMapping("/test")
+    ResponseEntity<String> test();
 }
