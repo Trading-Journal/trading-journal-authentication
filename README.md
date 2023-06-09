@@ -2,20 +2,19 @@
 
 ## Change Log
 
-### 2.0.1
-* Fix CORS configuration
-
 ### 2.0.0
 * Change the /authentication/ endpoint to /auth/
-
-### 1.1.1
-* Kubernetes deploy via CI with postman testing on Pull Request
-
-### 1.1.0
-* Fully functional authentication with JWT library
+  * 2.0.1
+    * Fix CORS configuration
+  * 2.0.2
+    * Accept more METHODS for cors
 
 ### 1.0.0
 * Fully functional authentication with JWT generation and interpretation made in this project code
+  * 1.1.0
+    * Fully functional authentication with JWT library
+  * 1.1.1
+     * Kubernetes deploy via CI with postman testing on Pull Request
 
 ## Pending for the future
 * Manage user session
