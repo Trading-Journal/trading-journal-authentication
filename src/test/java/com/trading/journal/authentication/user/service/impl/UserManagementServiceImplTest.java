@@ -444,7 +444,7 @@ class UserManagementServiceImplTest {
         assertThat(exception.getStatusText()).isEqualTo("Request is invalid");
 
         verify(userManagementRepository, never()).findByTenancyIdAndEmail(any(), any());
-        verify(userManagementRepository, never()).delete(any());
+        verify(userManagementRepository, never()).delete(any(User.class));
         verify(tenancyService, never()).lowerUsage(anyLong());
         verify(verificationService, never()).verify(any());
         verify(userService, never()).existsByTenancyId(anyLong());
@@ -469,7 +469,7 @@ class UserManagementServiceImplTest {
         assertThat(exception.getStatusText()).isEqualTo("Verification does not exist or is invalid");
 
         verify(userManagementRepository, never()).findByTenancyIdAndEmail(any(), any());
-        verify(userManagementRepository, never()).delete(any());
+        verify(userManagementRepository, never()).delete(any(User.class));
         verify(tenancyService, never()).lowerUsage(anyLong());
         verify(verificationService, never()).verify(any());
         verify(userService, never()).existsByTenancyId(anyLong());
@@ -496,7 +496,7 @@ class UserManagementServiceImplTest {
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("Email mail@mail.com not found");
 
-        verify(userManagementRepository, never()).delete(any());
+        verify(userManagementRepository, never()).delete(any(User.class));
         verify(tenancyService, never()).lowerUsage(anyLong());
         verify(verificationService, never()).verify(any());
         verify(userService, never()).existsByTenancyId(anyLong());
@@ -690,9 +690,9 @@ class UserManagementServiceImplTest {
 
         when(userManagementRepository.save(argThat(u ->
                 u.getUserName().equals("userName-updated")
-                && u.getFirstName().equals("firstName-Updated")
-                && u.getLastName().equals("lastName-Updated")
-                ))).thenReturn(User.builder()
+                        && u.getFirstName().equals("firstName-Updated")
+                        && u.getLastName().equals("lastName-Updated")
+        ))).thenReturn(User.builder()
                 .id(1L)
                 .userName("userName-updated")
                 .password("password")

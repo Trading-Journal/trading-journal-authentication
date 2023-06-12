@@ -17,7 +17,6 @@ import com.trading.journal.authentication.verification.service.VerificationServi
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
 import java.util.Optional;
 
 @Service
@@ -35,7 +34,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final VerificationProperties verificationProperties;
 
     @Override
-    public SignUpResponse signUp(@Valid UserRegistration userRegistration) {
+    public SignUpResponse signUp(UserRegistration userRegistration) {
         Tenancy tenancy;
         try {
             tenancy = tenancyService.create(Tenancy.builder().name(userRegistration.getCompanyName()).userUsage(1).build());

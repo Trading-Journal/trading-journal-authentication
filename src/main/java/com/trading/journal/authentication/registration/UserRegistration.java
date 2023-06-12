@@ -3,12 +3,12 @@ package com.trading.journal.authentication.registration;
 import com.trading.journal.authentication.password.validation.PasswordAndConfirmation;
 import com.trading.journal.authentication.password.validation.PasswordConfirmed;
 import com.trading.journal.authentication.password.validation.PasswordPolicy;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -27,7 +27,7 @@ public class UserRegistration implements PasswordAndConfirmation {
     private String firstName;
 
     @NotBlank(message = "Last name is required")
-    @Size(max = 128, min = 3, message = "Las name size is invalid")
+    @Size(max = 128, min = 3, message = "Last name size is invalid")
     private String lastName;
 
     @NotBlank(message = "User name is required")
