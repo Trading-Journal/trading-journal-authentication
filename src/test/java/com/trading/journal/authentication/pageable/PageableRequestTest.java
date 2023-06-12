@@ -66,6 +66,6 @@ class PageableRequestTest {
         PageableRequest pageableRequest = new PageableRequest(1, 20, sort, "something");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, pageableRequest::pageable);
-        assertThat(exception.getMessage()).contains("Invalid value 'abc' for orders given! Has to be either 'desc' or 'asc'");
+        assertThat(exception.getMessage()).contains("Invalid value 'abc' for orders given; Has to be either 'desc' or 'asc' (case insensitive)");
     }
 }

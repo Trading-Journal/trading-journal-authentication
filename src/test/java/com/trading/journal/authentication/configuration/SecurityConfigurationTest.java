@@ -101,7 +101,7 @@ public class SecurityConfigurationTest {
     void anonymously() {
         webTestClient
                 .get()
-                .uri("/swagger-ui/index.html")
+                .uri("/auth/hello")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -166,7 +166,7 @@ public class SecurityConfigurationTest {
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()
                 .expectStatus()
-                .isForbidden();
+                .isUnauthorized();
     }
 
     @DisplayName("Access users admin path with Admin user is granted")
@@ -238,7 +238,7 @@ public class SecurityConfigurationTest {
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()
                 .expectStatus()
-                .isForbidden();
+                .isUnauthorized();
     }
 
     @DisplayName("Access authorities admin path with Admin user is granted")
@@ -345,7 +345,7 @@ public class SecurityConfigurationTest {
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()
                 .expectStatus()
-                .isForbidden();
+                .isUnauthorized();
     }
 
     @DisplayName("Access Organisation users path with common user token fails")
@@ -380,7 +380,7 @@ public class SecurityConfigurationTest {
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()
                 .expectStatus()
-                .isForbidden();
+                .isUnauthorized();
     }
 
     @DisplayName("Access Organisation users path with Organisation Admin user is granted")
@@ -455,7 +455,7 @@ public class SecurityConfigurationTest {
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()
                 .expectStatus()
-                .isForbidden();
+                .isUnauthorized();
     }
 
     @DisplayName("Access Organisation Tenancy path with Organisation Admin user is granted")
@@ -532,7 +532,7 @@ public class SecurityConfigurationTest {
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()
                 .expectStatus()
-                .isForbidden();
+                .isUnauthorized();
     }
 
     @DisplayName("Access Verifications path with Admin user is granted")
@@ -621,7 +621,7 @@ public class SecurityConfigurationTest {
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()
                 .expectStatus()
-                .isForbidden();
+                .isUnauthorized();
     }
 
     @DisplayName("Access Verifications path with Organisation Admin user is denied")
@@ -663,7 +663,7 @@ public class SecurityConfigurationTest {
                 .header("Authorization", "Bearer " + loginResponse.accessToken())
                 .exchange()
                 .expectStatus()
-                .isForbidden();
+                .isUnauthorized();
     }
 
     private static Stream<String> invalidTokens() {

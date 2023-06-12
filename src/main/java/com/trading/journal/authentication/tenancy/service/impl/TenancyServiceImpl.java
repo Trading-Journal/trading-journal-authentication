@@ -27,7 +27,7 @@ public class TenancyServiceImpl implements TenancyService {
 
     @Override
     public PageResponse<Tenancy> getAll(PageableRequest pageRequest) {
-        Specification<Tenancy> specification = null;
+        Specification<Tenancy> specification = Specification.where(null);
         if (pageRequest.hasFilter()) {
             specification = new FilterLike<Tenancy>(pageRequest.getFilter()).apply(Columns.NAME);
         }

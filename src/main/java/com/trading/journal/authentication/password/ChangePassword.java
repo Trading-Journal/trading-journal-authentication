@@ -4,9 +4,9 @@ import com.trading.journal.authentication.password.validation.PasswordAndConfirm
 import com.trading.journal.authentication.password.validation.PasswordConfirmed;
 import com.trading.journal.authentication.password.validation.PasswordPolicy;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @PasswordConfirmed
 public record ChangePassword(
