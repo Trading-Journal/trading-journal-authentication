@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @EnableConfigurationProperties({AdminUserProperties.class, JwtProperties.class})
 @EnableJpaRepositories
+//@ImportRuntimeHints(DatabaseRuntimeHintsRegistrar.class)
 public class AuthenticationApplication {
 
     public static void main(String[] args) {

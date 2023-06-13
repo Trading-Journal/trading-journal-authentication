@@ -23,15 +23,8 @@ jobs:
       - name: Build with Maven
         env:
           PASSWORD: ${{ secrets.PACKAGE_TOKEN }}
-        run: |
-          mvn -B clean package --file pom.xml --settings settings.xml
-          echo "APP_VERSION=$(mvn --file pom.xml --settings settings.xml  -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> "$GITHUB_OUTPUT"
+        run: echo "APP_VERSION=$(mvn --file pom.xml --settings settings.xml  -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> "$GITHUB_OUTPUT"
         id: build-version
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: $APP_NAME
-          path: target/*.jar
       - name: Create Tag
         uses: negz/create-tag@v1
         with:
@@ -55,18 +48,14 @@ jobs:
         path: target
     - name: Docker Login
       run: echo ${{ secrets.DOCKER_PASS }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
-    - name: Docker Build Version PRD
-      run: docker build -t allanweber/$APP_NAME:${{needs.build.outputs.app-version}} -f docker/Dockerfile .
-    - name: Build and Push Version
+    - name: Docker Build Native Image
+      run: mvn spring-boot:build-image -Pnative
+    - name: Push Version
       run: docker push allanweber/$APP_NAME:${{needs.build.outputs.app-version}}
-    - name: Docker Build Latest
-      run: docker build -t allanweber/$APP_NAME:latest -f docker/Dockerfile .
-    - name: Docker Push Latest
+    - name: Tag Latest
+      run: docker tag allanweber/$APP_NAME:${{needs.build.outputs.app-version}} allanweber/$APP_NAME:latest
+    - name: Push Latest
       run: docker push allanweber/$APP_NAME:latest
-    - name: Delete Artifact
-      uses: geekyeggo/delete-artifact@v2
-      with:
-        name: $APP_NAME
 
   deploy:
     name: Deploy on PRD

@@ -2,6 +2,9 @@
 
 ## Change Log
 
+### 3.0.0
+* Spring boot 3.1.0
+
 ### 2.0.0
 * Change the /authentication/ endpoint to /auth/
   * 2.0.1
@@ -26,11 +29,6 @@
     * Use configuration for that
     * The API must receive the JWT and check if session is still valid
 * * One way ssl or Two way ssl: https://dzone.com/articles/hakky54mutual-tls-1
-
-## Swagger
-
-[http://localhost:8080/swagger-ui/index.htm](http://localhost:8080/swagger-ui/index.html)
-Or just [http://localhost:8080](http://localhost:8080)
 
 ## Running
 
@@ -160,19 +158,13 @@ INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN')
 
 ## Docker
 
-### Build Locally or for Pipeline test
-
-This docker file copies the sample private and public keys in **/src/main/resources/** to the image, so you can refer each keys from **/etc/ssl/certs/private_key.pem** and **/etc/ssl/certs/public.pem**
-
-```docker build -t allanweber/trading-journal-authentication:1.0.0 -f docker/DockerfileTest .```
-
 ### Build for deployment
 
 For this option, you must provide your own private and public keys, add it to the image and configure the proper environment variables to read those files
 
-```docker build -t allanweber/trading-journal-authentication:1.0.0 -f docker/Dockerfile .```
+```mvn clean spring-boot:build-image -Pnative```
 
-Tag your image to latest: ```docker tag allanweber/trading-journal-authentication:1.0.0 allanweber/trading-journal-authentication:latest``` 
+Tag your image to latest: ```docker tag allanweber/trading-journal-authentication:<VERSION> allanweber/trading-journal-authentication:latest``` 
 
 Push image to registry: ```docker push allanweber/trading-journal-authentication:latest```
 
