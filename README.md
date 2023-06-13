@@ -162,7 +162,7 @@ INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN')
 
 For this option, you must provide your own private and public keys, add it to the image and configure the proper environment variables to read those files
 
-```mvn clean spring-boot:build-image -Pnative```
+```mvn spring-boot:build-image -DskipTests -Pnative --settings settings.xml```
 
 Tag your image to latest: ```docker tag allanweber/trading-journal-authentication:<VERSION> allanweber/trading-journal-authentication:latest``` 
 
