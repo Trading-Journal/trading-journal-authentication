@@ -27,7 +27,6 @@ jobs:
         id: build-version
 
 #  coverage:
-#    needs: build
 #    runs-on: ubuntu-latest
 #    steps:
 #      - uses: actions/checkout@v3
@@ -58,7 +57,7 @@ jobs:
       - name: Docker Build Native Image
         env:
           PASSWORD: ${{ secrets.PACKAGE_TOKEN }}
-        run: mvn spring-boot:build-image -Pnative --settings settings.xml
+        run: mvn spring-boot:build-image -DskipTests -Pnative --settings settings.xml
       - name: Build and Push Version
         run: docker push allanweber/$APP_NAME:${{needs.build.outputs.app-version}}
 
