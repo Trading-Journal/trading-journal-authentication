@@ -3,7 +3,7 @@
 ## Change Log
 
 ### 3.0.0
-* Spring boot 3.1.0
+* Spring boot 3.0.6
 
 ### 2.0.0
 * Change the /authentication/ endpoint to /auth/
