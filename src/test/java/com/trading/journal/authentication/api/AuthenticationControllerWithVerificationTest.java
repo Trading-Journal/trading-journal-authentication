@@ -68,8 +68,8 @@ public class AuthenticationControllerWithVerificationTest {
                 "lastName",
                 "UserName2",
                 "mail2@mail.com",
-                "dad231#$#4",
-                "dad231#$#4",
+                "daD231#$#4",
+                "daD231#$#4",
                 false
         );;
 
@@ -105,8 +105,8 @@ public class AuthenticationControllerWithVerificationTest {
                 "lastName",
                 "UserName2",
                 "mail2@mail.com",
-                "dad231#$#4",
-                "dad231#$#4",
+                "daD231#$#4",
+                "daD231#$#4",
                 false
         );
 
@@ -153,8 +153,8 @@ public class AuthenticationControllerWithVerificationTest {
                 "lastName",
                 "UserName2",
                 "mail2@mail.com",
-                "dad231#$#4",
-                "dad231#$#4",
+                "daD231#$#4",
+                "daD231#$#4",
                 false
         );
 

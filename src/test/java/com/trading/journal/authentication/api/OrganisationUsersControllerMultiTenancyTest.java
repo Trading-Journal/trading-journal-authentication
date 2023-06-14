@@ -559,8 +559,8 @@ class OrganisationUsersControllerMultiTenancyTest {
                 "lastName",
                 "UserName5",
                 "mail@mail.com",
-                "dad231#$#4",
-                "dad231#$#4",
+                "daD231#$#4",
+                "daD231#$#4",
                 false
         );
 
@@ -613,8 +613,8 @@ class OrganisationUsersControllerMultiTenancyTest {
                 "lastName",
                 "UserName5",
                 "mail@mail.com",
-                "dad231#$#4",
-                "dad231#$#4",
+                "daD231#$#4",
+                "daD231#$#4",
                 false
         );
 

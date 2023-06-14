@@ -158,11 +158,19 @@ INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN')
 
 ## Docker
 
+### Build for local use
+
+```mvn spring-boot:build-image --settings settings.xml```
+
+then
+
+```docker-compose up```
+
 ### Build for deployment
 
 For this option, you must provide your own private and public keys, add it to the image and configure the proper environment variables to read those files
 
-```mvn spring-boot:build-image -DskipTests -Pnative --settings settings.xml```
+```mvn spring-boot:build-image --settings settings.xml```
 
 Tag your image to latest: ```docker tag allanweber/trading-journal-authentication:<VERSION> allanweber/trading-journal-authentication:latest``` 
 

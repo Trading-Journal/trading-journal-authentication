@@ -210,7 +210,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
     @DisplayName("Change password with hash that does not exist return exception")
     void changePasswordInvalidHash() {
         TokenData tokenData = jwtTokenProvider.generateTemporaryToken("mail@email.com");
-        ChangePassword changePassword = new ChangePassword("mail@email.com", tokenData.token(), "dad231#$#4", "dad231#$#4");
+        ChangePassword changePassword = new ChangePassword("mail@email.com", tokenData.token(), "daD231#$#4", "daD231#$#4");
 
         webTestClient
                 .post()
@@ -241,7 +241,7 @@ public class AuthenticationControllerChangePasswordIntegratedTest {
                 .build()
         );
 
-        ChangePassword changePassword = new ChangePassword("mail@email.com", tokenData.token(), "dad231#$#4", "dad231#$#4");
+        ChangePassword changePassword = new ChangePassword("mail@email.com", tokenData.token(), "daD231#$#4", "daD231#$#4");
 
         webTestClient
                 .post()

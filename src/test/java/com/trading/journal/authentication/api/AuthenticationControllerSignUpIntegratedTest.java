@@ -67,8 +67,8 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 "lastName",
                 "UserName2",
                 "mail2@mail.com",
-                "dad231#$#4",
-                "dad231#$#4",
+                "daD231#$#4",
+                "daD231#$#4",
                 false
         );
 
@@ -190,8 +190,8 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 "lastName",
                 "UserName2",
                 "mail2@mail.com",
-                "dad231#$#4",
-                "dad231#$#4",
+                "daD231#$#4",
+                "daD231#$#4",
                 false
         );
 
@@ -230,8 +230,8 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 "UserName",
                 "UserName",
                 "mail2@mail.com",
-                "dad231#$#4",
-                "dad231#$#4",
+                "daD231#$#4",
+                "daD231#$#4",
                 false
         );
 

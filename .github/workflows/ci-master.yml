@@ -49,7 +49,9 @@ jobs:
     - name: Docker Login
       run: echo ${{ secrets.DOCKER_PASS }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
     - name: Docker Build Native Image
-      run: mvn spring-boot:build-image -Pnative
+      env:
+        PASSWORD: ${{ secrets.PACKAGE_TOKEN }}
+      run: mvn spring-boot:build-image --settings settings.xml
     - name: Push Version
       run: docker push allanweber/$APP_NAME:${{needs.build.outputs.app-version}}
     - name: Tag Latest

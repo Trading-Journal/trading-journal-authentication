@@ -57,14 +57,14 @@ jobs:
       - name: Docker Build Native Image
         env:
           PASSWORD: ${{ secrets.PACKAGE_TOKEN }}
-        run: mvn spring-boot:build-image -DskipTests -Pnative --settings settings.xml
+        run: mvn spring-boot:build-image --settings settings.xml
       - name: Build and Push Version
         run: docker push allanweber/$APP_NAME:${{needs.build.outputs.app-version}}
 
   deploy:
    name: Deploy on TST
    runs-on: ubuntu-latest
-   needs: docker
+   needs: [build, docker]
    steps:
      - name: Deploy Image
        uses: actions-hub/kubectl@master

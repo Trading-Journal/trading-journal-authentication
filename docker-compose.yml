@@ -35,6 +35,8 @@ services:
       - POSTGRES_DB=postgres
     expose:
       - 5432
+    volumes:
+      - ./src/test/resources/init_test_container_databases.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
