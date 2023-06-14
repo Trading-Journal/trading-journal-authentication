@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -42,7 +43,7 @@ class TenancyServiceImplTest {
     void pageWithoutFilter() {
         PageableRequest pageableRequest = new PageableRequest(0, 10, null, null);
 
-        when(tenancyRepository.findAll(null, pageableRequest.pageable())).thenReturn(new PageImpl<>(singletonList(Tenancy.builder().id(1L).name("tenancy1").build()), pageableRequest.pageable(), 2));
+        when(tenancyRepository.findAll(Specification.where(null), pageableRequest.pageable())).thenReturn(new PageImpl<>(singletonList(Tenancy.builder().id(1L).name("tenancy1").build()), pageableRequest.pageable(), 2));
         PageResponse<Tenancy> response = tenancyService.getAll(pageableRequest);
         assertThat(response.items()).hasSize(1);
         assertThat(response.totalPages()).isEqualTo(1);

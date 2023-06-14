@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -76,7 +76,7 @@ public class AuthenticationController implements AuthenticationApi {
     }
 
     @Override
-    public ResponseEntity<String> test() {
-        return ok("2.0.1");
+    public ResponseEntity<String> hello() {
+        return ok("hello");
     }
 }

@@ -51,6 +51,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
     EmailSender emailSender;
 
     @BeforeEach
+
     public void setUp() {
         userRepository.deleteAll();
         tenancyRepository.deleteAll();
@@ -249,5 +250,34 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 );
 
         assertThat(tenancyRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("When signUp as new user error because password does not match policy")
+    void passwordPolicy() {
+        UserRegistration userRegistration = new UserRegistration(
+                null,
+                "firstName",
+                "lastName",
+                "UserName2",
+                "mail2@mail.com",
+                "12345678901",
+                "12345678901",
+                false
+        );
+
+        webTestClient
+                .post()
+                .uri("/auth/signup")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userRegistration)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String,  List<String>>>() {
+                })
+                .value(response ->
+                        assertThat(response.get("errors")).isNotEmpty()
+                );
     }
 }

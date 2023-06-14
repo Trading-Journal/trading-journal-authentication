@@ -2342,14 +2342,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code is 403\", function () {\r",
-									"  pm.response.to.have.status(403);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"\r",
-									"\tpm.expect(response.error).to.equal(\"Forbidden\");\r",
+									"pm.test(\"Status code is 401\", function () {\r",
+									"  pm.response.to.have.status(401);\r",
 									"});"
 								],
 								"type": "text/javascript"

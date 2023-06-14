@@ -13,7 +13,6 @@ import com.trading.journal.authentication.verification.service.VerificationServi
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public void createAdmin(@Valid UserRegistration userRegistration) {
+    public void createAdmin(UserRegistration userRegistration) {
         User applicationUser = userRepository.save(adminUser(userRegistration));
         userAuthorityService.saveAdminUserAuthorities(applicationUser);
         verificationService.send(VerificationType.ADMIN_REGISTRATION, applicationUser);

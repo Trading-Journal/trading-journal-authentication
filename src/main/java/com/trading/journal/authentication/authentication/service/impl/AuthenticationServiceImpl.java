@@ -20,8 +20,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
-
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -32,7 +30,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtTokenReader jwtTokenReader;
 
     @Override
-    public LoginResponse signIn(@Valid Login login) {
+    public LoginResponse signIn(Login login) {
         Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.email(), login.password()));
         ContextUser principal = (ContextUser) authenticate.getPrincipal();
         User user = userService.getUserByEmail(principal.email())
