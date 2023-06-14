@@ -2,6 +2,9 @@
 
 ## Change Log
 
+### 3.0.0
+* Spring 3.1.0
+
 ### 2.0.0
 * Change the /authentication/ endpoint to /auth/
   * 2.0.1
