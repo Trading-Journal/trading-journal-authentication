@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      app-version: ${{ steps.build-version.outputs.APP_VERSION }}-${{github.head_ref}}
+      app-version: ${{ steps.build-version.outputs.APP_VERSION }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
