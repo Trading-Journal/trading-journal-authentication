@@ -163,25 +163,19 @@ INSERT INTO Authorities (category, name) VALUES ('ORGANISATION','TENANCY_ADMIN')
 
 ## Docker
 
-### Build Locally or for Pipeline test
+### Build
 
-This docker file copies the sample private and public keys in **/src/main/resources/** to the image, so you can refer each keys from **/etc/ssl/certs/private_key.pem** and **/etc/ssl/certs/public.pem**
+```docker build -t allanweber/trading-journal-authentication:<VERSION> -f docker/Dockerfile .```
 
-```docker build -t allanweber/trading-journal-authentication:1.0.0 -f docker/DockerfileTest .```
+Tag your image to latest: ```docker tag allanweber/trading-journal-authentication:<VERSION> allanweber/trading-journal-authentication:latest``` 
 
-### Build for deployment
+Push image to registry: ```docker push allanweber/trading-journal-authentication:<VERSION>```
 
-For this option, you must provide your own private and public keys, add it to the image and configure the proper environment variables to read those files
+#### Docker Composer
 
-```docker build -t allanweber/trading-journal-authentication:1.0.0 -f docker/Dockerfile .```
-
-Tag your image to latest: ```docker tag allanweber/trading-journal-authentication:1.0.0 allanweber/trading-journal-authentication:latest``` 
-
-Push image to registry: ```docker push allanweber/trading-journal-authentication:latest```
-
-### Run it with env variables
-
-* Get postgres container ip: ```docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' CONTAINER_ID```
+Helpful for local testing
+  
+```docker-compose up```
 
 ```bash
 docker run -p 8080:8080 --name trading-journal-authentication \
