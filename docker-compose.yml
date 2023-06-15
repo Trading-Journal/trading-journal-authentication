@@ -1,0 +1,44 @@
+services:
+  app:
+    image: allanweber/trading-journal-authentication:3.0.0
+    depends_on:
+      postgresSql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - ADMIN_EMAIL=a.cassianoweber@gmail.com
+      - DATASOURCE_URL=jdbc:postgresql://postgresSql:5432/postgres
+      - DATASOURCE_PASSWORD=postgres
+      - DATASOURCE_USERNAME=postgres
+      - EMAIL_HOST=smtp.googlemail.com
+      - EMAIL_PORT=587
+      - EMAIL_USERNAME=????@gmail.com
+      - EMAIL_PASSWORD=?????
+      - JWT_ACCESS_TOKEN_EXPIRATION=3600
+      - JWT_REFRESH_TOKEN_EXPIRATION=86400
+      - JWT_AUDIENCE=trade-journal
+      - JWT_ISSUER=https://tradejournal.biz
+      - JWT_PRIVATE_KEY=/etc/ssl/certs/private_key.pem
+      - JWT_PUBLIC_KEY=/etc/ssl/certs/public_key.pem
+      - WEB_APP_URL=http://localhost:3000
+    volumes:
+      - ./src/main/resources/private_key.pem:/etc/ssl/certs/private_key.pem
+      - ./src/main/resources/public_key.pem:/etc/ssl/certs/public_key.pem
+  postgresSql:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    expose:
+      - 5432
+    volumes:
+      - ./src/test/resources/init_test_container_databases.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
