@@ -44,7 +44,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     private User adminUser(UserRegistration userRegistration) {
         return User.builder()
-                .userName(userRegistration.getUserName())
                 .password(passwordService.randomPassword())
                 .firstName(userRegistration.getFirstName())
                 .lastName(userRegistration.getLastName())

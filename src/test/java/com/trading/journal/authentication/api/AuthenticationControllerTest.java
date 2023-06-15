@@ -55,7 +55,6 @@ public class AuthenticationControllerTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName5",
                 "mail5@mail.com",
                 "dad231#$#4",
                 "dad231#$#4",

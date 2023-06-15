@@ -46,8 +46,8 @@ public class UserManagementServiceImpl implements UserManagementService {
     public PageResponse<UserInfo> getAll(Long tenancyId, PageableRequest pageRequest) {
         Specification<User> specification = new FilterTenancy<User>(tenancyId).apply();
         if (pageRequest.hasFilter()) {
-            Specification<User> filter = new FilterLike<User>(pageRequest.getFilter()).apply(Columns.USER_NAME)
-                    .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.USER_NAME))
+            Specification<User> filter = new FilterLike<User>(pageRequest.getFilter())
+                    .apply(Columns.FIRST_NAME)
                     .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.FIRST_NAME))
                     .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.LAST_NAME))
                     .or(new FilterLike<User>(pageRequest.getFilter()).apply(Columns.EMAIL));
@@ -156,12 +156,12 @@ public class UserManagementServiceImpl implements UserManagementService {
         User user = userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.BAD_REQUEST, "User not found"));
 
-        Boolean exists = userManagementRepository.existsByTenancyIdAndUserNameAndIdNot(tenancyId, meUpdate.userName(), user.getId());
+        Boolean exists = userManagementRepository.existsByTenancyIdAndEmailAndIdNot(tenancyId, email, user.getId());
         if (exists) {
             throw new ApplicationException(HttpStatus.CONFLICT, "User name already exists for another user");
         }
 
-        user.update(meUpdate.userName(), meUpdate.firstName(), meUpdate.lastName());
+        user.update(meUpdate.firstName(), meUpdate.lastName());
         user = userManagementRepository.save(user);
         return new UserInfo(user);
     }
@@ -172,7 +172,6 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     private static class Columns {
-        public static final String USER_NAME = "userName";
         public static final String FIRST_NAME = "firstName";
         public static final String LAST_NAME = "lastName";
         public static final String EMAIL = "email";

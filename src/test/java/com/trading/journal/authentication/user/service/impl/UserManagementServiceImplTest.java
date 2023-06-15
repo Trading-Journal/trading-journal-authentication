@@ -66,7 +66,6 @@ class UserManagementServiceImplTest {
         when(userManagementRepository.findAll(any(), eq(pageableRequest.pageable()))).thenReturn(new PageImpl<>(
                 singletonList(User.builder()
                         .id(1L)
-                        .userName("UserName")
                         .password("password_secret")
                         .firstName("lastName")
                         .lastName("Wick")
@@ -94,7 +93,6 @@ class UserManagementServiceImplTest {
         when(userManagementRepository.findAll(any(), eq(pageableRequest.pageable()))).thenReturn(new PageImpl<>(
                 singletonList(User.builder()
                         .id(1L)
-                        .userName("UserName")
                         .password("password_secret")
                         .firstName("lastName")
                         .lastName("Wick")
@@ -121,7 +119,6 @@ class UserManagementServiceImplTest {
         Long userId = 10L;
         when(userManagementRepository.findByTenancyIdAndId(10L, userId)).thenReturn(Optional.of(User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -153,7 +150,6 @@ class UserManagementServiceImplTest {
         Long userId = 10L;
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -188,7 +184,6 @@ class UserManagementServiceImplTest {
         Long userId = 10L;
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -223,7 +218,6 @@ class UserManagementServiceImplTest {
         Long userId = 10L;
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -261,7 +255,6 @@ class UserManagementServiceImplTest {
         Long userId = 10L;
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -305,7 +298,6 @@ class UserManagementServiceImplTest {
         Long userId = 10L;
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -401,7 +393,6 @@ class UserManagementServiceImplTest {
         Long tenancyId = 10L;
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -517,7 +508,6 @@ class UserManagementServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -554,7 +544,6 @@ class UserManagementServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -583,7 +572,6 @@ class UserManagementServiceImplTest {
         Long tenancyId = 10L;
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -598,7 +586,6 @@ class UserManagementServiceImplTest {
 
         UserInfo userInfo = userManagementService.getUserByEmail(tenancyId, email);
         assertThat(userInfo.getEmail()).isEqualTo(user.getEmail());
-        assertThat(userInfo.getUserName()).isEqualTo(user.getUserName());
         assertThat(userInfo.getFirstName()).isEqualTo(user.getFirstName());
         assertThat(userInfo.getLastName()).isEqualTo(user.getLastName());
     }
@@ -615,13 +602,13 @@ class UserManagementServiceImplTest {
         assertThat(exception.getStatusText()).isEqualTo("User not found");
     }
 
-    @DisplayName("Update me same user name exists")
+    @DisplayName("Update me same user email exists")
     @Test
     void updateNotFound() {
         String email = "mail@mail.com";
         Long tenancyId = 10L;
 
-        MeUpdate meUpdate = new MeUpdate("userName-updated", "firstName-Updated", "lastName-Updated");
+        MeUpdate meUpdate = new MeUpdate("firstName-Updated", "lastName-Updated");
 
         when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.empty());
 
@@ -629,7 +616,7 @@ class UserManagementServiceImplTest {
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("User not found");
 
-        verify(userManagementRepository, never()).existsByTenancyIdAndUserNameAndIdNot(anyLong(), anyString(), anyLong());
+        verify(userManagementRepository, never()).existsByTenancyIdAndEmailAndIdNot(anyLong(), anyString(), anyLong());
         verify(userManagementRepository, never()).save(any());
     }
 
@@ -638,11 +625,10 @@ class UserManagementServiceImplTest {
     void updateSameUserName() {
         String email = "mail@mail.com";
         Long tenancyId = 10L;
-        MeUpdate meUpdate = new MeUpdate("userName-updated", "firstName-Updated", "lastName-Updated");
+        MeUpdate meUpdate = new MeUpdate("firstName-Updated", "lastName-Updated");
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -655,7 +641,7 @@ class UserManagementServiceImplTest {
 
         when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.of(user));
 
-        when(userManagementRepository.existsByTenancyIdAndUserNameAndIdNot(tenancyId, meUpdate.userName(), 1L)).thenReturn(true);
+        when(userManagementRepository.existsByTenancyIdAndEmailAndIdNot(tenancyId, email, 1L)).thenReturn(true);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> userManagementService.update(tenancyId, email, meUpdate));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
@@ -669,11 +655,10 @@ class UserManagementServiceImplTest {
     void update() {
         String email = "mail@mail.com";
         Long tenancyId = 10L;
-        MeUpdate meUpdate = new MeUpdate("userName-updated", "firstName-Updated", "lastName-Updated");
+        MeUpdate meUpdate = new MeUpdate("firstName-Updated", "lastName-Updated");
 
         User user = User.builder()
                 .id(1L)
-                .userName("userName")
                 .password("password")
                 .firstName("firstName")
                 .lastName("lastName")
@@ -686,15 +671,13 @@ class UserManagementServiceImplTest {
 
         when(userManagementRepository.findByTenancyIdAndEmail(tenancyId, email)).thenReturn(Optional.of(user));
 
-        when(userManagementRepository.existsByTenancyIdAndUserNameAndIdNot(tenancyId, meUpdate.userName(), 1L)).thenReturn(false);
+        when(userManagementRepository.existsByTenancyIdAndEmailAndIdNot(tenancyId, email, 1L)).thenReturn(false);
 
         when(userManagementRepository.save(argThat(u ->
-                u.getUserName().equals("userName-updated")
-                        && u.getFirstName().equals("firstName-Updated")
+                u.getFirstName().equals("firstName-Updated")
                         && u.getLastName().equals("lastName-Updated")
         ))).thenReturn(User.builder()
                 .id(1L)
-                .userName("userName-updated")
                 .password("password")
                 .firstName("firstName-Updated")
                 .lastName("lastName-Updated")
@@ -706,7 +689,6 @@ class UserManagementServiceImplTest {
                 .build());
 
         UserInfo userInfo = userManagementService.update(tenancyId, email, meUpdate);
-        assertThat(userInfo.getUserName()).isEqualTo("userName-updated");
         assertThat(userInfo.getFirstName()).isEqualTo("firstName-Updated");
         assertThat(userInfo.getLastName()).isEqualTo("lastName-Updated");
     }

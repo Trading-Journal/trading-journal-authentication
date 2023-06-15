@@ -30,10 +30,6 @@ public class UserRegistration implements PasswordAndConfirmation {
     @Size(max = 128, min = 3, message = "Last name size is invalid")
     private String lastName;
 
-    @NotBlank(message = "User name is required")
-    @Size(max = 128, min = 5, message = "User name size is invalid")
-    private String userName;
-
     @NotBlank(message = "Email is required")
     @Email(message = "Email is invalid")
     @Size(max = 128, message = "Email size is invalid")
@@ -54,7 +50,7 @@ public class UserRegistration implements PasswordAndConfirmation {
     public String getCompanyName() {
         String name = companyName;
         if (!StringUtils.hasText(name)) {
-            name = userName;
+            name = this.email;
         }
         return name;
     }

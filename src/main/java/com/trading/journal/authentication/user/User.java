@@ -34,8 +34,6 @@ public class User implements JwtUserData {
     @JoinColumn(name = "tenancyId")
     private Tenancy tenancy;
 
-    private String userName;
-
     private String password;
 
     private String firstName;
@@ -80,8 +78,7 @@ public class User implements JwtUserData {
         this.authorities = authorities;
     }
 
-    public void update(String userName, String firstName, String lastName) {
-        this.userName = userName;
+    public void update(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
     }

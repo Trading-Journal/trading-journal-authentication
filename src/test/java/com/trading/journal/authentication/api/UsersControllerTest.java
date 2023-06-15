@@ -81,7 +81,6 @@ class UsersControllerTest {
                     String firstName = names[0];
                     String lastName = names[1];
                     return User.builder()
-                            .userName(userName)
                             .email(email)
                             .password(UUID.randomUUID().toString())
                             .firstName(firstName)
@@ -122,7 +121,6 @@ class UsersControllerTest {
                     assertThat(response.getFirstName()).isEqualTo("Erma");
                     assertThat(response.getLastName()).isEqualTo("Black");
                     assertThat(response.getEmail()).isEqualTo("ermablack@email.com");
-                    assertThat(response.getUserName()).isEqualTo("ermablack");
                     assertThat(response.getVerified()).isEqualTo(true);
                     assertThat(response.getEnabled()).isEqualTo(true);
                 });
@@ -180,7 +178,6 @@ class UsersControllerTest {
                     assertThat(response.getFirstName()).isEqualTo("Ernesto");
                     assertThat(response.getLastName()).isEqualTo("Kim");
                     assertThat(response.getEmail()).isEqualTo("ernestokim@email.com");
-                    assertThat(response.getUserName()).isEqualTo("ernestokim");
                     assertThat(response.getVerified()).isEqualTo(true);
                     assertThat(response.getEnabled()).isEqualTo(false);
                 });
@@ -244,7 +241,6 @@ class UsersControllerTest {
                     assertThat(response.getFirstName()).isEqualTo("Fannie");
                     assertThat(response.getLastName()).isEqualTo("Hines");
                     assertThat(response.getEmail()).isEqualTo("fanniehines@email.com");
-                    assertThat(response.getUserName()).isEqualTo("fanniehines");
                     assertThat(response.getVerified()).isEqualTo(true);
                     assertThat(response.getEnabled()).isEqualTo(true);
                 });

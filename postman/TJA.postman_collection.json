@@ -31,7 +31,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal('admin');\r",
+									"    pm.expect(response.user).to.equal('a.cassianoweber@gmail.com');\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -78,7 +78,6 @@
 									"pm.collectionVariables.set(\"company-name\", getCompanyName());\r",
 									"pm.collectionVariables.set(\"first-name\", pm.collectionVariables.replaceIn(\"{{$randomFirstName}}\"));\r",
 									"pm.collectionVariables.set(\"last-name\", pm.collectionVariables.replaceIn(\"{{$randomLastName}}\"));\r",
-									"pm.collectionVariables.set(\"user-name\", gerUserName());\r",
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
@@ -126,7 +125,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"userName\": \"{{user-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -303,7 +302,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -362,7 +361,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -594,7 +593,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -641,7 +640,6 @@
 									"    const response = pm.response.json();\r",
 									"    \r",
 									"\tpm.expect(response.id).not.equal(null);\r",
-									"\tpm.expect(response.userName).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
 									"\tpm.expect(response.firstName).to.equal(pm.collectionVariables.get(\"first-name\"));\r",
 									"\tpm.expect(response.lastName).to.equal(pm.collectionVariables.get(\"last-name\"));\r",
 									"\tpm.expect(response.email).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
@@ -799,8 +797,6 @@
 									"\tpm.expect(response.totalItems).to.equal(1);\r",
 									"\t\r",
 									"\tvar user = response.items[0];\r",
-									"\r",
-									"\tpm.expect(user.userName).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -843,7 +839,6 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"\tpm.expect(response.userName).to.eql(\"user1\");\r",
 									"\tpm.expect(response.firstName).to.eql(\"user1\");\r",
 									"\tpm.expect(response.email).to.eql(\"user1@mail.com\");\r",
 									"\tpm.expect(response.lastName).to.eql(pm.collectionVariables.get(\"tenancy-name\"));\r",
@@ -866,7 +861,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstName\": \"user1\",\r\n    \"lastName\": \"{{tenancy-name}}\",\r\n    \"userName\": \"user1\",\r\n    \"email\": \"user1@mail.com\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"raw": "{\r\n    \"firstName\": \"user1\",\r\n    \"lastName\": \"{{tenancy-name}}\",\r\n    \"email\": \"user1@mail.com\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -900,7 +895,6 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"\tpm.expect(response.userName).to.eql(\"user2\");\r",
 									"\tpm.expect(response.firstName).to.eql(\"user2\");\r",
 									"\tpm.expect(response.email).to.eql(\"user2@mail.com\");\r",
 									"\tpm.expect(response.lastName).to.eql(pm.collectionVariables.get(\"tenancy-name\"));\r",
@@ -923,7 +917,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstName\": \"user2\",\r\n    \"lastName\": \"{{tenancy-name}}\",\r\n    \"userName\": \"user2\",\r\n    \"email\": \"user2@mail.com\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"raw": "{\r\n    \"firstName\": \"user2\",\r\n    \"lastName\": \"{{tenancy-name}}\",\r\n    \"email\": \"user2@mail.com\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1011,7 +1005,6 @@
 									"    const response = pm.response.json();\r",
 									"\r",
 									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"tenancy-user-2-id\"));\r",
-									"\tpm.expect(response.userName).to.eql( \"user2\");\r",
 									"\tpm.expect(response.firstName).to.eql( \"user2\");\r",
 									"\tpm.expect(response.lastName).to.eql(pm.collectionVariables.get(\"tenancy-name\"));\r",
 									"\tpm.expect(response.email).to.eql(\"user2@mail.com\");\r",
@@ -1570,7 +1563,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(\"user1\");\r",
+									"    pm.expect(response.user).to.equal(\"user1@mail.com\");\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1712,7 +1705,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(\"user2\");\r",
+									"    pm.expect(response.user).to.equal(\"user2@mail.com\");\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1886,7 +1879,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(\"user1\");\r",
+									"    pm.expect(response.user).to.equal(\"user1@mail.com\");\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1995,7 +1988,6 @@
 									"    const response = pm.response.json();\r",
 									"\r",
 									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"tenancy-user-2-id\"));\r",
-									"\tpm.expect(response.userName).to.eql( \"user2\");\r",
 									"\tpm.expect(response.firstName).to.eql( \"user2\");\r",
 									"\tpm.expect(response.lastName).to.eql(pm.collectionVariables.get(\"tenancy-name\"));\r",
 									"\tpm.expect(response.email).to.eql(\"user2@mail.com\");\r",
@@ -2045,7 +2037,6 @@
 									"    const response = pm.response.json();\r",
 									"\r",
 									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"tenancy-user-1-id\"));\r",
-									"\tpm.expect(response.userName).to.eql( \"user1\");\r",
 									"\tpm.expect(response.firstName).to.eql( \"user1\");\r",
 									"\tpm.expect(response.lastName).to.eql(pm.collectionVariables.get(\"tenancy-name\"));\r",
 									"\tpm.expect(response.email).to.eql(\"user1@mail.com\");\r",
@@ -2098,7 +2089,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(\"user2\");\r",
+									"    pm.expect(response.user).to.equal(\"user2@mail.com\");\r",
 									"\r",
 									"\tpm.collectionVariables.set(\"temp-access-token\", response.accessToken);\r",
 									"});"
@@ -2248,7 +2239,6 @@
 									"    const response = pm.response.json();\r",
 									"\r",
 									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"tenancy-user-2-id\"));\r",
-									"\tpm.expect(response.userName).to.eql( \"user2\");\r",
 									"\tpm.expect(response.firstName).to.eql( \"user2\");\r",
 									"\tpm.expect(response.lastName).to.eql(pm.collectionVariables.get(\"tenancy-name\"));\r",
 									"\tpm.expect(response.email).to.eql(\"user2@mail.com\");\r",
@@ -2301,7 +2291,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(\"user2\");\r",
+									"    pm.expect(response.user).to.equal(\"user2@mail.com\");\r",
 									"\r",
 									"\tpm.collectionVariables.set(\"temp-access-token\", response.accessToken);\r",
 									"});"
@@ -2474,7 +2464,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(\"user2\");\r",
+									"    pm.expect(response.user).to.equal(\"user2@mail.com\");\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2607,8 +2597,6 @@
 									"\tpm.expect(response.totalItems).to.equal(1);\r",
 									"\t\r",
 									"\tvar user = response.items[0];\r",
-									"\r",
-									"\tpm.expect(user.userName).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2745,7 +2733,6 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"\tpm.expect(response.userName).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
 									"\tpm.expect(response.firstName).to.equal(pm.collectionVariables.get(\"first-name\"));\r",
 									"\tpm.expect(response.lastName).to.equal(pm.collectionVariables.get(\"last-name\"));\r",
 									"\tpm.expect(response.email).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
@@ -3494,7 +3481,6 @@
 									"pm.collectionVariables.set(\"company-name\", getCompanyName());\r",
 									"pm.collectionVariables.set(\"first-name\", pm.collectionVariables.replaceIn(\"{{$randomFirstName}}\"));\r",
 									"pm.collectionVariables.set(\"last-name\", pm.collectionVariables.replaceIn(\"{{$randomLastName}}\"));\r",
-									"pm.collectionVariables.set(\"user-name\", gerUserName());\r",
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
@@ -3542,7 +3528,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"userName\": \"{{user-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3673,7 +3659,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4042,7 +4028,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4361,7 +4347,6 @@
 									"pm.collectionVariables.set(\"company-name\", getCompanyName());\r",
 									"pm.collectionVariables.set(\"first-name\", pm.collectionVariables.replaceIn(\"{{$randomFirstName}}\"));\r",
 									"pm.collectionVariables.set(\"last-name\", pm.collectionVariables.replaceIn(\"{{$randomLastName}}\"));\r",
-									"pm.collectionVariables.set(\"user-name\", gerUserName());\r",
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
@@ -4409,7 +4394,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"userName\": \"{{user-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4540,7 +4525,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4852,7 +4837,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -5346,7 +5331,6 @@
 									"pm.collectionVariables.set(\"company-name\", getCompanyName());\r",
 									"pm.collectionVariables.set(\"first-name\", pm.collectionVariables.replaceIn(\"{{$randomFirstName}}\"));\r",
 									"pm.collectionVariables.set(\"last-name\", pm.collectionVariables.replaceIn(\"{{$randomLastName}}\"));\r",
-									"pm.collectionVariables.set(\"user-name\", gerUserName());\r",
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
@@ -5394,7 +5378,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"userName\": \"{{user-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5585,7 +5569,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -5831,7 +5815,6 @@
 									"pm.collectionVariables.set(\"company-name\", getCompanyName());\r",
 									"pm.collectionVariables.set(\"first-name\", pm.collectionVariables.replaceIn(\"{{$randomFirstName}}\"));\r",
 									"pm.collectionVariables.set(\"last-name\", pm.collectionVariables.replaceIn(\"{{$randomLastName}}\"));\r",
-									"pm.collectionVariables.set(\"user-name\", gerUserName());\r",
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
@@ -5879,7 +5862,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"userName\": \"{{user-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -6112,7 +6095,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -6158,7 +6141,6 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"\tpm.expect(response.userName).to.eql(\"user1\");\r",
 									"\tpm.expect(response.firstName).to.eql(\"user1\");\r",
 									"\tpm.expect(response.email).to.eql(\"user1@mail.com\");\r",
 									"\tpm.expect(response.lastName).to.eql(pm.collectionVariables.get(\"tenancy-name\"));\r",
@@ -6181,7 +6163,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstName\": \"user1\",\r\n    \"lastName\": \"{{tenancy-name}}\",\r\n    \"userName\": \"user1\",\r\n    \"email\": \"user1@mail.com\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"raw": "{\r\n    \"firstName\": \"user1\",\r\n    \"lastName\": \"{{tenancy-name}}\",\r\n    \"email\": \"user1@mail.com\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -6215,7 +6197,6 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"\tpm.expect(response.userName).to.eql(\"user2\");\r",
 									"\tpm.expect(response.firstName).to.eql(\"user2\");\r",
 									"\tpm.expect(response.email).to.eql(\"user2@mail.com\");\r",
 									"\tpm.expect(response.lastName).to.eql(pm.collectionVariables.get(\"tenancy-name\"));\r",
@@ -6238,7 +6219,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstName\": \"user2\",\r\n    \"lastName\": \"{{tenancy-name}}\",\r\n    \"userName\": \"user2\",\r\n    \"email\": \"user2@mail.com\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"raw": "{\r\n    \"firstName\": \"user2\",\r\n    \"lastName\": \"{{tenancy-name}}\",\r\n    \"email\": \"user2@mail.com\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -6457,7 +6438,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(\"user1\");\r",
+									"    pm.expect(response.user).to.equal(\"user1@mail.com\");\r",
 									"\r",
 									"\tpm.collectionVariables.set(\"tenancy-user1-token\", response.accessToken)\r",
 									"});"
@@ -6505,7 +6486,6 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"\tpm.expect(response.userName).to.equal(\"user1\");\r",
 									"\tpm.expect(response.firstName).to.equal(\"user1\");\r",
 									"\tpm.expect(response.email).to.equal(\"user1@mail.com\");\r",
 									"\tpm.expect(response.lastName).to.equal(pm.collectionVariables.get(\"tenancy-name\"));\r",
@@ -6540,57 +6520,6 @@
 					"response": []
 				},
 				{
-					"name": "Update User 1 info fail because of user name",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 409\", function () {\r",
-									"  pm.response.to.have.status(409);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"\r",
-									"\tpm.expect(response.error).to.equal(\"User name already exists for another user\");\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{tenancy-user1-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n\t\"userName\": \"user2\",\r\n\t\"firstName\": \"First\",\r\n\t\"lastName\": \"Last\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{authentication-api}}/me",
-							"host": [
-								"{{authentication-api}}"
-							],
-							"path": [
-								"me"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Update User 1 info",
 					"event": [
 						{
@@ -6604,7 +6533,6 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"\tpm.expect(response.userName).to.equal(\"User1Name\");\r",
 									"\tpm.expect(response.firstName).to.equal(\"First\");\r",
 									"\tpm.expect(response.email).to.equal(\"user1@mail.com\");\r",
 									"\tpm.expect(response.lastName).to.equal(\"Last\");\r",
@@ -6628,7 +6556,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"userName\": \"User1Name\",\r\n\t\"firstName\": \"First\",\r\n\t\"lastName\": \"Last\"\r\n}",
+							"raw": "{\r\n\t\"firstName\": \"First\",\r\n\t\"lastName\": \"Last\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -6909,10 +6837,6 @@
 		},
 		{
 			"key": "last-name",
-			"value": ""
-		},
-		{
-			"key": "user-name",
 			"value": ""
 		},
 		{

@@ -60,13 +60,13 @@ class AdminUserServiceImplIntegratedTest {
     }
 
     @AfterAll
-    public static void shutdown(@Autowired UserRepository userRepository){
+    public static void shutdown(@Autowired UserRepository userRepository) {
         userRepository.deleteAll();
     }
 
     @Test
     void addAdmin() {
-        UserRegistration adminRegistration = new UserRegistration(null,"Admin", "Administrator", "admin", adminUserProperties.email(), null, null, false);
+        UserRegistration adminRegistration = new UserRegistration(null, "Admin", "Administrator", adminUserProperties.email(), null, null, false);
 
         Boolean thereIsAdmin = adminUserService.thereIsAdmin();
         assertThat(thereIsAdmin).isFalse();

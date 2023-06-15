@@ -271,7 +271,6 @@ class TenanciesControllerTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -344,7 +343,6 @@ class TenanciesControllerTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")

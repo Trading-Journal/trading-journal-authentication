@@ -7,10 +7,10 @@ import com.trading.journal.authentication.tenancy.TenancyRepository;
 import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
 import com.trading.journal.authentication.verification.Verification;
+import com.trading.journal.authentication.verification.VerificationRepository;
 import com.trading.journal.authentication.verification.VerificationStatus;
 import com.trading.journal.authentication.verification.VerificationType;
 import com.trading.journal.authentication.verification.service.VerificationEmailService;
-import com.trading.journal.authentication.verification.VerificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -66,12 +66,12 @@ public class AuthenticationControllerWithVerificationTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName2",
                 "mail2@mail.com",
                 "dad231#$#4",
                 "dad231#$#4",
                 false
-        );;
+        );
+        ;
 
         webTestClient
                 .post()
@@ -103,7 +103,6 @@ public class AuthenticationControllerWithVerificationTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName2",
                 "mail2@mail.com",
                 "dad231#$#4",
                 "dad231#$#4",
@@ -151,7 +150,6 @@ public class AuthenticationControllerWithVerificationTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName2",
                 "mail2@mail.com",
                 "dad231#$#4",
                 "dad231#$#4",

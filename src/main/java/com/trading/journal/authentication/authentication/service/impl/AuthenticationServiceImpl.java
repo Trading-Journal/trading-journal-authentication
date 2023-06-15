@@ -43,7 +43,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 accessToken.token(),
                 refreshToken.token(),
                 accessToken.issuedAt(),
-                user.getUserName());
+                user.getEmail());
     }
 
     @Override
@@ -58,7 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 accessToken.token(),
                 refreshToken,
                 accessToken.issuedAt(),
-                user.getUserName());
+                user.getEmail());
     }
 
     private String validateRefreshTokenAndGetUserEmail(String refreshToken) {

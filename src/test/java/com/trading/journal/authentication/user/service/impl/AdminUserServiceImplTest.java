@@ -71,11 +71,10 @@ class AdminUserServiceImplTest {
     @DisplayName("Given admin registration create admin user and send the verification email")
     @Test
     void createAdmin() {
-        UserRegistration adminRegistration = new UserRegistration(null,"john", "rambo", "admin", "mail@mail.com", null, null, false);
+        UserRegistration adminRegistration = new UserRegistration(null, "john", "rambo", "mail@mail.com", null, null, false);
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")

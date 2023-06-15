@@ -47,7 +47,6 @@ class UserPasswordAuthenticationManagerImplTest {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserAdm")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -90,7 +89,6 @@ class UserPasswordAuthenticationManagerImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("12345679")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -116,7 +114,6 @@ class UserPasswordAuthenticationManagerImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("12345679")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -142,7 +139,6 @@ class UserPasswordAuthenticationManagerImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -167,7 +163,6 @@ class UserPasswordAuthenticationManagerImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -192,7 +187,6 @@ class UserPasswordAuthenticationManagerImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -216,7 +210,6 @@ class UserPasswordAuthenticationManagerImplTest {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("mail@mail.com", "raw_password");
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserAdm")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")

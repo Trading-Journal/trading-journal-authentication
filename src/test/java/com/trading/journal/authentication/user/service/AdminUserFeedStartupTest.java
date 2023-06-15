@@ -26,7 +26,7 @@ class AdminUserFeedStartupTest {
 
         adminUserFeedStartup.onApplicationEvent(null);
 
-        UserRegistration userRegistration = new UserRegistration(null,"Admin", "Administrator", "admin", "mail@mail.com", null, null, false);
+        UserRegistration userRegistration = new UserRegistration(null, "Admin", "Administrator", "mail@mail.com", null, null, false);
         verify(adminUserService).createAdmin(userRegistration);
     }
 
