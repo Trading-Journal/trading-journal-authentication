@@ -67,7 +67,6 @@ public class AuthenticationServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("12345679")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -117,7 +116,6 @@ public class AuthenticationServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("12345679")
                 .firstName("lastName")
                 .lastName("Wick")

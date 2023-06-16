@@ -3,8 +3,8 @@ package com.trading.journal.authentication.userauthority.service.impl;
 import com.trading.journal.authentication.authority.Authority;
 import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.authority.service.AuthorityService;
-import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.AuthoritiesChange;
+import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.UserAuthorityRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -42,7 +42,6 @@ class UserAuthorityServiceImplTest {
     void saveOneCommonAuthority() {
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -69,7 +68,6 @@ class UserAuthorityServiceImplTest {
     void saveTwoCommonAuthority() {
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -100,7 +98,6 @@ class UserAuthorityServiceImplTest {
     void saveOneAdminAuthority() {
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -130,7 +127,6 @@ class UserAuthorityServiceImplTest {
     void saveOneOrganisationAuthority() {
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -162,7 +158,6 @@ class UserAuthorityServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -187,7 +182,6 @@ class UserAuthorityServiceImplTest {
         when(authorityService.getByName("ROLE_ADMIN")).thenReturn(Optional.of(new Authority(2L, AuthorityCategory.ADMINISTRATOR, "ROLE_ADMIN")));
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -216,7 +210,6 @@ class UserAuthorityServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -242,7 +235,6 @@ class UserAuthorityServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -270,7 +262,6 @@ class UserAuthorityServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -297,7 +288,6 @@ class UserAuthorityServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -326,7 +316,6 @@ class UserAuthorityServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -354,7 +343,6 @@ class UserAuthorityServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")

@@ -25,7 +25,7 @@ public class AdminUserFeedStartup implements ApplicationListener<ApplicationRead
         if (adminUserService.thereIsAdmin()) {
             log.info("Admin has been already create previously");
         } else {
-            UserRegistration userRegistration = new UserRegistration(null,"Admin", "Administrator", "admin", adminUserProperties.email(), null, null, false);
+            UserRegistration userRegistration = new UserRegistration(null,"Admin","Administrator", adminUserProperties.email(), null, null, false);
             adminUserService.createAdmin(userRegistration);
             log.info("Admin user created during startup");
         }

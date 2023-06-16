@@ -53,7 +53,6 @@ public class UserServiceImplTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName",
                 "mail@mail.com",
                 "123456",
                 "123456",
@@ -62,7 +61,6 @@ public class UserServiceImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -73,7 +71,6 @@ public class UserServiceImplTest {
                 .authorities(emptyList())
                 .build();
 
-        when(userRepository.existsByUserName(anyString())).thenReturn(false);
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(applicationUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
@@ -93,7 +90,6 @@ public class UserServiceImplTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName",
                 "mail@mail.com",
                 "123456",
                 "123456",
@@ -102,7 +98,6 @@ public class UserServiceImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -114,7 +109,6 @@ public class UserServiceImplTest {
                 .build();
 
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        when(userRepository.existsByUserName(anyString())).thenReturn(false);
         when(userAuthorityService.saveCommonUserAuthorities(any())).thenReturn(singletonList(new UserAuthority(applicationUser, new Authority(1L, AuthorityCategory.COMMON_USER, "ROLE_USER"))));
         when(passwordService.encodePassword(anyString())).thenReturn("sdsa54ds56a4ds564d");
         when(userRepository.save(any())).thenReturn(applicationUser);
@@ -131,7 +125,6 @@ public class UserServiceImplTest {
     void enableAndVerify() {
         User disabledUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -144,7 +137,6 @@ public class UserServiceImplTest {
 
         User enabledUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -174,7 +166,6 @@ public class UserServiceImplTest {
     void unprovenUser() {
         User verifiedUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -187,7 +178,6 @@ public class UserServiceImplTest {
 
         User unprovenUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password_secret")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -212,44 +202,18 @@ public class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("When create user and user name already exist return exception")
-    void userNameAlreadyExist() {
-        UserRegistration userRegistration = new UserRegistration(
-                null,
-                "firstName",
-                "lastName",
-                "UserName",
-                "mail@mail.com",
-                "123456",
-                "123456",
-                false
-        );;
-
-        when(userRepository.existsByUserName(anyString())).thenReturn(true);
-        when(userRepository.existsByEmail(anyString())).thenReturn(false);
-
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration, null));
-        assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
-        assertThat(exception.getStatusText()).isEqualTo("User name or email already exist");
-
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
     @DisplayName("When create user and email already exist return exception")
     void emailAlreadyExist() {
         UserRegistration userRegistration = new UserRegistration(
                 null,
                 "firstName",
                 "lastName",
-                "UserName",
                 "mail@mail.com",
                 "123456",
                 "123456",
                 false
         );
 
-        when(userRepository.existsByUserName(anyString())).thenReturn(false);
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration, null));
@@ -266,14 +230,12 @@ public class UserServiceImplTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName",
                 "mail@mail.com",
                 "123456",
                 "123456",
                 false
         );
 
-        when(userRepository.existsByUserName(anyString())).thenReturn(true);
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> applicationUserServiceImpl.createNewUser(userRegistration, null));
@@ -286,52 +248,22 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("When validate new user with valid data return is valid")
     void isValid() {
-        String userName = "user";
         String email = "mail@mail.com";
 
-        when(userRepository.existsByUserName(anyString())).thenReturn(false);
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
 
-        Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
+        Boolean userValid = applicationUserServiceImpl.validateNewUser(email);
         assertThat(userValid).isTrue();
-    }
-
-    @Test
-    @DisplayName("When validate new user with invalid data return is invalid")
-    void isInvalid() {
-        String userName = "user";
-        String email = "mail@mail.com";
-
-        when(userRepository.existsByUserName(anyString())).thenReturn(true);
-        when(userRepository.existsByEmail(anyString())).thenReturn(false);
-
-        Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
-        assertThat(userValid).isFalse();
-    }
-
-    @Test
-    @DisplayName("When validate new user with valid user name and invalid email return is valid")
-    void isEmailInvalid() {
-        String userName = "user";
-        String email = "mail@mail.com";
-
-        when(userRepository.existsByUserName(anyString())).thenReturn(false);
-        when(userRepository.existsByEmail(anyString())).thenReturn(true);
-
-        Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
-        assertThat(userValid).isFalse();
     }
 
     @Test
     @DisplayName("When validate new user with invalid user name and valid email return is valid")
     void isUserNameInvalid() {
-        String userName = "user";
         String email = "mail@mail.com";
 
-        when(userRepository.existsByUserName(anyString())).thenReturn(true);
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
-        Boolean userValid = applicationUserServiceImpl.validateNewUser(userName, email);
+        Boolean userValid = applicationUserServiceImpl.validateNewUser(email);
         assertThat(userValid).isFalse();
     }
 
@@ -340,7 +272,6 @@ public class UserServiceImplTest {
     void changePassword() {
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -356,7 +287,6 @@ public class UserServiceImplTest {
 
         User userWithNewPassword = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("new_password_encoded")
                 .firstName("lastName")
                 .lastName("Wick")

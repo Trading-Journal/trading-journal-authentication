@@ -251,7 +251,6 @@ class AuthoritiesControllerTest {
     @WithCustomMockUser(username = "ADMIN", authorities = {"ROLE_ADMIN"})
     void delete() {
         User user = User.builder()
-                .userName("johnwick")
                 .password("dad231#$#4")
                 .firstName("John")
                 .lastName("Wick")

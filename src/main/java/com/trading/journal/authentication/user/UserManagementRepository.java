@@ -11,5 +11,5 @@ public interface UserManagementRepository extends CrudRepository<User, Long>, Jp
 
     Optional<User> findByTenancyIdAndEmail(Long tenancyId, String email);
 
-    Boolean existsByTenancyIdAndUserNameAndIdNot(Long tenancyId, String userName, Long id);
+    Boolean existsByTenancyIdAndEmailAndIdNot(Long tenancyId, String email, Long id);
 }

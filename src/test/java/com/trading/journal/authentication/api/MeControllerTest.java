@@ -84,7 +84,6 @@ public class MeControllerTest {
 
         when(userManagementRepository.findByTenancyIdAndEmail(1L, "user")).thenReturn(
                 Optional.of(User.builder()
-                        .userName(user.getUserName())
                         .firstName(user.getFirstName())
                         .lastName(user.getLastName())
                         .email(user.getEmail())
@@ -101,7 +100,6 @@ public class MeControllerTest {
                 .isOk()
                 .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.getUserName()).isEqualTo(user.getUserName());
                     assertThat(response.getFirstName()).isEqualTo(user.getFirstName());
                     assertThat(response.getLastName()).isEqualTo(user.getLastName());
                     assertThat(response.getEmail()).isEqualTo(user.getEmail());
@@ -122,7 +120,6 @@ public class MeControllerTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("userName")
                 .firstName("firstName")
                 .lastName("lastName")
                 .email(email)
@@ -178,7 +175,6 @@ public class MeControllerTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("userName")
                 .password("password")
                 .firstName("firstName")
                 .lastName("lastName")
@@ -190,15 +186,13 @@ public class MeControllerTest {
                 .build();
         when(userManagementRepository.findByTenancyIdAndEmail(1L, "email@mail.com")).thenReturn(Optional.of(user));
 
-        when(userManagementRepository.existsByTenancyIdAndUserNameAndIdNot(1L, "userName-updated", 1L)).thenReturn(false);
+        when(userManagementRepository.existsByTenancyIdAndEmailAndIdNot(1L, "email@mail.com", 1L)).thenReturn(false);
 
         when(userManagementRepository.save(argThat(u ->
-                u.getUserName().equals("userName-updated")
-                        && u.getFirstName().equals("firstName-Updated")
+                u.getFirstName().equals("firstName-Updated")
                         && u.getLastName().equals("lastName-Updated")
         ))).thenReturn(User.builder()
                 .id(1L)
-                .userName("userName-updated")
                 .password("password")
                 .firstName("firstName-Updated")
                 .lastName("lastName-Updated")
@@ -209,7 +203,7 @@ public class MeControllerTest {
                 .authorities(emptyList())
                 .build());
 
-        MeUpdate meUpdate = new MeUpdate("userName-updated", "firstName-Updated", "lastName-Updated");
+        MeUpdate meUpdate = new MeUpdate("firstName-Updated", "lastName-Updated");
         webTestClient
                 .post()
                 .uri("/me")
@@ -220,7 +214,6 @@ public class MeControllerTest {
                 .isOk()
                 .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.getUserName()).isEqualTo("userName-updated");
                     assertThat(response.getFirstName()).isEqualTo("firstName-Updated");
                     assertThat(response.getLastName()).isEqualTo("lastName-Updated");
                 });
@@ -231,7 +224,6 @@ public class MeControllerTest {
                 new UserRegistration(null,
                         "John",
                         "Wick",
-                        "johnwick",
                         "johnwick@mail.com",
                         "dad231#$#4",
                         "dad231#$#4",
@@ -241,7 +233,6 @@ public class MeControllerTest {
                         null,
                         "John",
                         "Rambo",
-                        "johnrambo",
                         "johnrambo@mail.com",
                         "dad231#$#4",
                         "dad231#$#4",
@@ -251,7 +242,6 @@ public class MeControllerTest {
                         null,
                         "Han",
                         "Solo ",
-                        "hansolo",
                         "hansolo@mail.com",
                         "dad231#$#4",
                         "dad231#$#4",

@@ -14,7 +14,6 @@ class UserRegistrationTest {
                 "Allan CO",
                 "allan",
                 "weber",
-                "allanweber",
                 "email@mail.com",
                 "12345",
                 "12345",
@@ -31,13 +30,12 @@ class UserRegistrationTest {
                 null,
                 "allan",
                 "weber",
-                "allanweber",
                 "email@mail.com",
                 "12345",
                 "12345",
                 false
         );
 
-        assertThat(user.getCompanyName()).isEqualTo("allanweber");
+        assertThat(user.getCompanyName()).isEqualTo("email@mail.com");
     }
 }

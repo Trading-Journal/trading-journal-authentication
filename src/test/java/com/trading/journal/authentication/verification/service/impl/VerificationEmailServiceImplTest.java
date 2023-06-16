@@ -50,7 +50,6 @@ class VerificationEmailServiceImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -90,7 +89,6 @@ class VerificationEmailServiceImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -130,7 +128,6 @@ class VerificationEmailServiceImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -170,7 +167,6 @@ class VerificationEmailServiceImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -210,7 +206,6 @@ class VerificationEmailServiceImplTest {
 
         User applicationUser = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("password")
                 .firstName("lastName")
                 .lastName("Wick")

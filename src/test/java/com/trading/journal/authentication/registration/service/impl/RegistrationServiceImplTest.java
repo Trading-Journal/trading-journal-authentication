@@ -61,7 +61,6 @@ public class RegistrationServiceImplTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName",
                 "mail@mail.com",
                 "123456",
                 "123456",
@@ -70,7 +69,6 @@ public class RegistrationServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -82,7 +80,7 @@ public class RegistrationServiceImplTest {
                 .build();
 
         Tenancy tenancy = Tenancy.builder().id(1L).name("tenancy1").build();
-        when(tenancyService.create(argThat(ten -> ten.getName().equals("UserName")))).thenReturn(tenancy);
+        when(tenancyService.create(argThat(ten -> ten.getName().equals("mail@mail.com")))).thenReturn(tenancy);
         when(userService.createNewUser(userRegistration, tenancy)).thenReturn(user);
         when(userAuthorityService.saveOrganisationAdminUserAuthorities(user)).thenReturn(emptyList());
         when(verificationProperties.isEnabled()).thenReturn(false);
@@ -100,7 +98,6 @@ public class RegistrationServiceImplTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName",
                 "mail@mail.com",
                 "123456",
                 "123456",
@@ -109,7 +106,6 @@ public class RegistrationServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -121,7 +117,7 @@ public class RegistrationServiceImplTest {
                 .build();
 
         Tenancy tenancy = Tenancy.builder().id(1L).name("tenancy1").build();
-        when(tenancyService.create(argThat(ten -> ten.getName().equals("UserName")))).thenReturn(tenancy);
+        when(tenancyService.create(argThat(ten -> ten.getName().equals("mail@mail.com")))).thenReturn(tenancy);
         when(userService.createNewUser(userRegistration, tenancy)).thenReturn(user);
         when(userAuthorityService.saveOrganisationAdminUserAuthorities(user)).thenReturn(emptyList());
         when(userService.getUserByEmail("mail@mail.com")).thenReturn(Optional.of(user));
@@ -171,7 +167,6 @@ public class RegistrationServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -212,7 +207,6 @@ public class RegistrationServiceImplTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")

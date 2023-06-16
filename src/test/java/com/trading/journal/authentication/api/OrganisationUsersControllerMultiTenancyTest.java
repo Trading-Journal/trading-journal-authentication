@@ -98,7 +98,6 @@ class OrganisationUsersControllerMultiTenancyTest {
 
         when(userManagementRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<User>(
                 asList(User.builder()
-                                .userName("userName1")
                                 .email("userName1@mail.com")
                                 .password(UUID.randomUUID().toString())
                                 .firstName("user 1")
@@ -108,7 +107,6 @@ class OrganisationUsersControllerMultiTenancyTest {
                                 .createdAt(LocalDateTime.now())
                                 .build(),
                         User.builder()
-                                .userName("userName2")
                                 .email("userName2@mail.com")
                                 .password(UUID.randomUUID().toString())
                                 .firstName("user 2")
@@ -118,7 +116,6 @@ class OrganisationUsersControllerMultiTenancyTest {
                                 .createdAt(LocalDateTime.now())
                                 .build(),
                         User.builder()
-                                .userName("userName3")
                                 .email("userName3@mail.com")
                                 .password(UUID.randomUUID().toString())
                                 .firstName("user 3")
@@ -161,7 +158,6 @@ class OrganisationUsersControllerMultiTenancyTest {
 
         when(userManagementRepository.findByTenancyIdAndId(20L, 100L)).thenReturn(
                 Optional.of(User.builder()
-                        .userName("userName1")
                         .email("userName1@mail.com")
                         .password(UUID.randomUUID().toString())
                         .enabled(true)
@@ -220,7 +216,6 @@ class OrganisationUsersControllerMultiTenancyTest {
 
         when(userManagementRepository.findByTenancyIdAndId(20L, 100L)).thenReturn(
                 Optional.of(User.builder()
-                        .userName("userName1")
                         .email("userName1@mail.com")
                         .password(UUID.randomUUID().toString())
                         .enabled(true)
@@ -230,7 +225,6 @@ class OrganisationUsersControllerMultiTenancyTest {
         );
 
         when(userManagementRepository.save(argThat(user -> user.getEnabled().equals(false)))).thenReturn(User.builder()
-                .userName("userName1")
                 .email("userName1@mail.com")
                 .password(UUID.randomUUID().toString())
                 .enabled(false)
@@ -298,7 +292,6 @@ class OrganisationUsersControllerMultiTenancyTest {
 
         when(userManagementRepository.findByTenancyIdAndId(20L, 100L)).thenReturn(
                 Optional.of(User.builder()
-                        .userName("userName1")
                         .email("userName1@mail.com")
                         .password(UUID.randomUUID().toString())
                         .enabled(false)
@@ -308,7 +301,6 @@ class OrganisationUsersControllerMultiTenancyTest {
         );
 
         when(userManagementRepository.save(argThat(user -> user.getEnabled().equals(true)))).thenReturn(User.builder()
-                .userName("userName1")
                 .email("userName1@mail.com")
                 .password(UUID.randomUUID().toString())
                 .enabled(false)
@@ -376,7 +368,6 @@ class OrganisationUsersControllerMultiTenancyTest {
 
         when(userManagementRepository.findByTenancyIdAndId(20L, 100L)).thenReturn(
                 Optional.of(User.builder()
-                        .userName("userName1")
                         .email("userName1@mail.com")
                         .password(UUID.randomUUID().toString())
                         .enabled(false)
@@ -430,7 +421,6 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
 
         User user = User.builder()
-                .userName("userName1")
                 .email("userName1@mail.com")
                 .password(UUID.randomUUID().toString())
                 .enabled(false)
@@ -490,7 +480,6 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .thenReturn(new AccessTokenInfo("user", 20L, "tenancy10", singletonList("TENANCY_ADMIN")));
 
         User user = User.builder()
-                .userName("userName1")
                 .email("userName1@mail.com")
                 .password(UUID.randomUUID().toString())
                 .enabled(false)
@@ -557,7 +546,6 @@ class OrganisationUsersControllerMultiTenancyTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName5",
                 "mail@mail.com",
                 "dad231#$#4",
                 "dad231#$#4",
@@ -566,7 +554,6 @@ class OrganisationUsersControllerMultiTenancyTest {
 
         User user = User.builder()
                 .id(1L)
-                .userName("UserName5")
                 .password("password")
                 .firstName("firstName")
                 .lastName("lastName")
@@ -590,7 +577,6 @@ class OrganisationUsersControllerMultiTenancyTest {
                 .isOk()
                 .expectBody(UserInfo.class)
                 .value(response -> {
-                    assertThat(response.getUserName()).isEqualTo(user.getUserName());
                     assertThat(response.getFirstName()).isEqualTo(user.getFirstName());
                     assertThat(response.getLastName()).isEqualTo(user.getLastName());
                     assertThat(response.getEmail()).isEqualTo(user.getEmail());
@@ -611,7 +597,6 @@ class OrganisationUsersControllerMultiTenancyTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName5",
                 "mail@mail.com",
                 "dad231#$#4",
                 "dad231#$#4",

@@ -61,7 +61,6 @@ class UsersControllerPagingTest {
             String firstName = names[0];
             String lastName = names[1];
             return User.builder()
-                    .userName(userName)
                     .email(email)
                     .password(UUID.randomUUID().toString())
                     .firstName(firstName)

@@ -130,7 +130,6 @@ class VerificationsControllerTest {
         String email = "mail@mail.com";
 
         User user = User.builder()
-                .userName("UserName")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")

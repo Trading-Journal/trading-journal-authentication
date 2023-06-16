@@ -113,7 +113,6 @@ CREATE TABLE Tenancy (
 CREATE TABLE Users (
   id SERIAL NOT NULL,
   tenancyId int NULL,
-  userName VARCHAR(45) NOT NULL,
   password VARCHAR(2000) NOT NULL,
   firstName VARCHAR(45) NOT NULL,
   lastName VARCHAR(45) NOT NULL,

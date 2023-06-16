@@ -54,7 +54,6 @@ class PasswordManagementServiceImplTest {
         String email = "mail@mail.com";
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")
@@ -139,7 +138,6 @@ class PasswordManagementServiceImplTest {
         String hash = UUID.randomUUID().toString();
         User user = User.builder()
                 .id(1L)
-                .userName("UserName")
                 .password("encoded_password")
                 .firstName("lastName")
                 .lastName("Wick")

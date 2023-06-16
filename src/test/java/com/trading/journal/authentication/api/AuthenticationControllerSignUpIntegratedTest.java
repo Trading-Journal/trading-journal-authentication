@@ -1,16 +1,12 @@
 package com.trading.journal.authentication.api;
 
 import com.trading.journal.authentication.PostgresTestContainerInitializer;
-import com.trading.journal.authentication.authority.Authority;
-import com.trading.journal.authentication.authority.AuthorityCategory;
 import com.trading.journal.authentication.email.service.EmailSender;
 import com.trading.journal.authentication.registration.SignUpResponse;
 import com.trading.journal.authentication.registration.UserRegistration;
 import com.trading.journal.authentication.tenancy.Tenancy;
 import com.trading.journal.authentication.tenancy.TenancyRepository;
-import com.trading.journal.authentication.user.User;
 import com.trading.journal.authentication.user.UserRepository;
-import com.trading.journal.authentication.userauthority.UserAuthority;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,11 +20,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -65,7 +59,6 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName2",
                 "mail2@mail.com",
                 "dad231#$#4",
                 "dad231#$#4",
@@ -97,7 +90,6 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 null,
                 null,
                 null,
-                null,
                 false
         );
 
@@ -109,14 +101,13 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String,  List<String>>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
                 .value(response -> {
                     assertThat(response.get("errors")).contains("First name is required");
                     assertThat(response.get("errors")).contains("Last name is required");
                     assertThat(response.get("errors")).matches(message -> message.contains("Password is required") || message.contains("Password is not valid"));
                     assertThat(response.get("errors")).contains("Password confirmation is required");
-                    assertThat(response.get("errors")).contains("User name is required");
                     assertThat(response.get("errors")).contains("Email is required");
                 });
     }
@@ -128,7 +119,6 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName2",
                 "mail2",
                 "dad231#$#4",
                 "dad231#$#4",
@@ -143,7 +133,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String,  List<String>>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
                 .value(response ->
                         assertThat(response.get("errors")).contains("Email is invalid")
@@ -157,7 +147,6 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 null,
                 "firstName",
                 "lastName",
-                "UserName2",
                 "mail2@email.com",
                 "dad231#$#4",
                 "dad231#$#4xxx",
@@ -188,7 +177,6 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 "tenancy-1",
                 "firstName",
                 "lastName",
-                "UserName2",
                 "mail2@mail.com",
                 "dad231#$#4",
                 "dad231#$#4",
@@ -211,55 +199,12 @@ public class AuthenticationControllerSignUpIntegratedTest {
     }
 
     @Test
-    @DisplayName("When signUp with a user name that already exists return error and delete created tenancy")
-    void signUpUserAlreadyExist() {
-        userRepository.save(User.builder()
-                .userName("UserName")
-                .password("encoded_password")
-                .firstName("lastName")
-                .lastName("Wick")
-                .email("mail@mail.com")
-                .enabled(true)
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .build());
-
-        UserRegistration userRegistration = new UserRegistration(
-                "tenancy-1",
-                "firstName",
-                "UserName",
-                "UserName",
-                "mail2@mail.com",
-                "dad231#$#4",
-                "dad231#$#4",
-                false
-        );
-
-        webTestClient
-                .post()
-                .uri("/auth/signup")
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(userRegistration)
-                .exchange()
-                .expectStatus()
-                .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, String>>() {
-                })
-                .value(response ->
-                        assertThat(response.get("error")).isEqualTo("User name or email already exist")
-                );
-
-        assertThat(tenancyRepository.findAll()).isEmpty();
-    }
-
-    @Test
     @DisplayName("When signUp as new user error because password does not match policy")
     void passwordPolicy() {
         UserRegistration userRegistration = new UserRegistration(
                 null,
                 "firstName",
                 "lastName",
-                "UserName2",
                 "mail2@mail.com",
                 "12345678901",
                 "12345678901",
@@ -274,7 +219,7 @@ public class AuthenticationControllerSignUpIntegratedTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String,  List<String>>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
                 .value(response ->
                         assertThat(response.get("errors")).isNotEmpty()

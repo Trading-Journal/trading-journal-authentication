@@ -10,12 +10,12 @@ import com.trading.journal.authentication.user.service.UserService;
 import com.trading.journal.authentication.userauthority.UserAuthority;
 import com.trading.journal.authentication.userauthority.service.UserAuthorityService;
 import com.trading.journal.authentication.verification.properties.VerificationProperties;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createNewUser(@NotNull UserRegistration userRegistration, Tenancy tenancy) {
-        Boolean validUser = validateNewUser(userRegistration.getUserName(), userRegistration.getEmail());
+        Boolean validUser = validateNewUser(userRegistration.getEmail());
         if (validUser) {
             User user = userRepository.save(buildUser(userRegistration, tenancy));
             List<UserAuthority> userAuthorities = userAuthorityService.saveCommonUserAuthorities(user);
@@ -52,15 +52,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean validateNewUser(@NotNull String userName, @NotBlank String email) {
-        Boolean userNameExists = userNameExists(userName);
-        Boolean emailExists = emailExists(email);
-        return !userNameExists && !emailExists;
-    }
-
-    @Override
-    public Boolean userNameExists(@NotBlank String userName) {
-        return userRepository.existsByUserName(userName);
+    public Boolean validateNewUser(@NotBlank String email) {
+        return !emailExists(email);
     }
 
     @Override
@@ -103,7 +96,6 @@ public class UserServiceImpl implements UserService {
         boolean enabledAndVerified = !verificationProperties.isEnabled();
         return User.builder()
                 .tenancy(tenancy)
-                .userName(userRegistration.getUserName())
                 .password(passwordService.encodePassword(userRegistration.getPassword()))
                 .firstName(userRegistration.getFirstName())
                 .lastName(userRegistration.getLastName())

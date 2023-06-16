@@ -22,8 +22,6 @@ public class UserInfo {
 
     private Long id;
 
-    private String userName;
-
     private String firstName;
 
     private String lastName;
@@ -41,7 +39,6 @@ public class UserInfo {
 
     public UserInfo(User applicationUser) {
         this.id = applicationUser.getId();
-        this.userName = applicationUser.getUserName();
         this.firstName = applicationUser.getFirstName();
         this.lastName = applicationUser.getLastName();
         this.email = applicationUser.getEmail();
